@@ -12,6 +12,18 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Listing Workflow Specification v0.1 - technical source](./SteadFast_Listing_Workflow_Specification_v0.1.md)
 - [Database Design v0.1](./SteadFast_Database_Design_v0.1.docx)
 - [Database Design v0.1 - technical source](./SteadFast_Database_Design_v0.1.md)
+- [Application and API Architecture v0.1](./SteadFast_Application_and_API_Architecture_v0.1.docx)
+- [Application and API Architecture v0.1 - technical source](./SteadFast_Application_and_API_Architecture_v0.1.md)
+- [UX Sitemap and User Flows v0.1](./SteadFast_UX_Sitemap_and_User_Flows_v0.1.docx)
+- [UX Sitemap and User Flows v0.1 - technical source](./SteadFast_UX_Sitemap_and_User_Flows_v0.1.md)
+- [Security Plan and Threat Model v0.1](./SteadFast_Security_Plan_and_Threat_Model_v0.1.docx)
+- [Security Plan and Threat Model v0.1 - technical source](./steadfast-threat-model.md)
+- [Testing and Deployment Plan v0.1](./SteadFast_Testing_and_Deployment_Plan_v0.1.docx)
+- [Testing and Deployment Plan v0.1 - technical source](./SteadFast_Testing_and_Deployment_Plan_v0.1.md)
+- [Development Backlog v0.1](./SteadFast_Development_Backlog_v0.1.docx)
+- [Development Backlog v0.1 - technical source](./SteadFast_Development_Backlog_v0.1.md)
+- [Pilot and Legal Readiness Pack v0.1](./SteadFast_Pilot_and_Legal_Readiness_Pack_v0.1.docx)
+- [Pilot and Legal Readiness Pack v0.1 - technical source](./SteadFast_Pilot_and_Legal_Readiness_Pack_v0.1.md)
 - [Deployment Reference](./DEPLOYMENT.md)
 
 ## Business planning
@@ -19,9 +31,9 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Business Proposal v0.1](./SteadFast_Business_Proposal_v0.1.docx)
 - [Business Plan v0.1](./SteadFast_Business_Plan_v0.1.docx)
 
-## Documentation to add during implementation
+## Living documentation to add during implementation
 
-- System architecture and deployment guide
-- API and international listing-feed integration guide
+- API reference generated from implemented contracts
+- International listing-feed certification guide for each contracted channel
 - Operations, monitoring, backup, and recovery guide
 - Developer onboarding and release process
