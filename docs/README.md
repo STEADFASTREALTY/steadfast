@@ -26,6 +26,7 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Pilot and Legal Readiness Pack v0.1 - technical source](./SteadFast_Pilot_and_Legal_Readiness_Pack_v0.1.md)
 - [Deployment Reference](./DEPLOYMENT.md)
 - [Database Development and Migration Guide](./DATABASE_DEVELOPMENT.md)
+- [Identity and Brokerage Foundation](./IDENTITY_AND_BROKERAGE_FOUNDATION.md)
 
 ## Business planning
 
