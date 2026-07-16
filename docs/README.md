@@ -6,6 +6,8 @@ This directory contains the approved planning documents for the SteadFast platfo
 
 - [Product and Technical Plan v0.1](./SteadFast_Product_and_Technical_Plan_v0.1.docx)
 - [MVP Product Requirements v0.1](./SteadFast_MVP_Product_Requirements_v0.1.docx)
+- [Roles and Permissions Matrix v0.1](./SteadFast_Roles_and_Permissions_Matrix_v0.1.docx)
+- [Roles and Permissions Matrix v0.1 - technical source](./SteadFast_Roles_and_Permissions_Matrix_v0.1.md)
 - [Deployment Reference](./DEPLOYMENT.md)
 
 ## Business planning
@@ -17,7 +19,6 @@ This directory contains the approved planning documents for the SteadFast platfo
 
 - System architecture and deployment guide
 - Database schema and Row Level Security policy guide
-- User roles and permissions matrix
 - Listing approval and sharing workflow
 - API and international listing-feed integration guide
 - Operations, monitoring, backup, and recovery guide
