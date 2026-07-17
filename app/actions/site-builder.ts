@@ -68,7 +68,8 @@ export async function uploadSiteAssetAction(formData: FormData) {
     const output = await sharp(bytes).metadata();
     const assetId = randomUUID(); const pathPlacement = placement.data.replaceAll("_", "-");
     objectPath = `${site.id}/${pathPlacement}/${assetId}.webp`;
-    const { error: uploadError } = await admin.storage.from("professional-site-assets").upload(objectPath, bytes, { contentType: "image/webp", cacheControl: "0", upsert: false });
+    const preparedImage = new Blob([bytes], { type: "image/webp" });
+    const { error: uploadError } = await admin.storage.from("professional-site-assets").upload(objectPath, preparedImage, { contentType: "image/webp", cacheControl: "0", upsert: false });
     if (uploadError) throw uploadError;
     const { data: existing, error: existingError } = await admin.from("site_assets").select("id,object_path").eq("site_id", site.id).eq("placement", placement.data).eq("status", "ready");
     if (existingError) throw existingError;
