@@ -64,6 +64,7 @@ export default async function Properties({ searchParams }: { searchParams: Searc
   const minimumBeds = wholeNumber(params.beds, 20); const minimumSize = wholeNumber(params.minSize, 10_000_000);
   const intent = firstParameter(params.intent) === "rent" ? "rent" : "buy";
   const supabase = await createClient();
+  const { data: authData } = await supabase.auth.getUser();
 
   let listingsQuery = supabase
     .from("public_listing_snapshots")
@@ -106,7 +107,7 @@ export default async function Properties({ searchParams }: { searchParams: Searc
       <header className="site-header search-header">
         <BrandLogo />
         <nav className="desktop-nav" aria-label="Property search navigation"><Link href="/properties">Buy</Link><Link href="/properties?intent=rent">Rent</Link></nav>
-        <Link className="outline-button" href="/sign-in">Sign in</Link>
+        <Link className="outline-button" href={authData.user ? "/account" : "/sign-in"}>{authData.user ? "My account" : "Sign in"}</Link>
       </header>
 
       <section className="marketplace-heading">
