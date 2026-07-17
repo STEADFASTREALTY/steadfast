@@ -321,8 +321,11 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .brokerage-site-hero .site-logo { flex: 0 1 auto; margin: 0; }
 .professional-site-hero > span, .professional-site-intro span { color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .professional-site-hero h1 { color: var(--ivory); font-family: Georgia,serif; font-size: clamp(52px,8vw,104px); font-weight: 400; letter-spacing: -.055em; margin: 22px 0 18px; max-width: 980px; }
+.professional-site-hero.light-professional-site-hero h1 { color: var(--charcoal) !important; }
 .brokerage-site-hero .brokerage-site-title { font-size: clamp(30px, 5.5vw, 82px); max-width: none; overflow: hidden; text-overflow: clip; white-space: nowrap; width: 100%; }
 .professional-site-hero p { color: rgba(255,255,255,.66); font-family: Georgia,serif; font-size: clamp(17px,2vw,25px); line-height: 1.5; max-width: 720px; }
+.professional-site-hero.light-professional-site-hero p { color: #40504b !important; }
+.professional-site-hero.light-professional-site-hero .site-join-button { color: var(--charcoal) !important; }
 .site-join-button { border: 1px solid var(--site-accent, var(--gold)); color: #fff; display: inline-flex; font-size: 12px; font-weight: 700; margin-top: 22px; padding: 12px 17px; text-decoration: none; }
 .site-join-button:hover { background: var(--site-accent, var(--gold)); color: var(--site-primary, var(--evergreen)); }
 .join-brokerage-shell { margin: 0 auto; max-width: 760px; padding: 0 28px 80px; }
