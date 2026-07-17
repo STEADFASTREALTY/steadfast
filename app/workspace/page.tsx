@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountHeader } from "@/app/components/account-header";
-import { getActiveMembershipContext } from "@/lib/auth/session";
+import { getActiveMembershipContext, requireInternalMfa } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
 export const metadata: Metadata = { title: "Workspace", robots: { index: false, follow: false } };
@@ -15,6 +15,7 @@ export default async function WorkspacePage() {
     permissions: context.permissions, platformRoles: context.platformRoles,
   });
   if (!access.hasWorkspace) redirect("/access-denied?reason=professional-workspace");
+  await requireInternalMfa(context, "/workspace");
 
   const brokerage = context.membership?.brokerages as unknown as { display_name?: string } | null;
   return (

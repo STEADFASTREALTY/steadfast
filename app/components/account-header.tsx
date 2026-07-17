@@ -22,6 +22,7 @@ export function AccountHeader({
         {hasWorkspace ? <Link href="/workspace">Workspace</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}
         <Link href="/account">My account</Link>
+        <Link href="/account/security">Security</Link>
       </nav>
       <form action={signOutAction}>
         <span>{displayName}</span>

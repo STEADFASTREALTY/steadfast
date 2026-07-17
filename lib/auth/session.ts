@@ -70,3 +70,22 @@ export async function getActiveMembershipContext(nextPath = "/account") {
     platformRoles,
   };
 }
+
+export async function requireInternalMfa(
+  context: Awaited<ReturnType<typeof getActiveMembershipContext>>,
+  nextPath = "/workspace",
+) {
+  const requiresMfa = context.platformRoles.some((role) =>
+    role === "steadfast_operations" || role === "steadfast_admin",
+  );
+  if (!requiresMfa) return;
+
+  const { data, error } = await context.supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (error || !data) {
+    redirect("/sign-in?error=Your+session+assurance+could+not+be+verified.");
+  }
+  if (data.currentLevel === "aal2") return;
+
+  const destination = encodeURIComponent(nextPath);
+  redirect(data.nextLevel === "aal2" ? `/mfa/challenge?next=${destination}` : `/mfa/setup?next=${destination}`);
+}
