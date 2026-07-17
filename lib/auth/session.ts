@@ -21,8 +21,8 @@ export async function requireAccount(nextPath = "/account") {
   return { supabase, user: userData.user, person };
 }
 
-export async function getActiveMembershipContext() {
-  const account = await requireAccount();
+export async function getActiveMembershipContext(nextPath = "/account") {
+  const account = await requireAccount(nextPath);
   const [{ data: memberships }, { data: internalRoles }] = await Promise.all([
     account.supabase
       .from("brokerage_memberships")

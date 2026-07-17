@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Workspace", robots: { index: false, 
 export const dynamic = "force-dynamic";
 
 export default async function WorkspacePage() {
-  const context = await getActiveMembershipContext();
+  const context = await getActiveMembershipContext("/workspace");
   const access = deriveWorkspaceAccess({
     hasMembership: Boolean(context.membership), roles: context.roles,
     permissions: context.permissions, platformRoles: context.platformRoles,

@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BrokerAgentsPage({ searchParams }: { searchParams: Promise<{ error?: string; notice?: string }> }) {
   const params = await searchParams;
-  const context = await getActiveMembershipContext();
+  const context = await getActiveMembershipContext("/broker/agents");
   if (!context.membership) redirect("/access-denied?reason=brokerage-membership");
 
   const access = deriveWorkspaceAccess({ hasMembership: true, roles: context.roles, permissions: context.permissions, platformRoles: context.platformRoles });
