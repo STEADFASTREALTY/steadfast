@@ -222,7 +222,8 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .rich-editor { background: #fff; border: 1px solid var(--sand); line-height: 1.6; min-height: 150px; padding: 14px; }
 .stack-form.site-asset-upload { align-items: stretch; border-top: 1px solid var(--sand); display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr) minmax(230px, .65fr); margin-top: 22px; padding-top: 18px; }
 .site-asset-upload label.site-file-picker { align-items: center; background: #fff; border: 1px solid var(--sand); cursor: pointer; justify-content: center; min-height: 92px; padding: 18px; text-align: center; }
-.site-asset-upload .image-upload-button { border-radius: 0; justify-self: stretch; min-height: 92px; width: 100%; }
+.site-asset-upload .image-upload-button { background: #e1e8e3; border-radius: 0; justify-self: stretch; min-height: 92px; transition: background .2s, border-color .2s, color .2s, transform .2s; width: 100%; }
+.site-asset-upload .image-upload-button:not(:disabled):hover { background: var(--evergreen); border-color: var(--evergreen); color: #fff; transform: translateY(-1px); }
 .site-file-input { block-size: 1px; clip-path: inset(50%); inline-size: 1px; opacity: 0; overflow: hidden; position: absolute; }
 .site-file-picker-row { align-items: center; display: flex; gap: 10px; justify-content: center; }
 .site-file-picker-button { align-items: center; background: var(--evergreen); color: #fff; display: inline-flex; font-size: 12px; font-weight: 700; justify-content: center; min-height: 42px; padding: 0 18px; }
