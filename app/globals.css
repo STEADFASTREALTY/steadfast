@@ -70,9 +70,9 @@ button, input, select, textarea { font: inherit; }
 .hero-intro { color: rgba(255,255,255,.68); font-family: Georgia, serif; font-size: 18px; line-height: 1.55; margin: 0 0 39px; max-width: 500px; }
 
 .property-search { background: var(--paper); border-radius: 5px; box-shadow: 0 22px 60px rgba(0,0,0,.2); color: var(--ink); display: grid; grid-template-columns: minmax(230px, 1.65fr) minmax(150px, .9fr) 62px; max-width: 680px; padding: 8px; }
-.property-search-full { gap: 1px; grid-template-columns: repeat(4, minmax(145px, 1fr)); max-width: 1120px; padding: 10px; }
-.property-search-full label { background: rgba(255,255,255,.54); border-right: 0; min-height: 66px; padding: 10px 14px; }
-.property-search-full button { align-items: center; display: flex; gap: 8px; grid-column: 4; justify-content: center; min-height: 52px; padding: 0 20px; }
+.property-search-full { border: 1px solid #b9ad97; gap: 0; grid-template-columns: repeat(4, minmax(145px, 1fr)); max-width: 1120px; padding: 10px; }
+.property-search-full label { background: rgba(255,255,255,.72); border: 1px solid #cfc5b4; margin: -1px 0 0 -1px; min-height: 70px; padding: 11px 15px; }
+.property-search-full button { align-items: center; border: 1px solid var(--teal-strong); display: flex; gap: 8px; grid-column: 1 / -1; justify-content: center; margin-top: 10px; min-height: 54px; padding: 0 20px; }
 .property-search-full button span { font-size: 12px; font-weight: 700; }
 .property-search label { border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 7px; justify-content: center; padding: 10px 18px; }
 .property-search label > span:first-child { color: #72817e; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
@@ -649,7 +649,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
   .marketplace-layout, .public-listing-layout { grid-template-columns: 1fr; }
   .professional-site-intro { gap: 25px; grid-template-columns: 1fr; }
   .property-search-full { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .property-search-full button { grid-column: 2; }
+  .property-search-full button { grid-column: 1 / -1; }
   .area-map-panel, .public-agent-card { position: relative; top: 0; }
   .listing-media-status { grid-column: 1 / -1; justify-self: start; text-align: left; }
   .listing-records > article { grid-template-columns: 120px minmax(0, 1fr); }
