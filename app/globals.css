@@ -72,9 +72,9 @@ button, input, select, textarea { font: inherit; }
 .property-search { background: var(--paper); border-radius: 5px; box-shadow: 0 22px 60px rgba(0,0,0,.2); color: var(--ink); display: grid; grid-template-columns: minmax(230px, 1.65fr) minmax(150px, .9fr) 62px; max-width: 680px; padding: 8px; }
 .property-search-full { border: 0; gap: 10px; grid-template-columns: repeat(4, minmax(145px, 1fr)); max-width: 1120px; padding: 14px; }
 .property-search-full label { background: transparent; border: 0; margin: 0; min-height: 70px; padding: 0; }
-.property-search-full select { background: #fff; border: 1px solid #cfc5b4; min-height: 46px; padding: 0 13px; }
+.property-search.property-search-full select { background: #fff; border: 1px solid #cfc5b4; min-height: 46px; padding: 0 13px; }
 .property-search-full .search-input-row { background: #fff; border: 1px solid #cfc5b4; min-height: 46px; padding: 0 13px; }
-.property-search-full .search-input-row select { border: 0; min-height: 44px; padding: 0; }
+.property-search.property-search-full .search-input-row select { border: 0; min-height: 44px; padding: 0; }
 .property-search-full button { align-items: center; border: 1px solid var(--teal-strong); display: flex; gap: 8px; grid-column: 1 / -1; justify-content: center; margin-top: 10px; min-height: 54px; padding: 0 20px; }
 .property-search-full button span { font-size: 12px; font-weight: 700; }
 .property-search label { border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 7px; justify-content: center; padding: 10px 18px; }
