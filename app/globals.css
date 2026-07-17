@@ -222,7 +222,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .rich-editor { background: #fff; border: 1px solid var(--sand); line-height: 1.6; min-height: 150px; padding: 14px; }
 .site-asset-upload { border-top: 1px solid var(--sand); margin-top: 22px; padding-top: 18px; }
 .site-asset-upload label:not(.check-row) { align-items: center; background: #fff; border: 1px solid var(--sand); justify-content: center; min-height: 116px; padding: 18px; text-align: center; }
-.site-asset-upload input[type="file"] { max-width: 100%; width: auto; }
+.site-asset-upload input[type="file"][type="file"] { align-self: center; max-width: 100%; width: auto; }
 .professional-site-page { background: var(--site-background, var(--ivory)); color: var(--site-text, var(--charcoal)); min-height: 100vh; }
 .professional-site-page .professional-site-hero { background: var(--site-primary, var(--evergreen)); color: #fff; }
 .professional-site-page .professional-site-hero > span, .professional-site-page .professional-site-listings > .section-heading span, .professional-site-testimonials > span, .professional-site-search > span, .professional-site-contact > span { color: var(--site-accent, var(--gold)); }
