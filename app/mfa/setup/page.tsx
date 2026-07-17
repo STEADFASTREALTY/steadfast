@@ -6,7 +6,7 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { safeInternalPath } from "@/lib/app-url";
 import { requireAccount } from "@/lib/auth/session";
 
-export const metadata: Metadata = { title: "Set up authenticator", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Set up authenticator", description: "Protect restricted SteadFast work with an authenticator.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function MfaSetupPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {

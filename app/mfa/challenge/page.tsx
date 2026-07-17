@@ -5,7 +5,7 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { safeInternalPath } from "@/lib/app-url";
 import { requireAccount } from "@/lib/auth/session";
 
-export const metadata: Metadata = { title: "Verify authenticator", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Verify authenticator", description: "Verify your identity before opening restricted SteadFast tools.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function MfaChallengePage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {

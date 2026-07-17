@@ -8,7 +8,7 @@ import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "Agent management", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Agent management", description: "Manage brokerage agents, staff permissions, and applications.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function BrokerAgentsPage({ searchParams }: { searchParams: Promise<{ error?: string; notice?: string }> }) {
@@ -40,7 +40,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
             <div className="card-heading"><span>Approval queue</span><h2>Agent applications</h2></div>
             <div className="record-list">{applications?.length ? applications.map((application) => {
               const person = application.people as unknown as { display_name?: string; primary_email?: string } | null;
-              return <article key={application.id}><div><strong>{person?.display_name ?? "Applicant"}</strong><span>{person?.primary_email ?? "Email unavailable"}</span></div><span className={`record-status status-${application.status}`}>{application.status.replaceAll("_", " ")}</span>{application.status === "submitted" ? <form action={decideAgentApplicationAction} className="decision-form"><input type="hidden" name="applicationId" value={application.id} /><label><span>Decision note</span><input name="reason" maxLength={2000} placeholder="Required when declining" /></label><button name="decision" value="approve" className="solid-button" type="submit">Approve</button><button name="decision" value="deny" className="outline-dark-button" type="submit">Decline</button></form> : null}</article>;
+              return <article key={application.id}><div><strong>{person?.display_name ?? "Applicant"}</strong><span>{person?.primary_email ?? "Email unavailable"}</span></div><span className={`record-status status-${application.status}`}>{application.status.replaceAll("_", " ")}</span>{application.status === "submitted" ? <form action={decideAgentApplicationAction} className="decision-form"><input type="hidden" name="applicationId" value={application.id} /><label><span>Decision note</span><input name="reason" maxLength={2000} placeholder="Required when declining" /></label><button name="decision" value="approve" className="solid-button" type="submit" data-prompt-title="Approve this agent application?" data-prompt-message="The application will advance under this brokerage and remain subject to SteadFast platform approval." data-prompt-confirm="Approve application">Approve</button><button name="decision" value="deny" className="outline-dark-button" type="submit" data-prompt-title="Decline this agent application?" data-prompt-message="The applicant will not join this brokerage. The decision and your reason will be retained." data-prompt-confirm="Decline application" data-prompt-variant="danger">Decline</button></form> : null}</article>;
             }) : <p className="muted-copy">No applications are waiting for review.</p>}</div>
           </section>
           <section className="account-card">
@@ -67,7 +67,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
                   {canManageAgents && isAgent && !isPrincipalBroker && member.person_id !== context.person.id ? (
                     <details className="departure-panel">
                       <summary>End brokerage access</summary>
-                      <form action={departAgentAction} className="departure-form">
+                      <form action={departAgentAction} className="departure-form" data-prompt-title="End this agent’s brokerage access?" data-prompt-message="The agent will immediately lose brokerage access and represented listings will be removed from public display until reassigned." data-prompt-confirm="End access" data-prompt-variant="danger">
                         <input name="membershipId" type="hidden" value={member.id} />
                         <p><strong>Represented listings: 0</strong><br />Listing tools are not active yet. The person’s SteadFast login and personal account will remain active.</p>
                         <label><span>Reason</span><input name="reason" minLength={3} maxLength={1000} required placeholder="Why is this agent leaving the brokerage?" /></label>

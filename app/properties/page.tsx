@@ -4,11 +4,14 @@ import Image from "next/image";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { BrandLogo } from "@/app/components/brand-logo";
+import { publicPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "Property Search",
   description: "Search brokerage-approved property listings across Jamaica with SteadFast Realty.",
-};
+  path: "/properties",
+  keywords: ["homes for sale Jamaica", "property for rent Jamaica", "Jamaica property search"],
+});
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 type PublicListing = {

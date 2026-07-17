@@ -4,7 +4,7 @@ import { MfaEnrollment } from "@/app/components/mfa-enrollment";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "Account security", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Account security", description: "Manage SteadFast account and multi-factor security.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AccountSecurityPage() {

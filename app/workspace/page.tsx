@@ -5,7 +5,7 @@ import { AccountHeader } from "@/app/components/account-header";
 import { getActiveMembershipContext, requireInternalMfa } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "Workspace", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Workspace", description: "Open your role-aware SteadFast professional workspace.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function WorkspacePage() {

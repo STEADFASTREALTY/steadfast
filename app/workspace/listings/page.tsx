@@ -6,7 +6,7 @@ import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "Listings", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Listings", description: "Manage private and approved brokerage property listings.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 type Version = { version_number: number; title: string; purpose: string; price: number; currency: string; revision_state: string };

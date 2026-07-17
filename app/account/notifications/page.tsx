@@ -10,6 +10,7 @@ import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
 export const metadata: Metadata = {
   title: "Notifications",
+  description: "Review private SteadFast account and brokerage workflow notifications.",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";

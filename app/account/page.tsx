@@ -9,7 +9,7 @@ import {
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "My account", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "My account", description: "Manage your private SteadFast profile and brokerage participation.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 const applicationLabels: Record<string, string> = {
@@ -63,7 +63,7 @@ export default async function AccountPage({
           <StatusMessage error={params.error} notice={params.notice} />
           <section className="account-card">
             <div className="card-heading"><span>Profile</span><h2>Your details</h2></div>
-            <form action={updateProfileAction} className="stack-form two-column">
+            <form action={updateProfileAction} className="stack-form two-column" data-prompt-title="Save your profile changes?" data-prompt-message="Your SteadFast display name and phone number will be updated for future account and professional use." data-prompt-confirm="Save profile">
               <label className="full"><span>Display name</span><input name="displayName" defaultValue={context.person.display_name} minLength={2} maxLength={120} required /></label>
               <label className="full"><span>Email</span><input value={context.person.primary_email ?? context.user.email ?? ""} readOnly /></label>
               <label className="full"><span>Phone</span><input name="phone" defaultValue={context.person.primary_phone ?? ""} autoComplete="tel" maxLength={30} /></label>
@@ -77,7 +77,7 @@ export default async function AccountPage({
             <section className="account-card accent-card">
               <div className="card-heading"><span>For professionals</span><h2>Apply to join a brokerage</h2></div>
               <p>Independent agent registration is not available. Choose the brokerage that referred you; its broker will review your application.</p>
-              <form action={submitAgentApplicationAction} className="stack-form">
+              <form action={submitAgentApplicationAction} className="stack-form" data-prompt-title="Send this agent application?" data-prompt-message="The selected brokerage will receive your application for review. You cannot join as an independent agent." data-prompt-confirm="Send application">
                 <label><span>Brokerage</span><select name="brokerageId" required defaultValue=""><option value="" disabled>Select your brokerage</option>{brokerages?.map((brokerage) => <option key={brokerage.id} value={brokerage.id}>{brokerage.display_name}</option>)}</select></label>
                 <button className="solid-button" type="submit">Send application</button>
               </form>

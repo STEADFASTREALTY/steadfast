@@ -12,7 +12,7 @@ export function CreateListingForm({ parishes }: { parishes: Parish[] }) {
   const showRooms = propertyType === "residential" || propertyType === "development";
 
   return (
-    <form action={formAction} className="listing-wizard">
+    <form action={formAction} className="listing-wizard" data-prompt-title="Create this private draft?" data-prompt-message="SteadFast will save these details inside your brokerage workspace. You can continue editing before submitting it for approval." data-prompt-confirm="Create draft">
       <section className="wizard-section">
         <div className="wizard-step"><span>01</span><div><strong>What are you marketing?</strong><p>Start with the offer and property type.</p></div></div>
         <div className="wizard-fields two">

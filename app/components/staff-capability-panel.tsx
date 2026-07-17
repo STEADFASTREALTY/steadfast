@@ -28,7 +28,7 @@ export function StaffCapabilityPanel({ membershipId, activePermissionKeys }: Sta
         {capabilities.map((capability) => {
           const enabled = activePermissionKeys.includes(capability.key);
           return (
-            <form action={updateStaffCapabilityAction} className="capability-row" key={capability.key}>
+            <form action={updateStaffCapabilityAction} className="capability-row" key={capability.key} data-prompt-title={`${enabled ? "Remove" : "Grant"} this staff permission?`} data-prompt-message={`${capability.name} access will be ${enabled ? "removed from" : "granted to"} this team member and recorded in the activity history.`} data-prompt-confirm={enabled ? "Remove access" : "Grant access"} data-prompt-variant={enabled ? "danger" : "standard"}>
               <input name="membershipId" type="hidden" value={membershipId} />
               <input name="permissionKey" type="hidden" value={capability.key} />
               <input name="operation" type="hidden" value={enabled ? "revoke" : "grant"} />

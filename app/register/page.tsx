@@ -4,7 +4,7 @@ import { registerAction } from "@/app/actions/auth";
 import { StatusMessage } from "@/app/components/status-message";
 import { BrandLogo } from "@/app/components/brand-logo";
 
-export const metadata: Metadata = { title: "Create account", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Create account", description: "Create a free SteadFast property-search account.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function RegisterPage({

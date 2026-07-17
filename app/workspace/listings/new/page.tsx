@@ -6,7 +6,7 @@ import { CreateListingForm } from "@/app/components/create-listing-form";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "Create listing", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Create listing", description: "Create a private property listing draft for brokerage review.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function NewListingPage() {

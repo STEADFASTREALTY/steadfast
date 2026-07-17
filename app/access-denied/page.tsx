@@ -4,7 +4,7 @@ import { AccountHeader } from "@/app/components/account-header";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "Access unavailable", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Access unavailable", description: "The requested SteadFast workspace access is unavailable.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 const messages: Record<string, { title: string; detail: string }> = {

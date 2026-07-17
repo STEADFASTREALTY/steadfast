@@ -12,7 +12,7 @@ export function InvitationForm({ brokerageId }: { brokerageId: string }) {
   const [state, action, pending] = useActionState(createBrokerageInvitationAction, initialState);
 
   return (
-    <form action={action} className="stack-form">
+    <form action={action} className="stack-form" data-prompt-title="Create this team invitation?" data-prompt-message="A private, one-time invitation link will be created with the selected brokerage roles." data-prompt-confirm="Create invitation">
       <input type="hidden" name="brokerageId" value={brokerageId} />
       <label>
         <span>Email address</span>

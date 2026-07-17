@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { SteadFastPromptProvider } from "@/app/components/steadfast-prompt-provider";
+import { StructuredData } from "@/app/components/structured-data";
+import { STEADFAST_SITE_URL } from "@/lib/seo/metadata";
 import "./globals.css";
 
-const siteUrl = "https://steadfast.rockhillinnovation.com";
+const siteUrl = STEADFAST_SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -32,7 +35,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en-JM">
-      <body>{children}</body>
+      <body>
+        <SteadFastPromptProvider>{children}</SteadFastPromptProvider>
+        <StructuredData value={[
+          { "@context": "https://schema.org", "@type": "Organization", name: "SteadFast Realty", url: siteUrl, areaServed: { "@type": "Country", name: "Jamaica" } },
+          { "@context": "https://schema.org", "@type": "WebSite", name: "SteadFast Realty", url: siteUrl, inLanguage: "en-JM" },
+        ]} />
+      </body>
     </html>
   );
 }

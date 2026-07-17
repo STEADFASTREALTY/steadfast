@@ -12,6 +12,7 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Listing Workflow Specification v0.1 - technical source](./SteadFast_Listing_Workflow_Specification_v0.1.md)
 - [Implemented listing draft foundation](./LISTING_DRAFT_FOUNDATION.md)
 - [Implemented secure listing media pipeline](./LISTING_MEDIA_PIPELINE.md)
+- [Mandatory UI prompt and discovery metadata standards](./UI_AND_DISCOVERY_STANDARDS.md)
 - [Implemented listing submission and brokerage approval](./LISTING_SUBMISSION_AND_APPROVAL.md)
 - [Implemented workflow notifications](./WORKFLOW_NOTIFICATIONS.md)
 - [Implemented public listing activation and search](./PUBLIC_LISTING_ACTIVATION_AND_SEARCH.md)

@@ -6,7 +6,9 @@ import { decideListingReviewAction, type ReviewListingState } from "@/app/action
 export function ReviewDecisionForm({ listingId, listingVersionId }: { listingId: string; listingVersionId: string }) {
   const [decision, setDecision] = useState<"approved" | "changes_requested" | "rejected">("approved");
   const [state, action, pending] = useActionState<ReviewListingState, FormData>(decideListingReviewAction, {});
-  return <form action={action} className="review-decision-card">
+  const promptTitle = decision === "approved" ? "Approve this listing?" : decision === "changes_requested" ? "Return this listing for changes?" : "Reject this listing?";
+  const promptMessage = decision === "approved" ? "This version will become the brokerage-approved record. Public activation will still require a separate confirmation." : decision === "changes_requested" ? "The submission will be retained and a new working draft will be opened for the agent." : "This proposal will be closed and retained in the brokerage history.";
+  return <form action={action} className="review-decision-card" data-prompt-title={promptTitle} data-prompt-message={promptMessage} data-prompt-confirm={decision === "approved" ? "Approve listing" : decision === "changes_requested" ? "Request changes" : "Reject listing"} data-prompt-variant={decision === "rejected" ? "danger" : "standard"}>
     <input type="hidden" name="listingId" value={listingId} />
     <input type="hidden" name="listingVersionId" value={listingVersionId} />
     <div><span>Brokerage decision</span><h2>Review this submission</h2><p>The submitted snapshot cannot be edited. Return it to the agent when corrections are needed.</p></div>

@@ -6,7 +6,7 @@ import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
-export const metadata: Metadata = { title: "Listing review", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Listing review", description: "Review submitted brokerage listings and record approval decisions.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 type SubmittedVersion = {

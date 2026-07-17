@@ -28,7 +28,7 @@ export function AccountHeader({
         <Link href="/account">My account</Link>
         <Link href="/account/security">Security</Link>
       </nav>
-      <form action={signOutAction}>
+      <form action={signOutAction} data-prompt-title="Sign out of SteadFast?" data-prompt-message="Your current session will end. Saved work will remain available when you sign in again." data-prompt-confirm="Sign out">
         <span>{displayName}</span>
         <button className="text-button" type="submit">Sign out</button>
       </form>

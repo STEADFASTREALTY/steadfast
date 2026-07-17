@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { saveListingDraftAction } from "@/app/actions/listings";
 
 type Parish = { id: string; name: string };
@@ -98,20 +98,8 @@ export function EditListingForm({ initial, parishes }: { initial: EditableListin
     if (dirtyRef.current && !conflictRef.current && result.status === "saved") scheduleAutosave();
   }
 
-  useEffect(() => {
-    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
-      if (!dirtyRef.current && !savingRef.current) return;
-      event.preventDefault();
-    };
-    window.addEventListener("beforeunload", warnBeforeLeaving);
-    return () => {
-      clearSaveTimer();
-      window.removeEventListener("beforeunload", warnBeforeLeaving);
-    };
-  }, []);
-
   return (
-    <form ref={formRef} className="listing-wizard" onChange={scheduleAutosave} onSubmit={(event) => { event.preventDefault(); dirtyRef.current = true; void saveDraft("manual"); }}>
+    <form ref={formRef} className="listing-wizard" data-prompt-title="Save these listing changes?" data-prompt-message="Your current edits will replace the working draft. The saved history and brokerage approval rules remain unchanged." data-prompt-confirm="Save changes" onChange={scheduleAutosave} onSubmit={(event) => { event.preventDefault(); dirtyRef.current = true; void saveDraft("manual"); }}>
       <section className="wizard-section">
         <div className="wizard-step"><span>01</span><div><strong>Offer and property</strong><p>Changes save after you pause typing.</p></div></div>
         <div className="wizard-fields two">
@@ -159,4 +147,3 @@ export function EditListingForm({ initial, parishes }: { initial: EditableListin
     </form>
   );
 }
-

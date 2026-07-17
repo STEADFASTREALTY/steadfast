@@ -14,7 +14,7 @@ import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 import { LISTING_MEDIA_BUCKET } from "@/lib/media/constants";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const metadata: Metadata = { title: "Listing draft", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Listing draft", description: "Edit, review, and publish a private brokerage listing record.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 type DraftVersion = {
@@ -147,7 +147,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
       {reviews.length ? <section className="listing-review-history"><div><span>Decision history</span><h2>Brokerage reviews</h2></div>{reviews.map((review) => <article key={`${review.listing_version_id}:${review.decided_at}`}><strong>{review.decision.replaceAll("_", " ")}</strong><small>{new Date(review.decided_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })}{review.is_self_approval ? " · authorized self-approval" : ""}</small>{review.comment ? <p>{review.comment}</p> : null}</article>)}</section> : null}
       {listing.lifecycle_state === "approved_inactive" && listing.current_approved_version_id && access.canReviewListings ? <section className="activation-panel">
         <div><span>Final publication check</span><h2>Activate in the public marketplace</h2><p>This separately verifies the approved public visibility, active brokerage, active agent representative, cleared property record, validated media, and current listing version.</p></div>
-        <form action={activatePublicListingAction}>
+        <form action={activatePublicListingAction} data-prompt-title="Activate this listing publicly?" data-prompt-message="The approved listing and its privacy-safe photographs will become searchable on the SteadFast marketplace." data-prompt-confirm="Activate listing">
           <input type="hidden" name="listingId" value={listing.id} />
           <input type="hidden" name="approvedVersionId" value={listing.current_approved_version_id} />
           <input type="hidden" name="expectedLockVersion" value={listing.lock_version} />

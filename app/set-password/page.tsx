@@ -5,7 +5,7 @@ import { StatusMessage } from "@/app/components/status-message";
 import { BrandLogo } from "@/app/components/brand-logo";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Set password", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Set password", description: "Set a secure password for your SteadFast account.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SetPasswordPage({

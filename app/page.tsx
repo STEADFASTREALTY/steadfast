@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { BrandLogo } from "@/app/components/brand-logo";
+import { publicPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata = publicPageMetadata({
+  title: "Property, connected",
+  description: "Discover Jamaican property and work with trusted agents and brokerages through SteadFast Realty.",
+  path: "/",
+  keywords: ["Jamaica real estate", "Jamaica property", "Jamaica real estate agents"],
+});
 
 const propertyTypes = ["House", "Apartment", "Townhouse", "Land", "Commercial"];
 

@@ -4,7 +4,7 @@ import { forgotPasswordAction } from "@/app/actions/auth";
 import { StatusMessage } from "@/app/components/status-message";
 import { BrandLogo } from "@/app/components/brand-logo";
 
-export const metadata: Metadata = { title: "Forgot password", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Forgot password", description: "Request a secure SteadFast password reset link.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ForgotPasswordPage({

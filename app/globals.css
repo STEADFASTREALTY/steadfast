@@ -50,6 +50,15 @@ button, input, select, textarea { font: inherit; }
 .launch-note { color: var(--lime); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
 .outline-button, .solid-button { align-items: center; border: 1px solid rgba(255,255,255,.36); border-radius: 999px; display: inline-flex; font-size: 12px; font-weight: 700; justify-content: center; min-height: 42px; padding: 0 21px; }
 .outline-button:hover { border-color: var(--lime); }
+.prompt-backdrop { align-items: center; background: rgba(9,28,26,.7); display: flex; inset: 0; justify-content: center; padding: 24px; position: fixed; z-index: 1000; }
+.steadfast-prompt { background: var(--ivory); border: 1px solid var(--sand); box-shadow: 0 30px 100px rgba(0,0,0,.32); max-width: 520px; padding: clamp(32px, 5vw, 52px); width: 100%; }
+.steadfast-prompt > span { color: var(--teal-strong); display: block; font-size: 9px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.steadfast-prompt.danger > span { color: var(--error); }
+.steadfast-prompt h2 { color: var(--evergreen); font-family: Georgia, serif; font-size: clamp(32px, 5vw, 46px); font-weight: 400; letter-spacing: -.04em; margin: 14px 0; }
+.steadfast-prompt p { color: #5b6c67; font-size: 14px; line-height: 1.65; margin: 0; }
+.steadfast-prompt > div { display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; }
+.danger-button { align-items: center; background: var(--error); border: 1px solid var(--error); border-radius: 999px; color: #fff; cursor: pointer; display: inline-flex; font-size: 12px; font-weight: 700; justify-content: center; min-height: 42px; padding: 0 21px; }
+.danger-button:hover { background: #7f2f25; }
 
 .hero { background: var(--ink); color: #fff; display: grid; grid-template-columns: 56% 44%; min-height: 690px; overflow: hidden; }
 .hero-copy { padding: clamp(56px, 8vw, 104px) clamp(28px, 7vw, 104px) 48px; position: relative; z-index: 2; }
@@ -296,7 +305,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .departure-form label:not(.check-row) { display: grid; gap: 7px; }
 .departure-form label > span { color: #667572; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .departure-form input:not([type="checkbox"]) { border: 1px solid var(--line); min-height: 46px; padding: 0 13px; width: 100%; }
-.danger-button { background: var(--error); border: 0; border-radius: 999px; color: #fff; cursor: pointer; justify-self: start; min-height: 42px; padding: 0 18px; }
+.departure-form .danger-button { justify-self: start; }
 .workspace-grid { display: grid; gap: 20px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: -38px auto 0; max-width: 1250px; padding: 0 28px 90px; position: relative; }
 .workspace-card { background: var(--paper); border: 1px solid var(--line); display: flex; flex-direction: column; min-height: 275px; padding: 30px; }
 .workspace-card.active { border-top: 4px solid var(--lime); }

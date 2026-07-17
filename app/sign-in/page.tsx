@@ -4,7 +4,7 @@ import { signInAction } from "@/app/actions/auth";
 import { StatusMessage } from "@/app/components/status-message";
 import { BrandLogo } from "@/app/components/brand-logo";
 
-export const metadata: Metadata = { title: "Sign in", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Sign in", description: "Securely sign in to your SteadFast account.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SignInPage({

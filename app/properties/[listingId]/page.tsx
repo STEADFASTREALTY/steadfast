@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { BrandLogo } from "@/app/components/brand-logo";
+import { StructuredData } from "@/app/components/structured-data";
+import { publicPageMetadata, STEADFAST_SITE_URL } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +21,13 @@ async function getPublicListing(listingId: string) {
 
 export async function generateMetadata({ params }: RouteProps): Promise<Metadata> {
   const listing = await getPublicListing((await params).listingId);
-  if (!listing) return { title: "Property not available", robots: { index: false, follow: false } };
-  return { title: listing.title, description: listing.description.slice(0, 155), alternates: { canonical: `/properties/${listing.listing_id}` } };
+  if (!listing) return { title: "Property not available", description: "This SteadFast property listing is not publicly available.", robots: { index: false, follow: false, noarchive: true } };
+  return publicPageMetadata({
+    title: listing.title,
+    description: listing.description.slice(0, 155),
+    path: `/properties/${listing.listing_id}`,
+    keywords: [listing.property_subtype ?? listing.property_type, listing.administrative_area_name, "Jamaica property"],
+  });
 }
 
 export default async function PublicListingPage({ params }: RouteProps) {
@@ -37,6 +44,17 @@ export default async function PublicListingPage({ params }: RouteProps) {
     .order("position");
 
   return <main className="public-listing-page">
+    <StructuredData value={{
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: listing.title,
+      description: listing.description,
+      category: "Real estate listing",
+      url: `${STEADFAST_SITE_URL}/properties/${listing.listing_id}`,
+      offers: { "@type": "Offer", price: listing.price, priceCurrency: listing.currency, availability: "https://schema.org/InStock" },
+      areaServed: { "@type": "AdministrativeArea", name: listing.administrative_area_name },
+      seller: { "@type": "RealEstateAgent", name: listing.brokerage_name },
+    }} />
     <header className="site-header search-header"><BrandLogo /><Link className="outline-button" href="/properties">Back to search</Link></header>
     <section className="public-listing-hero">
       <div><span>{listing.purpose === "sale" ? "For sale" : "Long-term rental"} · {listing.lifecycle_state.replaceAll("_", " ")}</span><h1>{listing.title}</h1><p>{location}</p></div>
