@@ -20,8 +20,8 @@ function readText(formData: FormData, key: string) {
 
 async function steadfastCookieDomain() {
   const host = (await headers()).get("x-forwarded-host")?.split(",")[0]?.trim().toLowerCase();
-  return host === "steadfast.rockhillinnovation.com" || host?.endsWith(".steadfast.rockhillinnovation.com")
-    ? ".steadfast.rockhillinnovation.com"
+  return host === "canadasap.com" || host?.endsWith(".canadasap.com")
+    ? ".canadasap.com"
     : undefined;
 }
 

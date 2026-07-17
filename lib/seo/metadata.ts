@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const STEADFAST_SITE_URL = "https://steadfast.rockhillinnovation.com";
+export const STEADFAST_SITE_URL = "https://canadasap.com";
 
 export function publicPageMetadata(input: {
   title: string;

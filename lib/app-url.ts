@@ -1,6 +1,6 @@
 import "server-only";
 
-const DEFAULT_APP_URL = "https://steadfast.rockhillinnovation.com";
+const DEFAULT_APP_URL = "https://canadasap.com";
 
 export function getAppUrl() {
   const configured = process.env.NEXT_PUBLIC_APP_URL ?? DEFAULT_APP_URL;

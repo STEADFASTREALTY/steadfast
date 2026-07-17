@@ -55,10 +55,10 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("Content-Security-Policy", policy);
 
   const hostname = request.nextUrl.hostname.toLowerCase();
-  const cookieDomain = hostname === "steadfast.rockhillinnovation.com" || hostname.endsWith(".steadfast.rockhillinnovation.com")
-    ? ".steadfast.rockhillinnovation.com"
+  const cookieDomain = hostname === "canadasap.com" || hostname.endsWith(".canadasap.com")
+    ? ".canadasap.com"
     : undefined;
-  const subdomainMatch = hostname.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.steadfast\.rockhillinnovation\.com$/);
+  const subdomainMatch = hostname.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.canadasap\.com$/);
   const rewriteUrl = subdomainMatch && request.nextUrl.pathname === "/"
     ? new URL(`/sites/${subdomainMatch[1]}`, request.url)
     : null;
