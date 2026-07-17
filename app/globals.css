@@ -118,6 +118,103 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .solid-button { background: var(--ink); border: 1px solid var(--ink); color: #fff; }
 .solid-button:hover { background: #20433f; }
 
+.auth-page { background: var(--cream); display: grid; grid-template-columns: minmax(340px, .9fr) minmax(480px, 1.1fr); min-height: 100vh; }
+.auth-intro { background: var(--ink); color: #fff; display: flex; flex-direction: column; justify-content: center; padding: clamp(48px, 8vw, 110px); }
+.auth-intro .brand { left: clamp(36px, 6vw, 90px); position: absolute; top: 34px; }
+.auth-intro h1 { color: var(--lime); font-family: Georgia, serif; font-size: clamp(62px, 7vw, 106px); font-weight: 400; letter-spacing: -.06em; line-height: .84; margin: 30px 0; }
+.auth-intro p { color: rgba(255,255,255,.62); font-family: Georgia, serif; font-size: 18px; line-height: 1.6; max-width: 470px; }
+.auth-card { align-self: center; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 28px 80px rgba(16,44,42,.1); justify-self: center; margin: 50px; max-width: 520px; padding: clamp(34px, 5vw, 66px); width: calc(100% - 100px); }
+.auth-card.wide { max-width: 650px; }
+.auth-card h2, .account-card h2 { font-family: Georgia, serif; font-size: 38px; font-weight: 400; letter-spacing: -.04em; margin: 17px 0 10px; }
+.auth-card > div > p, .muted-copy { color: #657572; font-size: 13px; line-height: 1.6; }
+.stack-form { display: flex; flex-direction: column; gap: 18px; margin-top: 28px; }
+.stack-form.two-column { display: grid; grid-template-columns: 1fr 1fr; }
+.stack-form .full { grid-column: 1 / -1; }
+.stack-form label:not(.check-row) { display: flex; flex-direction: column; gap: 8px; }
+.stack-form label > span, .decision-form label > span { color: #667572; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.stack-form input:not([type="checkbox"]), .stack-form select, .decision-form input, .invite-result input { background: #fff; border: 1px solid var(--line); border-radius: 2px; min-height: 50px; outline: 0; padding: 0 15px; width: 100%; }
+.stack-form input:focus, .stack-form select:focus, .decision-form input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(200,241,80,.35); }
+.stack-form .solid-button { cursor: pointer; min-height: 50px; }
+.stack-form .solid-button:disabled { cursor: wait; opacity: .65; }
+.check-row { align-items: flex-start; color: #5d6d69; display: flex; font-size: 12px; gap: 10px; line-height: 1.5; }
+.check-row input { accent-color: var(--ink); margin-top: 2px; }
+.stack-form fieldset { border: 1px solid var(--line); display: flex; gap: 22px; margin: 0; padding: 16px; }
+.stack-form legend { color: #667572; font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 0 6px; text-transform: uppercase; }
+.auth-switch { color: #657572; font-size: 12px; margin: 26px 0 0; text-align: center; }
+.auth-switch a { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.status-message { border-left: 3px solid; font-size: 12px; line-height: 1.5; margin: 22px 0 0; padding: 12px 15px; }
+.status-message.error { background: #fff0ec; border-color: #bd4b36; color: #7d2c1d; }
+.status-message.success { background: #edf6d5; border-color: var(--lime-dark); color: #355118; }
+.invite-result { background: var(--cream); border: 1px solid var(--line); padding: 17px; }
+.invite-result strong { font-family: Georgia, serif; font-size: 18px; font-weight: 400; }
+.invite-result p { color: #657572; font-size: 11px; line-height: 1.5; }
+.invite-result input { font-size: 11px; }
+
+.account-page { background: var(--cream); min-height: 100vh; }
+.account-header { align-items: center; background: var(--ink); color: #fff; display: flex; min-height: 78px; padding: 0 clamp(24px, 5vw, 76px); }
+.account-header nav { display: flex; gap: 28px; margin-left: auto; }
+.account-header nav a { color: rgba(255,255,255,.68); font-size: 12px; }
+.account-header > form { align-items: center; border-left: 1px solid rgba(255,255,255,.18); display: flex; gap: 14px; margin-left: 30px; padding-left: 30px; }
+.account-header > form span { color: rgba(255,255,255,.68); font-size: 11px; }
+.text-button { background: none; border: 0; color: var(--lime); cursor: pointer; font-size: 11px; font-weight: 700; padding: 0; }
+.account-hero { background: var(--ink); color: #fff; padding: 72px clamp(28px, 7vw, 104px) 92px; }
+.account-hero.compact { padding-bottom: 70px; padding-top: 54px; }
+.account-hero h1 { color: var(--lime); font-family: Georgia, serif; font-size: clamp(48px, 6vw, 78px); font-weight: 400; letter-spacing: -.055em; margin: 24px 0 12px; }
+.account-hero p { color: rgba(255,255,255,.57); font-family: Georgia, serif; font-size: 17px; margin: 0; }
+.account-layout, .management-layout { display: grid; gap: 34px; grid-template-columns: minmax(0, 1fr) 320px; margin: -38px auto 0; max-width: 1250px; padding: 0 28px 90px; position: relative; }
+.management-layout { grid-template-columns: minmax(0, 1fr) 380px; }
+.account-main, .management-layout > div, .management-aside { display: flex; flex-direction: column; gap: 26px; }
+.account-card { background: var(--paper); border: 1px solid var(--line); padding: 34px; }
+.accent-card { border-top: 4px solid var(--lime); }
+.account-card > p { color: #657572; font-size: 13px; line-height: 1.65; }
+.card-heading > span, .account-sidebar section > span { color: #74837f; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.card-heading h2 { font-size: 30px; margin: 9px 0 0; }
+.account-sidebar { display: flex; flex-direction: column; gap: 1px; }
+.account-sidebar section { background: var(--ink); color: #fff; padding: 29px; }
+.account-sidebar section > span { color: var(--lime); display: block; margin-bottom: 13px; }
+.account-sidebar section > strong { display: block; font-family: Georgia, serif; font-size: 20px; font-weight: 400; }
+.account-sidebar section > p { color: rgba(255,255,255,.56); font-size: 11px; line-height: 1.6; margin: 12px 0 0; }
+.account-sidebar > .solid-button { border-radius: 0; min-height: 52px; }
+.record-list { display: flex; flex-direction: column; margin-top: 24px; }
+.record-list article { align-items: center; border-top: 1px solid var(--line); display: grid; gap: 16px; grid-template-columns: minmax(180px, 1fr) auto; padding: 20px 0; }
+.record-list article > div > strong, .mini-list strong { display: block; font-family: Georgia, serif; font-size: 17px; font-weight: 400; }
+.record-list article > div > span, .mini-list span { color: #768480; display: block; font-size: 10px; margin-top: 5px; }
+.record-list article > p { color: #657572; font-size: 12px; grid-column: 1 / -1; margin: 0; }
+.record-status { background: var(--cream); color: #52635f; font-size: 9px; font-weight: 700; letter-spacing: .08em; padding: 8px 10px; text-transform: uppercase; }
+.status-submitted { background: #fff2c9; color: #745b0b; }
+.status-activated { background: #e5f4bd; color: #385411; }
+.status-broker_denied { background: #f8ded7; color: #7d2c1d; }
+.decision-form { align-items: end; display: grid; gap: 10px; grid-column: 1 / -1; grid-template-columns: minmax(200px, 1fr) auto auto; }
+.decision-form label { display: flex; flex-direction: column; gap: 7px; }
+.decision-form .solid-button, .outline-dark-button { border-radius: 999px; min-height: 42px; padding: 0 18px; }
+.outline-dark-button { background: transparent; border: 1px solid var(--ink); color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 700; }
+.mini-list { display: flex; flex-direction: column; margin-top: 18px; }
+.mini-list > div { border-top: 1px solid var(--line); padding: 15px 0; }
+
+@media (max-width: 960px) {
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-intro { min-height: 480px; }
+  .auth-card { margin: 45px auto; width: calc(100% - 48px); }
+  .account-layout, .management-layout { grid-template-columns: 1fr; }
+  .account-sidebar, .management-aside { grid-row: auto; }
+}
+
+@media (max-width: 680px) {
+  .auth-intro { min-height: 430px; padding: 100px 28px 55px; }
+  .auth-intro .brand { left: 28px; }
+  .auth-intro h1 { font-size: 58px; }
+  .stack-form.two-column { grid-template-columns: 1fr; }
+  .stack-form.two-column > * { grid-column: 1; }
+  .account-header nav, .account-header > form span { display: none; }
+  .account-header > form { margin-left: auto; }
+  .account-hero { padding-left: 28px; padding-right: 28px; }
+  .account-layout, .management-layout { padding-left: 16px; padding-right: 16px; }
+  .account-card { padding: 24px; }
+  .record-list article { align-items: start; grid-template-columns: 1fr; }
+  .record-status { justify-self: start; }
+  .decision-form { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 900px) {
   .desktop-nav, .launch-note { display: none; }
   .hero { grid-template-columns: 1fr; }

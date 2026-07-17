@@ -1,3 +1,4 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 function getSupabaseConnectSources() {
@@ -17,7 +18,7 @@ function getSupabaseConnectSources() {
   }
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const isDevelopment = process.env.NODE_ENV === "development";
   const supabaseConnectSources = getSupabaseConnectSources();
@@ -41,7 +42,32 @@ export function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", policy);
 
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const configuredKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (configuredUrl && configuredKey) {
+    const supabase = createServerClient(configuredUrl, configuredKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet, responseHeaders) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request: { headers: requestHeaders } });
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
+          Object.entries(responseHeaders).forEach(([key, value]) => {
+            response.headers.set(key, value);
+          });
+        },
+      },
+    });
+
+    await supabase.auth.getClaims();
+  }
+
   response.headers.set("Content-Security-Policy", policy);
   return response;
 }

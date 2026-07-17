@@ -56,7 +56,7 @@ export default async function Home() {
         </nav>
         <div className="header-actions">
           <span className="launch-note">Private preview</span>
-          <a className="outline-button" href="#platform">Explore platform</a>
+          <Link className="outline-button" href="/sign-in">Sign in</Link>
         </div>
       </header>
 

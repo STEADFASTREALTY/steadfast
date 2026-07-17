@@ -27,6 +27,7 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Deployment Reference](./DEPLOYMENT.md)
 - [Database Development and Migration Guide](./DATABASE_DEVELOPMENT.md)
 - [Identity and Brokerage Foundation](./IDENTITY_AND_BROKERAGE_FOUNDATION.md)
+- [Authentication and Professional Onboarding](./AUTHENTICATION_AND_ONBOARDING.md)
 
 ## Business planning
 
