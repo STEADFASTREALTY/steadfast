@@ -6,6 +6,7 @@ This document describes the first implemented M2 listing workflow slice. It crea
 
 - `/workspace/listings` shows the listing records the signed-in professional is authorized to read.
 - `/workspace/listings/new` provides the guided create-listing form.
+- `/workspace/listings/[listingId]` reopens an authorized working draft for recoverable editing.
 - Both routes require an active brokerage membership. Creation additionally requires an active agent or broker role.
 
 The form supports sale and long-term rental listings for residential, commercial, land, and development properties. Currency is fixed to JMD for the initial Jamaica release. Public, professional-network, and private visibility are requests only; a new listing always remains private and in Draft state.
@@ -25,6 +26,16 @@ The `app_private.process_create_listing_draft_command()` trigger rechecks the au
 7. appends a privacy-safe audit summary.
 
 The command trigger returns `null`, so command payloads are never stored. Exact addresses and listing content are excluded from the audit summary.
+
+## Editing and autosave
+
+The browser submits edits only through `update_listing_draft_commands`. The private trigger locks the target listing, rechecks active brokerage access and record state, and compares the caller's `expected_lock_version` with the current listing lock. A stale tab receives SQLSTATE `40001`; its data cannot overwrite a newer save.
+
+Valid forms autosave to Supabase after a short pause. Private form content is not copied into browser storage. The page warns before navigation while a save is outstanding, shows saved, incomplete, error, and conflict states in plain language, and offers an explicit reload path after a conflict.
+
+Identical autosaves are idempotent and do not advance the lock. A material save updates the working version and increments the listing lock atomically. Manual material saves append only a safe changed-field summary to the audit log; autosaves do not create noisy audit events. Submitted versions and non-Draft listings cannot pass this command.
+
+An address or property-type edit never mutates the retained property behind another listing. The transaction selects an existing matching brokerage property or creates a new private property candidate and repoints only the working listing.
 
 ## Validation and usability
 
@@ -47,5 +58,4 @@ Run `npm run db:verify` and `npm run ci`. The database suite includes creation, 
 
 ## Next implementation slice
 
-Add recoverable editing and autosave for the working version, including optimistic concurrency, server-side validation progress, and a draft-detail route. Media upload and brokerage submission remain separate controlled milestones.
-
+Add private media upload authorization and image validation, followed by draft completeness checks and brokerage submission. Public projection and approval remain separate controlled milestones.

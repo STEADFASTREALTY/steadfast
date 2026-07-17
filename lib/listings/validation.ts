@@ -10,7 +10,7 @@ const optionalWholeNumber = z.union([
   z.string().trim().regex(/^\d+$/).transform(Number).pipe(z.number().int().min(0).max(100)),
 ]);
 
-export const createListingDraftSchema = z.object({
+const listingDraftFields = z.object({
   administrativeAreaId: z.string().uuid(),
   addressLine1: z.string().trim().min(2).max(200),
   addressLine2: z.string().trim().max(200),
@@ -29,7 +29,9 @@ export const createListingDraftSchema = z.object({
   areaUnit: z.enum(["", "sq_ft", "sq_m", "acre", "hectare"]),
   visibility: z.enum(["private", "professional_network", "public"]),
   publicLocationPrecision: z.enum(["exact", "street", "area", "hidden"]),
-}).superRefine((value, context) => {
+});
+
+function validateDraftRules(value: z.infer<typeof listingDraftFields>, context: z.RefinementCtx) {
   if (value.purpose === "sale" && value.pricePeriod !== "") {
     context.addIssue({ code: "custom", path: ["pricePeriod"], message: "A sale price does not use a billing period." });
   }
@@ -39,5 +41,12 @@ export const createListingDraftSchema = z.object({
   if ((value.buildingArea !== null || value.landArea !== null) && value.areaUnit === "") {
     context.addIssue({ code: "custom", path: ["areaUnit"], message: "Choose an area unit." });
   }
-});
+}
 
+export const createListingDraftSchema = listingDraftFields.superRefine(validateDraftRules);
+
+export const updateListingDraftSchema = listingDraftFields.extend({
+  listingId: z.string().uuid(),
+  expectedLockVersion: z.string().trim().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()),
+  saveMode: z.enum(["autosave", "manual"]),
+}).superRefine(validateDraftRules);

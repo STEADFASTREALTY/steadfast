@@ -283,6 +283,16 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .listing-records article > div > p { color: #657572; font-size: 11px; margin: 0; }
 .listing-record-note { color: #52635f; font-size: 10px; line-height: 1.5; }
 .listing-record-note span { color: #899591; }
+.listing-record-note a { color: var(--ink); display: inline-block; font-weight: 700; margin-top: 6px; text-decoration: underline; text-underline-offset: 3px; }
+.wizard-submit.save-unsaved { box-shadow: inset 4px 0 #d5a52f; }
+.wizard-submit.save-saving { box-shadow: inset 4px 0 #6c8882; }
+.wizard-submit.save-saved { box-shadow: inset 4px 0 var(--lime-dark); }
+.wizard-submit.save-incomplete, .wizard-submit.save-error, .wizard-submit.save-conflict { box-shadow: inset 4px 0 #bd4b36; }
+.reload-draft-link { color: #7d2c1d; display: inline-block; font-size: 11px; font-weight: 700; margin-top: 10px; text-decoration: underline; text-underline-offset: 3px; }
+.locked-listing-card { background: var(--paper); border: 1px solid var(--line); padding: clamp(36px, 6vw, 64px); }
+.locked-listing-card > span { color: #8a3427; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.locked-listing-card h2 { font-family: Georgia, serif; font-size: 34px; font-weight: 400; letter-spacing: -.03em; margin: 20px 0 12px; }
+.locked-listing-card p { color: #657572; font-size: 13px; line-height: 1.65; max-width: 700px; }
 .listing-empty { background: var(--paper); border: 1px solid var(--line); padding: 56px; }
 .listing-empty > span { color: var(--lime-dark); font-family: Georgia, serif; }
 .listing-empty h2 { font-size: 34px; margin-top: 20px; }
