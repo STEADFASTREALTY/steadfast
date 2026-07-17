@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     .download(derivative.object_path);
   if (error || !image) return new NextResponse(null, { status: 404 });
 
-  return new NextResponse(await image.arrayBuffer(), {
+  return new NextResponse(await imageBytes(image), {
     status: 200,
     headers: responseHeaders(etag),
   });
@@ -65,7 +65,14 @@ async function siteAssetResponse(assetId: string, filename: string) {
   if (!asset) return new NextResponse(null, { status: 404 });
   const { data: image, error } = await admin.storage.from(asset.bucket_id).download(asset.object_path);
   if (error || !image) return new NextResponse(null, { status: 404 });
-  return new NextResponse(await image.arrayBuffer(), { status: 200, headers: responseHeaders(`"${assetId}"`) });
+  return new NextResponse(await imageBytes(image), { status: 200, headers: responseHeaders(`"${assetId}"`) });
+}
+
+async function imageBytes(image: Blob) {
+  const bytes = new Uint8Array(await image.arrayBuffer());
+  // Legacy prepared demo files can contain a UTF-8 BOM before the WebP RIFF header.
+  // Strip it at delivery time so browsers receive a standards-compliant image.
+  return bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf ? bytes.slice(3) : bytes;
 }
 
 function responseHeaders(etag: string) {
