@@ -17,6 +17,11 @@ export default async function WorkspacePage() {
   if (!access.hasWorkspace) redirect("/access-denied?reason=professional-workspace");
   await requireInternalMfa(context, "/workspace");
 
+  const { count: unreadNotificationCount } = await context.supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .is("read_at", null);
+
   const brokerage = context.membership?.brokerages as unknown as { display_name?: string } | null;
   return (
     <main className="account-page">
@@ -27,6 +32,7 @@ export default async function WorkspacePage() {
         <p>{brokerage?.display_name ?? (access.isAdmin ? "SteadFast administration" : "SteadFast operations")}</p>
       </section>
       <section className="workspace-grid">
+        <article className="workspace-card active"><span>Updates</span><h2>Notifications</h2><p>{unreadNotificationCount ? `${unreadNotificationCount} unread workflow update${unreadNotificationCount === 1 ? "" : "s"}.` : "You are caught up on brokerage workflow updates."}</p><Link className="solid-button" href="/account/notifications">Open notifications</Link></article>
         {access.isAgent ? <article className="workspace-card active"><span>Agent</span><h2>Listings</h2><p>Create private property drafts and see the brokerage records available to you.</p><Link className="solid-button" href="/workspace/listings">Open listings</Link></article> : null}
         {access.canReviewListings ? <article className="workspace-card active"><span>Approvals</span><h2>Listing review</h2><p>Review immutable agent submissions, request corrections, reject proposals, or establish approved content.</p><Link className="solid-button" href="/workspace/reviews">Open review queue</Link></article> : null}
         {access.canManageAgents ? <article className="workspace-card active"><span>Brokerage</span><h2>Agents and access</h2><p>Review applications, invite team members, manage capabilities, and process departures.</p><Link className="solid-button" href="/broker/agents">Open team management</Link></article> : null}

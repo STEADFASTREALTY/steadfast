@@ -116,7 +116,7 @@ The database suite covers:
 
 ## Deferred work
 
-- In-app and email notification delivery with an outbox and retry worker.
+- In-app workflow notifications and the reliable outbox foundation are implemented; see [Workflow notifications](./WORKFLOW_NOTIFICATIONS.md). Email delivery workers remain deferred.
 - Public listing projection, search indexing, maps, brokerage/agent websites, and activation guards.
 - Material changes to already approved listings and before/after comparison.
 - Reviewer reminders, service-level reporting, and escalation settings.

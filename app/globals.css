@@ -356,6 +356,26 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .listing-review-history article small { color: #71807c; display: block; font-size: 9px; margin-top: 5px; }
 .listing-review-history article p { color: #52635f; font-size: 11px; line-height: 1.6; margin: 10px 0 0; }
 .review-back { align-items: center; display: inline-flex; min-height: 42px; padding: 0 17px; }
+.notification-shell { margin: -38px auto 0; max-width: 1040px; padding: 0 28px 90px; position: relative; }
+.notification-toolbar { align-items: center; background: var(--ink); color: #fff; display: flex; justify-content: space-between; min-height: 82px; padding: 20px 25px; }
+.notification-toolbar span, .notification-toolbar strong { display: block; }
+.notification-toolbar span { color: var(--lime); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.notification-toolbar strong { font-family: Georgia, serif; font-size: 20px; font-weight: 400; margin-top: 7px; }
+.notification-toolbar .outline-dark-button { border-color: rgba(255,255,255,.55); color: #fff; min-height: 42px; padding: 0 16px; }
+.notification-list { background: var(--paper); border: 1px solid var(--line); border-top: 0; }
+.notification-list article { align-items: center; border-top: 1px solid var(--line); display: grid; gap: 20px; grid-template-columns: 8px minmax(0, 1fr) auto; padding: 25px; }
+.notification-list article:first-child { border-top: 0; }
+.notification-list article.unread { background: #fbfff0; }
+.notification-marker { background: #c2cbc8; border-radius: 50%; height: 8px; width: 8px; }
+.notification-list article.unread .notification-marker { background: var(--lime-dark); box-shadow: 0 0 0 4px rgba(163,202,42,.15); }
+.notification-list article > div:nth-child(2) > span { color: #71807c; font-size: 8px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.notification-list h2 { font-family: Georgia, serif; font-size: 22px; font-weight: 400; margin: 6px 0; }
+.notification-list p { color: #5f706c; font-size: 11px; line-height: 1.6; margin: 0; }
+.notification-list small { color: #889590; display: block; font-size: 9px; margin-top: 9px; }
+.notification-actions { align-items: flex-end; display: flex; flex-direction: column; gap: 10px; }
+.notification-actions .solid-button { align-items: center; display: inline-flex; min-height: 40px; padding: 0 15px; }
+.notification-actions .text-button { color: var(--ink); cursor: pointer; font-size: 10px; text-decoration: underline; text-underline-offset: 3px; }
+.notification-read-state { color: #7f8c88; font-size: 9px; font-weight: 700; text-transform: uppercase; }
 
 @media (max-width: 960px) {
   .auth-page { grid-template-columns: 1fr; }
@@ -390,6 +410,10 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
   .account-header > form { margin-left: auto; padding-left: 16px; }
   .workspace-grid { grid-template-columns: 1fr; padding-left: 16px; padding-right: 16px; }
   .security-layout { padding-left: 16px; padding-right: 16px; }
+  .notification-shell { padding-left: 16px; padding-right: 16px; }
+  .notification-toolbar { align-items: flex-start; flex-direction: column; gap: 18px; }
+  .notification-list article { align-items: flex-start; grid-template-columns: 8px 1fr; }
+  .notification-actions { align-items: flex-start; grid-column: 2; }
   .listing-wizard-shell, .listing-index { padding-left: 16px; padding-right: 16px; }
   .wizard-section { gap: 26px; padding: 28px 22px; }
   .listing-media-card { padding: 28px 22px; }
