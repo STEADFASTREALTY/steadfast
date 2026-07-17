@@ -20,9 +20,8 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     .select("id,variant")
     .eq("id", route.derivativeId)
     .maybeSingle();
-  if (!publicMedia || route.filename !== `${publicMedia.variant}.webp`) {
-    return new NextResponse(null, { status: 404 });
-  }
+  if (!publicMedia) return siteAssetResponse(route.derivativeId, route.filename);
+  if (route.filename !== `${publicMedia.variant}.webp`) return new NextResponse(null, { status: 404 });
 
   const admin = createAdminClient();
   const { data: projection } = await admin
@@ -52,6 +51,21 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     status: 200,
     headers: responseHeaders(etag),
   });
+}
+
+async function siteAssetResponse(assetId: string, filename: string) {
+  if (filename !== "card.webp") return new NextResponse(null, { status: 404 });
+  const admin = createAdminClient();
+  const { data: asset } = await admin
+    .from("site_assets")
+    .select("bucket_id,object_path")
+    .eq("id", assetId)
+    .eq("status", "ready")
+    .maybeSingle();
+  if (!asset) return new NextResponse(null, { status: 404 });
+  const { data: image, error } = await admin.storage.from(asset.bucket_id).download(asset.object_path);
+  if (error || !image) return new NextResponse(null, { status: 404 });
+  return new NextResponse(await image.arrayBuffer(), { status: 200, headers: responseHeaders(`"${assetId}"`) });
 }
 
 function responseHeaders(etag: string) {
