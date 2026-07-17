@@ -6,6 +6,7 @@ export type WorkspaceAccess = {
   canManageAgents: boolean;
   canReviewListings: boolean;
   canManageInquiries: boolean;
+  canShareListings: boolean;
   canManageBrokerage: boolean;
   isOperations: boolean;
   isAdmin: boolean;
@@ -35,6 +36,7 @@ export function deriveWorkspaceAccess({
     canManageAgents: isBroker || allows("agent.manage"),
     canReviewListings: isBroker || allows("listing.review"),
     canManageInquiries: isBroker || roles.includes("agent") || allows("inquiry.manage") || allows("inquiry.own.manage"),
+    canShareListings: isBroker || roles.includes("agent") || allows("listing.share"),
     canManageBrokerage: isBroker || allows("brokerage.profile"),
     isOperations,
     isAdmin,

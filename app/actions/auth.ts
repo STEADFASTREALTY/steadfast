@@ -1,12 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getAppUrl, safeInternalPath } from "@/lib/app-url";
 import {
   forgotPasswordSchema,
   passwordSetupSchema,
   registerSchema,
   signInSchema,
+  signOutSchema,
 } from "@/lib/auth/validation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,6 +21,7 @@ export async function signInAction(formData: FormData) {
   const parsed = signInSchema.safeParse({
     email: readText(formData, "email"),
     password: readText(formData, "password"),
+    rememberDevice: readText(formData, "rememberDevice") || undefined,
   });
   const next = safeInternalPath(readText(formData, "next"));
 
@@ -26,8 +29,25 @@ export async function signInAction(formData: FormData) {
     redirect(`/sign-in?error=Enter+a+valid+email+and+password.&next=${encodeURIComponent(next)}`);
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const rememberDevice = parsed.data.rememberDevice === "on";
+  const cookieStore = await cookies();
+  if (rememberDevice) {
+    cookieStore.set("sf_remember_device", "1", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 400 * 24 * 60 * 60,
+    });
+  } else {
+    cookieStore.delete("sf_remember_device");
+  }
+
+  const supabase = await createClient({ persistentSession: rememberDevice });
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
   if (error) {
     redirect(`/sign-in?error=We+could+not+sign+you+in+with+those+details.&next=${encodeURIComponent(next)}`);
   }
@@ -66,10 +86,17 @@ export async function registerAction(formData: FormData) {
   redirect("/sign-in?notice=Check+your+email+to+confirm+your+new+account.");
 }
 
-export async function signOutAction() {
+export async function signOutAction(formData: FormData) {
+  const parsed = signOutSchema.safeParse({ scope: readText(formData, "scope") });
+  if (!parsed.success) redirect("/account/security?error=Choose+a+valid+sign-out+option.");
   const supabase = await createClient();
-  await supabase.auth.signOut({ scope: "local" });
-  redirect("/sign-in?notice=You+have+been+signed+out.");
+  await supabase.auth.signOut({ scope: parsed.data.scope });
+  if (parsed.data.scope === "others") {
+    redirect("/account/security?notice=Other+device+sessions+have+been+signed+out.");
+  }
+  const cookieStore = await cookies();
+  cookieStore.delete("sf_remember_device");
+  redirect(`/sign-in?notice=${parsed.data.scope === "global" ? "You+have+been+signed+out+on+all+machines." : "You+have+been+signed+out+on+this+machine."}`);
 }
 
 export async function forgotPasswordAction(formData: FormData) {

@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
 type RouteContext = { params: Promise<{ derivativeId: string; filename: string }> };
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
+  if (request.headers.get("sec-fetch-site") === "cross-site") {
+    return new NextResponse(null, { status: 403 });
+  }
   const route = await params;
   if (!z.string().uuid().safeParse(route.derivativeId).success) return new NextResponse(null, { status: 404 });
 
@@ -57,7 +60,9 @@ function responseHeaders(etag: string) {
     "Content-Disposition": "inline; filename=steadfast-property.webp",
     "Content-Security-Policy": "default-src 'none'; sandbox",
     "Content-Type": "image/webp",
+    "Cross-Origin-Resource-Policy": "same-site",
     ETag: etag,
+    "X-Robots-Tag": "noimageindex, noarchive",
     "X-Content-Type-Options": "nosniff",
   };
 }

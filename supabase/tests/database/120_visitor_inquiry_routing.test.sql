@@ -1,5 +1,5 @@
 begin;
-select plan(31);
+select plan(43);
 
 select has_table('public', 'inquiries', 'private inquiry records exist');
 select has_table('public', 'create_inquiry_commands', 'write-only visitor inquiry boundary exists');
@@ -109,6 +109,90 @@ insert into public.activate_public_listing_commands (
 );
 reset role;
 
+select has_table('public','professional_sites','professional websites exist');
+select has_table('public','site_domains','verified domain records exist');
+select has_table('public','listing_shares','display-only listing shares exist');
+select has_column('public','inquiries','source_site_id','inquiries retain their professional site source');
+select has_column('public','inquiries','listing_owner_agent_person_id','inquiries retain the listing owner agent');
+select has_column('public','inquiries','displaying_agent_person_id','inquiries retain the displaying agent');
+
+insert into auth.users (
+  id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,
+  raw_app_meta_data,raw_user_meta_data,created_at,updated_at
+) values (
+  '5b000000-0000-4000-8000-000000000005','00000000-0000-0000-0000-000000000000',
+  'authenticated','authenticated','display.agent@example.test','',now(),'{}',
+  '{"display_name":"Display Agent"}',now(),now()
+);
+insert into public.professional_profiles(person_id,public_slug)
+select id,'display-agent' from public.people where auth_user_id='5b000000-0000-4000-8000-000000000005';
+insert into public.brokerage_memberships(id,brokerage_id,person_id,status,starts_at)
+values('7b000000-0000-4000-8000-000000000005','6b000000-0000-4000-8000-000000000001',
+  (select id from public.people where auth_user_id='5b000000-0000-4000-8000-000000000005'),'active',now());
+insert into public.membership_roles(membership_id,brokerage_id,role_key)
+values('7b000000-0000-4000-8000-000000000005','6b000000-0000-4000-8000-000000000001','agent');
+insert into public.professional_sites(id,site_type,owner_person_id,slug,display_name)
+values
+('ad100000-0000-4000-8000-000000000001','agent',(select id from public.people where auth_user_id='5b000000-0000-4000-8000-000000000001'),'inquiry-agent-site','Inquiry Agent'),
+('ad100000-0000-4000-8000-000000000002','agent',(select id from public.people where auth_user_id='5b000000-0000-4000-8000-000000000005'),'display-agent-site','Display Agent');
+select set_config('test.display_agent_person_id',(select id::text from public.people where auth_user_id='5b000000-0000-4000-8000-000000000005'),false);
+
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"5b000000-0000-4000-8000-000000000001","role":"authenticated"}',true);
+select lives_ok(
+  $$insert into public.create_listing_share_commands(request_id,listing_id,displaying_agent_person_id)
+    values('ae100000-0000-4000-8000-000000000001','8b000000-0000-4000-8000-000000000001',
+      current_setting('test.display_agent_person_id')::uuid)$$,
+  'the assigned owner agent can create an immediate display-only share'
+);
+reset role;
+select results_eq(
+  $$select count(*)::bigint from public.listing_shares where status='active'$$,
+  $$values (1::bigint)$$,
+  'the listing share is active without transferring listing ownership'
+);
+
+set local role anon;
+select set_config('request.jwt.claims','{"role":"anon"}',true);
+select lives_ok(
+  $$insert into public.create_inquiry_commands(
+      request_id,listing_id,selected_agent_person_id,requester_name,requester_email,
+      contact_preference,message,consent_version,consent_to_contact,source_surface,
+      source_site_id,website
+    ) values(
+      'af100000-0000-4000-8000-000000000001','8b000000-0000-4000-8000-000000000001',
+      current_setting('test.display_agent_person_id')::uuid,
+      'Shared Site Visitor','shared-visitor@example.test','email',
+      'I would like information from the agent whose website I visited.',
+      'inquiry-contact-v1',true,'shared_agent_site','ad100000-0000-4000-8000-000000000002',''
+    )$$,
+  'a visitor can choose the displaying agent from an active shared-agent website'
+);
+reset role;
+select results_eq(
+  $$select source_site_id,listing_owner_agent_person_id,displaying_agent_person_id,selected_agent_person_id
+    from public.inquiries where request_id='af100000-0000-4000-8000-000000000001'$$,
+  $$select 'ad100000-0000-4000-8000-000000000002'::uuid,
+      (select id from public.people where auth_user_id='5b000000-0000-4000-8000-000000000001'),
+      (select id from public.people where auth_user_id='5b000000-0000-4000-8000-000000000005'),
+      (select id from public.people where auth_user_id='5b000000-0000-4000-8000-000000000005')$$,
+  'the inquiry preserves both agent roles and routes private contact data to the visitor choice'
+);
+
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"5b000000-0000-4000-8000-000000000005","role":"authenticated"}',true);
+select lives_ok(
+  $$insert into public.end_listing_share_commands(listing_share_id,operation,reason)
+    values((select id from public.listing_shares where status='active'),'remove','Removed from my website')$$,
+  'the displaying agent can remove a share from their own website'
+);
+reset role;
+select results_eq(
+  $$select status from public.listing_shares$$,
+  $$values ('removed'::text)$$,
+  'removing a display share does not alter the underlying listing'
+);
+
 set local role anon;
 select set_config('request.jwt.claims','{"role":"anon"}',true);
 select throws_like(
@@ -206,20 +290,23 @@ select results_eq(
 );
 select results_eq(
   $$select count(*)::bigint from public.notifications
-    where target_type='inquiry' and event_type='inquiry.received'$$,
+    where target_type='inquiry' and event_type='inquiry.received'
+      and target_id=(select id from public.inquiries where request_id='ac100000-0000-4000-8000-000000000001')$$,
   $$values (1::bigint)$$,
   'a successful inquiry creates one agent notification'
 );
 select results_eq(
   $$select body_safe from public.notifications
-    where target_type='inquiry' and event_type='inquiry.received'$$,
+    where target_type='inquiry' and event_type='inquiry.received'
+      and target_id=(select id from public.inquiries where request_id='ac100000-0000-4000-8000-000000000001')$$,
   $$values ('A new property inquiry is waiting in your private inquiry inbox.'::text)$$,
   'the notification contains no visitor contact details or message content'
 );
 select results_eq(
   $$select aggregate_type,payload ? 'notification_id',payload ? 'person_id',
            payload ? 'requester_email'
-    from app_private.outbox_events where aggregate_type='inquiry'$$,
+    from app_private.outbox_events where aggregate_type='inquiry'
+      and aggregate_id=(select id from public.inquiries where request_id='ac100000-0000-4000-8000-000000000001')$$,
   $$values ('inquiry'::text,true,true,false)$$,
   'the delivery outbox contains identifiers only'
 );
@@ -333,7 +420,7 @@ set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"5b000000-0000-4000-8000-000000000003","role":"authenticated"}',true);
 select results_eq(
   $$select count(*)::bigint from public.inquiries$$,
-  $$values (4::bigint)$$,
+  $$values (5::bigint)$$,
   'the broker can oversee every brokerage inquiry'
 );
 select lives_ok(

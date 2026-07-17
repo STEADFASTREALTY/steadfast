@@ -19,7 +19,7 @@ export default async function NewListingPage() {
   const brokerage = context.membership?.brokerages as unknown as { display_name?: string } | null;
 
   return <main className="account-page">
-    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} />
+    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
     <section className="account-hero compact"><span className="eyebrow"><i /> Private workspace</span><h1>Create a listing.</h1><p>{brokerage?.display_name ?? "Your brokerage"} owns and approves every listing.</p></section>
     <div className="listing-wizard-shell">
       <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>Draft · not public</span></div>

@@ -8,6 +8,7 @@ import {
 } from "@/app/actions/listings";
 import { MAX_IMAGE_BYTES, MAX_LISTING_IMAGES, MAX_UPLOAD_BATCH } from "@/lib/media/constants";
 import { createClient } from "@/lib/supabase/client";
+import { compressListingImage } from "@/lib/media/client-image-compression";
 
 type ReadyMedia = {
   id: string;
@@ -56,7 +57,15 @@ export function ListingMediaUploader({
     const supabase = createClient();
     let completed = 0;
 
-    for (const file of selected) {
+    for (const sourceFile of selected) {
+      setState({ kind: "uploading", message: `Compressing image ${completed + 1} of ${selected.length} before upload…` });
+      let file: File;
+      try {
+        file = await compressListingImage(sourceFile);
+      } catch {
+        setState({ kind: "error", message: "An image could not be compressed safely. Choose a different JPEG, PNG, or WebP file." });
+        break;
+      }
       setState({ kind: "uploading", message: `Uploading and checking image ${completed + 1} of ${selected.length}…` });
       const authorization = await authorizeListingMediaUploadAction({
         listingId,

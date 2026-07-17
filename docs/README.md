@@ -1,5 +1,7 @@
 # SteadFast documentation
 
+- [Professional sites, sharing, and recorded demo data](PROFESSIONAL_SITES_SHARING_AND_DEMO_DATA.md)
+
 This directory contains the approved planning documents for the SteadFast platform.
 
 ## Product and technical planning

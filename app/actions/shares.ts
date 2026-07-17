@@ -1,0 +1,11 @@
+"use server";
+import { randomUUID } from "node:crypto";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { getActiveMembershipContext } from "@/lib/auth/session";
+const createSchema=z.object({listingId:z.string().uuid(),displayingAgentPersonId:z.string().uuid()});
+const endSchema=z.object({shareId:z.string().uuid(),operation:z.enum(["remove","revoke"])});
+const text=(formData:FormData,key:string)=>{const value=formData.get(key);return typeof value==="string"?value:"";};
+export async function createListingShareAction(formData:FormData){const parsed=createSchema.safeParse({listingId:text(formData,"listingId"),displayingAgentPersonId:text(formData,"displayingAgentPersonId")});if(!parsed.success)redirect("/workspace/sharing?error=Choose+an+active+listing+and+agent.");const context=await getActiveMembershipContext("/workspace/sharing");const{error}=await context.supabase.from("create_listing_share_commands").insert({request_id:randomUUID(),listing_id:parsed.data.listingId,displaying_agent_person_id:parsed.data.displayingAgentPersonId});if(error)redirect("/workspace/sharing?error=The+listing+could+not+be+shared.+Current+eligibility+was+checked.");revalidatePath("/workspace/sharing");redirect("/workspace/sharing?notice=The+listing+is+now+available+on+that+agent+website.");}
+export async function endListingShareAction(formData:FormData){const parsed=endSchema.safeParse({shareId:text(formData,"shareId"),operation:text(formData,"operation")});if(!parsed.success)redirect("/workspace/sharing?error=That+share+action+is+not+valid.");const context=await getActiveMembershipContext("/workspace/sharing");const{error}=await context.supabase.from("end_listing_share_commands").insert({listing_share_id:parsed.data.shareId,operation:parsed.data.operation,reason:"Website display changed by participating agent."});if(error)redirect("/workspace/sharing?error=The+share+could+not+be+changed.");revalidatePath("/workspace/sharing");redirect("/workspace/sharing?notice=Listing+display+updated.");}

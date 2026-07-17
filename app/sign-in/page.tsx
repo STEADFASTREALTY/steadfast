@@ -28,10 +28,11 @@ export default async function SignInPage({
           <p>Use the email address connected to your SteadFast account.</p>
         </div>
         <StatusMessage error={params.error} notice={params.notice} />
-        <form action={signInAction} className="stack-form">
+        <form action={signInAction} className="stack-form" noValidate>
           <input type="hidden" name="next" value={params.next ?? "/account"} />
-          <label><span>Email</span><input name="email" type="email" autoComplete="email" maxLength={320} required /></label>
-          <label><span>Password</span><input name="password" type="password" autoComplete="current-password" minLength={10} maxLength={128} required /></label>
+          <label><span>Email</span><input name="email" type="email" autoComplete="email" maxLength={320} /></label>
+          <label><span>Password</span><input name="password" type="password" autoComplete="current-password" minLength={10} maxLength={128} /></label>
+          <label className="remember-device"><input name="rememberDevice" type="checkbox" /><span>Keep me signed in on this machine</span></label>
           <p className="form-assist"><Link href="/forgot-password">Forgot your password?</Link></p>
           <button className="solid-button" type="submit">Sign in</button>
         </form>

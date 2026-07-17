@@ -9,7 +9,15 @@ const password = z
   .regex(/[A-Z]/, "Include an uppercase letter.")
   .regex(/[0-9]/, "Include a number.");
 
-export const signInSchema = z.object({ email, password });
+export const signInSchema = z.object({
+  email,
+  password,
+  rememberDevice: z.literal("on").optional(),
+});
+
+export const signOutSchema = z.object({
+  scope: z.enum(["local", "global", "others"]),
+});
 
 export const forgotPasswordSchema = z.object({ email });
 

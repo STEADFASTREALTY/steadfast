@@ -6,6 +6,7 @@ export const createInquirySchema = z.object({
   requestId: z.string().uuid("This inquiry request is not valid."),
   listingId: z.string().uuid("This property is not available."),
   selectedAgentPersonId: z.string().uuid("The listing representative is not available."),
+  sourceSiteId: z.union([z.literal(""), z.string().uuid("This professional website is not available.")]),
   requesterName: z.string().trim().min(2, "Enter your name.").max(120, "Your name is too long."),
   requesterEmail: z.string().trim().toLowerCase().email("Enter a valid email address.").max(320),
   requesterPhone: z.string().trim().max(30).refine(
@@ -26,4 +27,3 @@ export const inquiryStatusSchema = z.object({
   inquiryId: z.string().uuid("This inquiry is not valid."),
   operation: z.enum(["claim", "close", "reopen"]),
 });
-

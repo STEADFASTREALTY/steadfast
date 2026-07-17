@@ -24,7 +24,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
 
   return <main className="account-page">
-    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} />
+    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
     <section className="account-hero compact"><span className="eyebrow"><i /> Brokerage inventory</span><h1>Listings.</h1><p>{brokerage?.display_name ?? "Your brokerage"}</p></section>
     <div className="listing-index">
       <div className="listing-index-bar"><div><span>Your work</span><strong>{listings?.length ?? 0} visible to you</strong></div>{access.isAgent ? <Link className="solid-button" href="/workspace/listings/new">Create listing</Link> : null}</div>

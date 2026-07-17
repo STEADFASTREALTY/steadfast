@@ -6,6 +6,7 @@ const validInquiry = {
   requestId: "10000000-0000-4000-8000-000000000001",
   listingId: "10000000-0000-4000-8000-000000000002",
   selectedAgentPersonId: "10000000-0000-4000-8000-000000000003",
+  sourceSiteId: "",
   requesterName: "  Visitor Person  ",
   requesterEmail: "  VISITOR@EXAMPLE.TEST  ",
   requesterPhone: "",

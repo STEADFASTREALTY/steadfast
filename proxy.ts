@@ -54,11 +54,19 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", policy);
 
-  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  const hostname = request.nextUrl.hostname.toLowerCase();
+  const subdomainMatch = hostname.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.steadfast\.rockhillinnovation\.com$/);
+  const rewriteUrl = subdomainMatch && request.nextUrl.pathname === "/"
+    ? new URL(`/sites/${subdomainMatch[1]}`, request.url)
+    : null;
+  let response = rewriteUrl
+    ? NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } })
+    : NextResponse.next({ request: { headers: requestHeaders } });
 
   const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const configuredKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (configuredUrl && configuredKey) {
+    const persistentSession = request.cookies.get("sf_remember_device")?.value === "1";
     const supabase = createServerClient(configuredUrl, configuredKey, {
       cookies: {
         getAll() {
@@ -66,9 +74,18 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet, responseHeaders) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request: { headers: requestHeaders } });
+          response = rewriteUrl
+            ? NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } })
+            : NextResponse.next({ request: { headers: requestHeaders } });
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
+            if (persistentSession) {
+              response.cookies.set(name, value, options);
+              return;
+            }
+            const { maxAge: _maxAge, expires: _expires, ...sessionOptions } = options;
+            void _maxAge;
+            void _expires;
+            response.cookies.set(name, value, sessionOptions);
           });
           Object.entries(responseHeaders).forEach(([key, value]) => {
             response.headers.set(key, value);

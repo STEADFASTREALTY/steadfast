@@ -25,7 +25,7 @@ export default async function WorkspacePage() {
   const brokerage = context.membership?.brokerages as unknown as { display_name?: string } | null;
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} />
+      <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
       <section className="account-hero compact">
         <span className="eyebrow"><i /> Your work</span>
         <h1>Workspace.</h1>
@@ -34,6 +34,7 @@ export default async function WorkspacePage() {
       <section className="workspace-grid">
         <article className="workspace-card active"><span>Updates</span><h2>Notifications</h2><p>{unreadNotificationCount ? `${unreadNotificationCount} unread workflow update${unreadNotificationCount === 1 ? "" : "s"}.` : "You are caught up on brokerage workflow updates."}</p><Link className="solid-button" href="/account/notifications">Open notifications</Link></article>
         {access.canManageInquiries ? <article className="workspace-card active"><span>Client service</span><h2>Property inquiries</h2><p>Respond to private visitor contact requests. Agents see their own; authorized brokers see the brokerage queue.</p><Link className="solid-button" href="/workspace/inquiries">Open inquiry inbox</Link></article> : null}
+        {access.canShareListings ? <article className="workspace-card active"><span>Advertising</span><h2>Listing sharing</h2><p>Let another SteadFast agent display an approved listing without transferring ownership or editing rights.</p><Link className="solid-button" href="/workspace/sharing">Manage sharing</Link></article> : null}
         {access.isAgent ? <article className="workspace-card active"><span>Agent</span><h2>Listings</h2><p>Create private property drafts and see the brokerage records available to you.</p><Link className="solid-button" href="/workspace/listings">Open listings</Link></article> : null}
         {access.canReviewListings ? <article className="workspace-card active"><span>Approvals</span><h2>Listing review</h2><p>Review immutable agent submissions, request corrections, reject proposals, or establish approved content.</p><Link className="solid-button" href="/workspace/reviews">Open review queue</Link></article> : null}
         {access.canManageAgents ? <article className="workspace-card active"><span>Brokerage</span><h2>Agents and access</h2><p>Review applications, invite team members, manage capabilities, and process departures.</p><Link className="solid-button" href="/broker/agents">Open team management</Link></article> : null}

@@ -49,6 +49,7 @@ export default async function InquiryInboxPage({ searchParams }: PageProps) {
         canManageListings={access.isAgent || access.canReviewListings}
         canReviewListings={access.canReviewListings}
         canManageInquiries={access.canManageInquiries}
+        canShareListings={access.canShareListings}
       />
       <section className="account-hero compact">
         <span className="eyebrow"><i /> Private client service</span>
