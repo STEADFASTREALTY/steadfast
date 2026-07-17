@@ -14,6 +14,6 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.redirect(
-    new URL("/sign-in?error=The+confirmation+link+is+invalid+or+expired.", getAppUrl()),
+    new URL("/sign-in?error=The+email+link+is+invalid+or+expired.", getAppUrl()),
   );
 }

@@ -11,6 +11,8 @@ const password = z
 
 export const signInSchema = z.object({ email, password });
 
+export const forgotPasswordSchema = z.object({ email });
+
 export const registerSchema = z
   .object({
     displayName: z.string().trim().min(2).max(120),

@@ -2,7 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { getAppUrl, safeInternalPath } from "@/lib/app-url";
-import { passwordSetupSchema, registerSchema, signInSchema } from "@/lib/auth/validation";
+import {
+  forgotPasswordSchema,
+  passwordSetupSchema,
+  registerSchema,
+  signInSchema,
+} from "@/lib/auth/validation";
 import { createClient } from "@/lib/supabase/server";
 
 function readText(formData: FormData, key: string) {
@@ -67,6 +72,24 @@ export async function signOutAction() {
   redirect("/sign-in?notice=You+have+been+signed+out.");
 }
 
+export async function forgotPasswordAction(formData: FormData) {
+  const parsed = forgotPasswordSchema.safeParse({
+    email: readText(formData, "email"),
+  });
+
+  if (!parsed.success) {
+    redirect("/forgot-password?error=Enter+a+valid+email+address.");
+  }
+
+  const supabase = await createClient();
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${getAppUrl()}/auth/callback?next=%2Fset-password`,
+  });
+
+  // Always return the same response so this form cannot reveal registered emails.
+  redirect("/forgot-password?sent=1");
+}
+
 export async function setPasswordAction(formData: FormData) {
   const parsed = passwordSetupSchema.safeParse({
     password: readText(formData, "password"),
@@ -89,5 +112,7 @@ export async function setPasswordAction(formData: FormData) {
     redirect("/set-password?error=Your+password+could+not+be+saved.+Please+try+again.");
   }
 
-  redirect("/account?notice=Your+password+has+been+set.");
+  await supabase.auth.signOut({ scope: "others" });
+
+  redirect("/account?notice=Your+password+has+been+updated.");
 }

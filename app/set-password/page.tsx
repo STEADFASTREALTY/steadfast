@@ -25,12 +25,12 @@ export default async function SetPasswordPage({
     <main className="auth-page">
       <section className="auth-intro">
         <Link className="brand" href="/"><span className="brand-mark">S</span><span>SteadFast</span></Link>
-        <span className="eyebrow"><i /> Secure invitation</span>
+        <span className="eyebrow"><i /> Secure account</span>
         <h1>Protect your<br />account.</h1>
-        <p>Create the private password you will use to access SteadFast. We never send or store a temporary password for you.</p>
+        <p>Create the private password you will use to access SteadFast. Recovery links expire and can only be used through your email.</p>
       </section>
       <section className="auth-card">
-        <div><span className="eyebrow dark"><i /> First sign-in</span><h2>Set your password</h2></div>
+        <div><span className="eyebrow dark"><i /> Account recovery</span><h2>Set your password</h2></div>
         <StatusMessage error={params.error} />
         <form action={setPasswordAction} className="stack-form">
           <label><span>New password</span><input name="password" type="password" autoComplete="new-password" minLength={10} maxLength={128} required /></label>

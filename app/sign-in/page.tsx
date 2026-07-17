@@ -31,6 +31,7 @@ export default async function SignInPage({
           <input type="hidden" name="next" value={params.next ?? "/account"} />
           <label><span>Email</span><input name="email" type="email" autoComplete="email" maxLength={320} required /></label>
           <label><span>Password</span><input name="password" type="password" autoComplete="current-password" minLength={10} maxLength={128} required /></label>
+          <p className="form-assist"><Link href="/forgot-password">Forgot your password?</Link></p>
           <button className="solid-button" type="submit">Sign in</button>
         </form>
         <p className="auth-switch">New to SteadFast? <Link href={`/register?next=${encodeURIComponent(params.next ?? "/account")}`}>Create a free account</Link></p>

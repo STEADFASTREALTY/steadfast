@@ -142,6 +142,8 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .stack-form legend { color: #667572; font-size: 9px; font-weight: 700; letter-spacing: .12em; padding: 0 6px; text-transform: uppercase; }
 .auth-switch { color: #657572; font-size: 12px; margin: 26px 0 0; text-align: center; }
 .auth-switch a { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.form-assist { font-size: 12px; margin: -7px 0 0; text-align: right; }
+.form-assist a { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .status-message { border-left: 3px solid; font-size: 12px; line-height: 1.5; margin: 22px 0 0; padding: 12px 15px; }
 .status-message.error { background: #fff0ec; border-color: #bd4b36; color: #7d2c1d; }
 .status-message.success { background: #edf6d5; border-color: var(--lime-dark); color: #355118; }
