@@ -221,8 +221,12 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .rich-toolbar button { background: var(--sage); border: 0; color: var(--evergreen); cursor: pointer; font-size: 11px; padding: 7px 10px; }
 .rich-editor { background: #fff; border: 1px solid var(--sand); line-height: 1.6; min-height: 150px; padding: 14px; }
 .site-asset-upload { border-top: 1px solid var(--sand); margin-top: 22px; padding-top: 18px; }
-.site-asset-upload label:not(.check-row) { align-items: center; background: #fff; border: 1px solid var(--sand); justify-content: center; min-height: 116px; padding: 18px; text-align: center; }
-.site-asset-upload input[type="file"][type="file"] { align-self: center; max-width: 100%; width: auto; }
+.site-asset-upload label.site-file-picker { align-items: center; background: #fff; border: 1px solid var(--sand); cursor: pointer; justify-content: center; min-height: 116px; padding: 18px; text-align: center; }
+.site-file-input { block-size: 1px; clip-path: inset(50%); inline-size: 1px; opacity: 0; overflow: hidden; position: absolute; }
+.site-file-picker-row { align-items: center; display: flex; gap: 10px; justify-content: center; }
+.site-file-picker-button { align-items: center; background: var(--evergreen); color: #fff; display: inline-flex; font-size: 12px; font-weight: 700; justify-content: center; min-height: 42px; padding: 0 18px; }
+.site-file-name { color: #61716e; font-size: 12px; min-width: 120px; text-align: left; }
+.site-file-picker:focus-within { border-color: var(--teal-strong); box-shadow: 0 0 0 3px rgba(22,140,145,.2); }
 .professional-site-page { background: var(--site-background, var(--ivory)); color: var(--site-text, var(--charcoal)); min-height: 100vh; }
 .professional-site-page .professional-site-hero { background: var(--site-primary, var(--evergreen)); color: #fff; }
 .professional-site-page .professional-site-hero > span, .professional-site-page .professional-site-listings > .section-heading span, .professional-site-testimonials > span, .professional-site-search > span, .professional-site-contact > span { color: var(--site-accent, var(--gold)); }

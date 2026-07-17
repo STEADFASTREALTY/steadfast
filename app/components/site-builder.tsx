@@ -31,6 +31,7 @@ export function SiteBuilder({ site }: { site: Site }) {
   const [contactPhone, setContactPhone] = useState(String(site.content?.contactPhone ?? ""));
   const [strengths, setStrengths] = useState(String(site.content?.strengths ?? ""));
   const [imageError, setImageError] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState("");
   const editor = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
   useEffect(() => { if (editor.current && !initialized.current) { editor.current.innerHTML = aboutHtml; initialized.current = true; } }, [aboutHtml]);
@@ -38,7 +39,7 @@ export function SiteBuilder({ site }: { site: Site }) {
   const [siteTheme, setSiteTheme] = useState<SiteTheme>(() => ({ primary: String(theme.primary ?? "#102C2A"), accent: String(theme.accent ?? "#D8A72E"), background: String(theme.background ?? "#FBFAF6"), text: String(theme.text ?? "#17201C") }));
   const move = (index: number, change: number) => setOrder((current) => { const next = [...current]; const target = index + change; if (target < 0 || target >= next.length) return current; [next[index], next[target]] = [next[target], next[index]]; return next; });
   const format = (command: string, value?: string) => { editor.current?.focus(); document.execCommand(command, false, value); setAboutHtml(editor.current?.innerHTML ?? ""); };
-  const compress = async (event: React.ChangeEvent<HTMLInputElement>) => { const selected = event.target.files?.[0]; if (!selected) return; try { const compressed = await compressListingImage(selected); const transfer = new DataTransfer(); transfer.items.add(compressed); event.target.files = transfer.files; setImageError(""); } catch { event.target.value = ""; setImageError("Choose a clear still image at least 300 pixels wide and high."); } };
+  const compress = async (event: React.ChangeEvent<HTMLInputElement>) => { const selected = event.target.files?.[0]; if (!selected) return; try { const compressed = await compressListingImage(selected); const transfer = new DataTransfer(); transfer.items.add(compressed); event.target.files = transfer.files; setSelectedFileName(selected.name); setImageError(""); } catch { event.target.value = ""; setSelectedFileName(""); setImageError("Choose a clear still image at least 300 pixels wide and high."); } };
   return <section className="account-card site-builder-card">
     <div className="card-heading"><span>Modular website</span><h2>{site.display_name}</h2></div>
     <p>Arrange sections, write your story, and choose a color system. Changes are saved only when you confirm below.</p>
@@ -53,7 +54,7 @@ export function SiteBuilder({ site }: { site: Site }) {
     </form>
     <form action={uploadSiteAssetAction} className="stack-form site-asset-upload" data-prompt-title="Save this website image?" data-prompt-message="It will be compressed to WebP, stripped of metadata, stored privately, and displayed only through SteadFast." data-prompt-confirm="Save image">
       <input type="hidden" name="siteId" value={site.id} /><input type="hidden" name="placement" value={site.site_type === "brokerage" ? "brokerage_logo" : "profile_photo"} />
-      <label><span>{site.site_type === "brokerage" ? "Brokerage logo" : "Professional photo"}</span><input name="asset" type="file" accept="image/jpeg,image/png,image/webp" onChange={compress} required /></label>{imageError ? <p className="form-error" role="alert">{imageError}</p> : null}<ImageUploadButton />
+      <label className="site-file-picker"><span>{site.site_type === "brokerage" ? "Brokerage logo" : "Professional photo"}</span><input className="site-file-input" name="asset" type="file" accept="image/jpeg,image/png,image/webp" onChange={compress} required /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">{selectedFileName || "No file chosen"}</span></span></label>{imageError ? <p className="form-error" role="alert">{imageError}</p> : null}<ImageUploadButton />
     </form>
   </section>;
 }
