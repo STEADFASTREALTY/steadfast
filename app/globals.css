@@ -198,6 +198,14 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .capability-row span small { color: #73817e; display: block; font-size: 10px; line-height: 1.45; margin-top: 4px; }
 .capability-toggle { background: #edf0ee; border: 1px solid #d1d8d4; border-radius: 999px; color: #56635f; cursor: pointer; font-size: 10px; font-weight: 700; min-width: 94px; padding: 9px 12px; }
 .capability-toggle.enabled { background: var(--lime); border-color: #a8ca40; color: var(--ink); }
+.departure-panel { border: 1px solid #e2c3bd; grid-column: 1 / -1; padding: 16px; }
+.departure-panel summary { color: #8b3428; cursor: pointer; font-size: 11px; font-weight: 700; }
+.departure-form { display: grid; gap: 14px; margin-top: 16px; }
+.departure-form p { color: #657572; font-size: 11px; line-height: 1.55; margin: 0; }
+.departure-form label:not(.check-row) { display: grid; gap: 7px; }
+.departure-form label > span { color: #667572; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.departure-form input:not([type="checkbox"]) { border: 1px solid var(--line); min-height: 46px; padding: 0 13px; width: 100%; }
+.danger-button { background: #8b3428; border: 0; border-radius: 999px; color: #fff; cursor: pointer; justify-self: start; min-height: 42px; padding: 0 18px; }
 .outline-dark-button { background: transparent; border: 1px solid var(--ink); color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 700; }
 .mini-list { display: flex; flex-direction: column; margin-top: 18px; }
 .mini-list > div { border-top: 1px solid var(--line); padding: 15px 0; }

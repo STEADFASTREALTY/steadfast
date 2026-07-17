@@ -89,3 +89,9 @@ export const staffCapabilitySchema = z.object({
   operation: z.enum(["grant", "revoke"]),
   reason: z.string().trim().max(1000),
 });
+
+export const agentDepartureSchema = z.object({
+  membershipId: z.string().uuid(),
+  reason: z.string().trim().min(3).max(1000),
+  confirmation: z.literal("on"),
+});

@@ -7,6 +7,7 @@ import { getAppUrl } from "@/lib/app-url";
 import { getActiveMembershipContext, requireAccount } from "@/lib/auth/session";
 import {
   applicationSchema,
+  agentDepartureSchema,
   decisionSchema,
   invitationAcceptanceSchema,
   invitationSchema,
@@ -173,4 +174,29 @@ export async function updateStaffCapabilityAction(formData: FormData) {
 
   revalidatePath("/broker/agents");
   redirect("/broker/agents?notice=Staff+access+updated.");
+}
+
+export async function departAgentAction(formData: FormData) {
+  const context = await getActiveMembershipContext();
+  if (!context.membership) {
+    redirect("/account?error=An+active+brokerage+membership+is+required.");
+  }
+
+  const parsed = agentDepartureSchema.safeParse({
+    membershipId: readText(formData, "membershipId"),
+    reason: readText(formData, "reason"),
+    confirmation: readText(formData, "confirmation"),
+  });
+  if (!parsed.success) {
+    redirect("/broker/agents?error=Provide+a+reason+and+confirm+the+agent+departure.");
+  }
+
+  const { error } = await context.supabase.from("agent_departure_commands").insert({
+    membership_id: parsed.data.membershipId,
+    reason: parsed.data.reason,
+  });
+  if (error) redirect("/broker/agents?error=The+agent+departure+could+not+be+completed.");
+
+  revalidatePath("/broker/agents");
+  redirect("/broker/agents?notice=Agent+brokerage+access+ended.+Their+SteadFast+account+remains+active.");
 }

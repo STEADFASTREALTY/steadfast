@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { decideAgentApplicationAction } from "@/app/actions/onboarding";
+import { decideAgentApplicationAction, departAgentAction } from "@/app/actions/onboarding";
 import { AccountHeader } from "@/app/components/account-header";
 import { InvitationForm } from "@/app/components/invitation-form";
 import { StaffCapabilityPanel } from "@/app/components/staff-capability-panel";
@@ -22,7 +22,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
 
   const [{ data: applications }, { data: members }, { data: invitations }] = await Promise.all([
     context.supabase.from("agent_applications").select("id, status, submitted_at, broker_reason, people(display_name, primary_email)").eq("brokerage_id", context.membership.brokerage_id).order("submitted_at"),
-    context.supabase.from("brokerage_memberships").select("id, status, starts_at, people(display_name, primary_email), membership_roles(role_key, ends_at), membership_permissions(permission_key, effect, ends_at)").eq("brokerage_id", context.membership.brokerage_id).eq("status", "active").order("starts_at"),
+    context.supabase.from("brokerage_memberships").select("id, person_id, status, starts_at, people(display_name, primary_email), membership_roles(role_key, ends_at), membership_permissions(permission_key, effect, ends_at)").eq("brokerage_id", context.membership.brokerage_id).eq("status", "active").order("starts_at"),
     canInvite ? context.supabase.from("brokerage_invitations").select("id, email, status, expires_at, created_at, brokerage_invitation_roles(role_key)").eq("brokerage_id", context.membership.brokerage_id).order("created_at", { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
   ]);
 
@@ -50,6 +50,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
               const activeRoles = roles.filter((role) => !role.ends_at).map((role) => role.role_key);
               const isStaff = activeRoles.includes("broker_staff");
               const isPrincipalBroker = activeRoles.includes("broker");
+              const isAgent = activeRoles.includes("agent");
               const activePermissionKeys = permissions
                 .filter((permission) => !permission.ends_at && permission.effect === "allow")
                 .map((permission) => permission.permission_key);
@@ -60,6 +61,18 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
                   <span className="record-status">{activeRoles.map((role) => role.replaceAll("_", " ")).join(", ")}</span>
                   {isBroker && isStaff && !isPrincipalBroker ? (
                     <StaffCapabilityPanel membershipId={member.id} activePermissionKeys={activePermissionKeys} />
+                  ) : null}
+                  {canManageAgents && isAgent && !isPrincipalBroker && member.person_id !== context.person.id ? (
+                    <details className="departure-panel">
+                      <summary>End brokerage access</summary>
+                      <form action={departAgentAction} className="departure-form">
+                        <input name="membershipId" type="hidden" value={member.id} />
+                        <p><strong>Represented listings: 0</strong><br />Listing tools are not active yet. The person’s SteadFast login and personal account will remain active.</p>
+                        <label><span>Reason</span><input name="reason" minLength={3} maxLength={1000} required placeholder="Why is this agent leaving the brokerage?" /></label>
+                        <label className="check-row"><input name="confirmation" type="checkbox" required /> I confirm this agent’s brokerage access should end now.</label>
+                        <button className="danger-button" type="submit">End brokerage access</button>
+                      </form>
+                    </details>
                   ) : null}
                 </article>
               );
