@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest, { params }: { params: Promise<{ assetId: string; filename: string }> }) {
   if (request.headers.get("sec-fetch-site") === "cross-site") return new NextResponse(null, { status: 403 });
   const route = await params;
-  if (route.filename !== "display.webp" || !z.string().uuid().safeParse(route.assetId).success) return new NextResponse(null, { status: 404 });
+  if (!['display.webp', 'logo.webp'].includes(route.filename) || !z.string().uuid().safeParse(route.assetId).success) return new NextResponse(null, { status: 404 });
   const supabase = await createClient();
   const { data: asset } = await supabase.from("site_assets").select("id").eq("id", route.assetId).eq("status", "ready").maybeSingle();
   if (!asset) return new NextResponse(null, { status: 404 });
