@@ -317,6 +317,10 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .professional-site-hero h1 { color: var(--ivory); font-family: Georgia,serif; font-size: clamp(52px,8vw,104px); font-weight: 400; letter-spacing: -.055em; margin: 22px 0 18px; max-width: 980px; }
 .brokerage-site-hero .brokerage-site-title { font-size: clamp(30px, 5.5vw, 82px); max-width: none; overflow: hidden; text-overflow: clip; white-space: nowrap; width: 100%; }
 .professional-site-hero p { color: rgba(255,255,255,.66); font-family: Georgia,serif; font-size: clamp(17px,2vw,25px); line-height: 1.5; max-width: 720px; }
+.site-join-button { border: 1px solid var(--site-accent, var(--gold)); color: #fff; display: inline-flex; font-size: 12px; font-weight: 700; margin-top: 22px; padding: 12px 17px; text-decoration: none; }
+.site-join-button:hover { background: var(--site-accent, var(--gold)); color: var(--site-primary, var(--evergreen)); }
+.join-brokerage-shell { margin: 0 auto; max-width: 760px; padding: 0 28px 80px; }
+.join-brokerage-card { margin-top: 22px; }
 .professional-site-intro { align-items: start; display: grid; gap: clamp(28px, 4vw, 54px); grid-template-columns: minmax(260px, .8fr) minmax(0, 1.2fr); margin: 0 auto; max-width: 1200px; padding: clamp(38px, 5vw, 58px) 28px; }
 .professional-site-intro h2 { font-family: Georgia,serif; font-size: clamp(30px, 3.1vw, 42px); font-weight: 400; line-height: 1.12; margin: 10px 0 0; max-width: 520px; }
 .professional-site-intro > p { color: #5f706c; font-size: 13px; line-height: 1.7; margin: 0; max-width: 680px; }

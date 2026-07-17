@@ -4,6 +4,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAppUrl } from "@/lib/app-url";
+import { safeInternalPath } from "@/lib/app-url";
 import { getActiveMembershipContext, requireAccount } from "@/lib/auth/session";
 import {
   applicationSchema,
@@ -47,18 +48,19 @@ export async function updateProfileAction(formData: FormData) {
 
 export async function submitAgentApplicationAction(formData: FormData) {
   const account = await requireAccount();
+  const returnTo = safeInternalPath(readText(formData, "returnTo"));
   const parsed = applicationSchema.safeParse({
     brokerageId: readText(formData, "brokerageId"),
   });
 
-  if (!parsed.success) redirect("/account?error=Choose+a+valid+brokerage.");
+  if (!parsed.success) redirect(`${returnTo}?error=Choose+a+valid+brokerage.`);
 
   const { error } = await account.supabase
     .from("agent_application_commands")
     .insert({ brokerage_id: parsed.data.brokerageId });
 
-  if (error) redirect("/account?error=Your+application+could+not+be+submitted.");
-  redirect("/account?notice=Your+agent+application+was+sent+to+the+brokerage.");
+  if (error) redirect(`${returnTo}?error=Your+application+could+not+be+submitted.`);
+  redirect(`${returnTo}?notice=Your+agent+application+was+sent+to+the+brokerage.`);
 }
 
 export async function decideAgentApplicationAction(formData: FormData) {
