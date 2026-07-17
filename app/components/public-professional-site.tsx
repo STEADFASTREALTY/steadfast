@@ -56,9 +56,8 @@ export async function PublicProfessionalSite({ slug, expectedType }: { slug: str
 function SiteShell({ site, listings, media, assets, testimonials }: { site: NonNullable<Awaited<ReturnType<typeof getProfessionalSite>>>; listings: SiteListing[]; media: SiteMedia[]; assets: {id:string;placement:string}[]; testimonials: Testimonial[] }) {
   const theme = site.theme ?? {};
   const palette = { primary: safeColor(theme.primary, "#102C2A"), accent: safeColor(theme.accent, "#D8A72E"), background: safeColor(theme.background, "#FBFAF6"), text: safeColor(theme.text, "#17201C") };
-  const heroHasLightBackground = isLightColor(palette.primary);
-  const heroTextColor = heroHasLightBackground ? palette.text : "#FFFFFF";
-  const heroSecondaryTextColor = heroHasLightBackground ? "#40504B" : "rgba(255,255,255,.66)";
+  const heroTextColor = palette.text;
+  const heroSecondaryTextColor = palette.text;
   const style = { "--site-primary": palette.primary, "--site-accent": palette.accent, "--site-background": palette.background, "--site-text": palette.text, "--site-on-primary": heroTextColor, "--site-on-primary-muted": heroSecondaryTextColor, backgroundColor: palette.background, color: palette.text } as CSSProperties;
   const rawOrder: unknown[] = Array.isArray(site.layout?.sectionOrder) ? site.layout.sectionOrder as unknown[] : [];
   const order: string[] = rawOrder.length ? rawOrder.filter((item: unknown): item is string => ["hero","about","search","listings","testimonials","contact"].includes(String(item))) : ["hero","about","search","listings","testimonials","contact"];
@@ -79,4 +78,3 @@ function SiteShell({ site, listings, media, assets, testimonials }: { site: NonN
 }
 
 function safeColor(value: unknown, fallback: string) { return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback; }
-function isLightColor(hex: string) { const rgb = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map((part) => Number.parseInt(part, 16) / 255); const [red, green, blue] = rgb.map((channel) => channel <= .03928 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4); return .2126 * red + .7152 * green + .0722 * blue > .45; }
