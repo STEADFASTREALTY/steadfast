@@ -65,9 +65,8 @@ function SiteShell({ site, listings, media, assets, testimonials }: { site: NonN
     contact: <section key="contact" className="professional-site-contact"><span>Start a conversation</span><h2>Ready when you are.</h2>{content.contactEmail ? <a href={`mailto:${encodeURIComponent(String(content.contactEmail))}`}>{String(content.contactEmail)}</a> : null}{content.contactPhone ? <p>{String(content.contactPhone)}</p> : null}<Link href="/properties">Browse all properties</Link></section>,
   } as Record<string, ReactNode>;
   return <main className="professional-site-page" style={style}>
-    <header className="professional-site-header"><nav><Link href="/properties">All properties</Link><Link href="/sign-in">Professional sign in</Link></nav></header>
     {order.map((name: string) => section[name])}
-    <footer className="professional-site-footer"><span>SteadFast Realty</span><a href="https://canadasap.com">canadasap.com</a><span>© {new Date().getFullYear()} SteadFast Realty. All rights reserved.</span></footer>
+    <footer className="professional-site-footer"><nav aria-label="Professional website navigation"><Link href="/properties">All properties</Link><Link href="/sign-in">Professional sign in</Link></nav><span>SteadFast Realty</span><a href="https://canadasap.com">canadasap.com</a><span>© {new Date().getFullYear()} SteadFast Realty. All rights reserved.</span></footer>
   </main>;
 }
 

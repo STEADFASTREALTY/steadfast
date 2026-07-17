@@ -189,7 +189,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .professional-site-page .professional-site-hero > span, .professional-site-page .professional-site-listings > .section-heading span, .professional-site-testimonials > span, .professional-site-search > span, .professional-site-contact > span { color: var(--site-accent, var(--gold)); }
 .site-profile-photo, .site-logo { border: 3px solid var(--site-accent, var(--gold)); display: block; height: 112px; margin: 0 0 22px; object-fit: cover; width: 112px; }
 .site-profile-photo { border-radius: 50%; }
-.site-logo { background: #fff; object-fit: contain; padding: 6px; }
+.site-logo { background: #fff; height: clamp(400px, 42vw, 520px); max-width: 1120px; object-fit: contain; padding: 18px; width: min(82vw, 1120px); }
 .site-rich-content { line-height: 1.75; max-width: 680px; }
 .site-strengths { border-left: 3px solid var(--site-accent, var(--gold)); display: grid; gap: 4px; margin-top: 22px; padding-left: 14px; }
 .professional-site-search, .professional-site-testimonials, .professional-site-contact { margin: 0 auto; max-width: 1240px; padding: 60px clamp(24px, 6vw, 92px); }
@@ -278,14 +278,13 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .contact-choice span, .contact-choice small { display: block; }
 .contact-choice small { color: #74817e; font-size: 8px; font-weight: 400; margin-top: 4px; }
 .professional-site-page { background: var(--paper); min-height: 100vh; }
-.professional-site-header { align-items: center; background: var(--site-background, var(--paper)); border-bottom: 1px solid color-mix(in srgb, var(--site-primary, var(--evergreen)) 14%, transparent); display: flex; justify-content: flex-end; min-height: 72px; padding: 0 clamp(28px, 8vw, 120px); }
-.professional-site-header nav { display: flex; gap: 22px; }
-.professional-site-header nav a { color: var(--site-text, var(--ink)); font-size: 11px; font-weight: 700; }
-.professional-site-header nav a:hover { color: var(--site-primary, var(--evergreen)); text-decoration: underline; text-underline-offset: 4px; }
 .professional-site-footer { align-items: center; border-top: 1px solid color-mix(in srgb, var(--site-primary, var(--evergreen)) 14%, transparent); color: color-mix(in srgb, var(--site-text, var(--charcoal)) 62%, transparent); display: flex; flex-wrap: wrap; font-size: 10px; gap: 10px 18px; justify-content: center; line-height: 1.5; padding: 26px clamp(28px, 8vw, 120px); text-align: center; }
-.professional-site-footer > span:first-child { color: var(--site-text, var(--charcoal)); font-weight: 700; }
+.professional-site-footer > nav + span { color: var(--site-text, var(--charcoal)); font-weight: 700; }
 .professional-site-footer a { color: var(--site-primary, var(--evergreen)); font-weight: 700; }
-.professional-site-hero { background: var(--ink); color: #fff; padding: clamp(70px,10vw,140px) clamp(28px,8vw,120px); }
+.professional-site-footer nav { display: flex; gap: 18px; }
+.professional-site-footer nav a { color: var(--site-text, var(--charcoal)); font-weight: 700; }
+.professional-site-footer nav a:hover { color: var(--site-primary, var(--evergreen)); text-decoration: underline; text-underline-offset: 4px; }
+.professional-site-hero { background: var(--site-primary, var(--ink)); color: #fff; padding: clamp(70px,10vw,140px) clamp(28px,8vw,120px); }
 .professional-site-hero > span, .professional-site-intro span { color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .professional-site-hero h1 { color: var(--ivory); font-family: Georgia,serif; font-size: clamp(52px,8vw,104px); font-weight: 400; letter-spacing: -.055em; margin: 22px 0 18px; max-width: 980px; }
 .professional-site-hero p { color: rgba(255,255,255,.66); font-family: Georgia,serif; font-size: clamp(17px,2vw,25px); line-height: 1.5; max-width: 720px; }
