@@ -58,6 +58,8 @@ export async function uploadSiteAssetAction(formData: FormData) {
     redirect("/workspace/site?error=Choose+a+JPEG,+PNG,+or+WebP+image+under+5+MB.");
   }
   const { admin, site } = await requireOwnedSite(siteId.data);
+  let objectPath: string | null = null;
+  let previous: { id: string; object_path: string }[] = [];
   try {
     const image = sharp(Buffer.from(await file.arrayBuffer()), { animated: false }).rotate();
     const metadata = await image.metadata();
@@ -65,17 +67,28 @@ export async function uploadSiteAssetAction(formData: FormData) {
     const bytes = await image.resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true }).webp({ quality: 84 }).toBuffer();
     const output = await sharp(bytes).metadata();
     const assetId = randomUUID(); const pathPlacement = placement.data.replaceAll("_", "-");
-    const objectPath = `${site.id}/${pathPlacement}/${assetId}.webp`;
+    objectPath = `${site.id}/${pathPlacement}/${assetId}.webp`;
     const { error: uploadError } = await admin.storage.from("professional-site-assets").upload(objectPath, bytes, { contentType: "image/webp", cacheControl: "0", upsert: false });
     if (uploadError) throw uploadError;
-    const { data: previous } = await admin.from("site_assets").select("id,object_path").eq("site_id", site.id).eq("placement", placement.data).eq("status", "ready");
+    const { data: existing, error: existingError } = await admin.from("site_assets").select("id,object_path").eq("site_id", site.id).eq("placement", placement.data).eq("status", "ready");
+    if (existingError) throw existingError;
+    previous = existing ?? [];
+    if (previous.length) {
+      const { error: retireError } = await admin.from("site_assets").update({ status: "removed", removed_at: new Date().toISOString() }).in("id", previous.map((item) => item.id));
+      if (retireError) throw retireError;
+    }
     const { error: insertError } = await admin.from("site_assets").insert({ id: assetId, site_id: site.id, placement: placement.data, object_path: objectPath, original_filename: file.name.slice(0, 180), byte_size: bytes.length, width: output.width, height: output.height });
-    if (insertError) throw insertError;
+    if (insertError) {
+      if (previous.length) await admin.from("site_assets").update({ status: "ready", removed_at: null }).in("id", previous.map((item) => item.id));
+      throw insertError;
+    }
     if (previous?.length) {
       await admin.storage.from("professional-site-assets").remove(previous.map((item) => item.object_path));
-      await admin.from("site_assets").update({ status: "removed", removed_at: new Date().toISOString() }).in("id", previous.map((item) => item.id));
     }
-  } catch { redirect("/workspace/site?error=The+image+could+not+be+prepared.+Use+a+clear+still+photograph+or+logo."); }
+  } catch {
+    if (objectPath) await admin.storage.from("professional-site-assets").remove([objectPath]);
+    redirect("/workspace/site?error=The+image+could+not+be+prepared.+Use+a+clear+still+photograph+or+logo.");
+  }
   revalidatePath(`/agents/${site.slug}`); revalidatePath(`/brokerages/${site.slug}`); revalidatePath("/workspace/site");
   redirect("/workspace/site?notice=Your+website+image+was+prepared+and+saved.");
 }
