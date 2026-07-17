@@ -11,6 +11,7 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Listing Workflow Specification v0.1](./SteadFast_Listing_Workflow_Specification_v0.1.docx)
 - [Listing Workflow Specification v0.1 - technical source](./SteadFast_Listing_Workflow_Specification_v0.1.md)
 - [Implemented listing draft foundation](./LISTING_DRAFT_FOUNDATION.md)
+- [Implemented secure listing media pipeline](./LISTING_MEDIA_PIPELINE.md)
 - [Database Design v0.1](./SteadFast_Database_Design_v0.1.docx)
 - [Database Design v0.1 - technical source](./SteadFast_Database_Design_v0.1.md)
 - [Application and API Architecture v0.1](./SteadFast_Application_and_API_Architecture_v0.1.docx)

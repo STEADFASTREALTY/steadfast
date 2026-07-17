@@ -26,6 +26,7 @@ The project reference and project URL are public identifiers. API keys must be m
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser-visible | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser-visible | Supabase publishable key; protected by Row Level Security |
+| `SUPABASE_SECRET_KEY` | Server-only | Privileged Storage signing and quarantined image validation; never expose to the browser |
 | `NEXT_PUBLIC_APP_URL` | Browser-visible | Canonical public application URL |
 
 Server-only keys will be added only when a feature requires them. A Supabase service-role key must never use the `NEXT_PUBLIC_` prefix.

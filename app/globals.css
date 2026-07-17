@@ -298,6 +298,30 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .listing-empty h2 { font-size: 34px; margin-top: 20px; }
 .listing-empty p { color: #657572; font-size: 13px; line-height: 1.65; max-width: 600px; }
 .listing-empty .solid-button { margin-top: 18px; }
+.listing-media-card { background: var(--paper); border: 1px solid var(--line); border-top: 0; padding: 42px; }
+.listing-media-heading { align-items: start; display: flex; gap: 28px; justify-content: space-between; }
+.listing-media-heading span { color: #60716d; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.listing-media-heading h2 { font-family: Georgia, serif; font-size: 30px; font-weight: 400; margin: 8px 0; }
+.listing-media-heading p, .listing-media-empty p { color: #687774; font-size: 11px; line-height: 1.6; margin: 0; max-width: 620px; }
+.listing-media-heading > strong { background: var(--cream); border-radius: 999px; color: #52635f; font-size: 10px; padding: 10px 14px; white-space: nowrap; }
+.listing-media-grid { display: grid; gap: 14px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 28px; }
+.listing-media-grid figure { background: var(--cream); border: 1px solid var(--line); margin: 0; min-width: 0; }
+.listing-media-grid img { aspect-ratio: 4 / 3; display: block; object-fit: cover; width: 100%; }
+.listing-media-grid figcaption { align-items: center; display: flex; gap: 8px; justify-content: space-between; padding: 11px 12px; }
+.listing-media-grid figcaption span { font-size: 9px; font-weight: 700; }
+.listing-media-grid figcaption small { color: #788682; font-size: 8px; }
+.listing-media-empty { border: 1px dashed #aeb9b5; margin-top: 28px; padding: 28px; }
+.listing-media-empty strong { display: block; font-family: Georgia, serif; font-size: 18px; font-weight: 400; margin-bottom: 7px; }
+.listing-media-upload { align-items: center; background: var(--cream); border: 1px solid var(--line); display: grid; gap: 18px; grid-template-columns: auto minmax(190px, 1fr) minmax(220px, 1fr); margin-top: 18px; padding: 18px; }
+.listing-media-upload .solid-button { align-items: center; cursor: pointer; display: inline-flex; min-height: 45px; padding: 0 18px; }
+.listing-media-upload .solid-button[aria-disabled="true"] { cursor: wait; opacity: .6; }
+.listing-media-upload input { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
+.listing-media-upload strong { display: block; font-size: 10px; }
+.listing-media-upload div p, .listing-media-status { color: #71807c; font-size: 9px; line-height: 1.5; margin: 4px 0 0; }
+.listing-media-status { justify-self: end; margin: 0; text-align: right; }
+.listing-media-upload.upload-error { border-color: #bd4b36; }
+.listing-media-upload.upload-error .listing-media-status { color: #8b3428; font-weight: 700; }
+.listing-media-upload.upload-success { border-color: var(--lime-dark); }
 
 @media (max-width: 960px) {
   .auth-page { grid-template-columns: 1fr; }
@@ -307,6 +331,9 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
   .workspace-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .security-layout { grid-template-columns: 1fr; }
   .wizard-section { grid-template-columns: 1fr; }
+  .listing-media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .listing-media-upload { grid-template-columns: auto 1fr; }
+  .listing-media-status { grid-column: 1 / -1; justify-self: start; text-align: left; }
   .listing-records > article { grid-template-columns: 120px minmax(0, 1fr); }
   .listing-record-note { grid-column: 1 / -1; }
   .account-sidebar, .management-aside { grid-row: auto; }
@@ -330,6 +357,10 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
   .security-layout { padding-left: 16px; padding-right: 16px; }
   .listing-wizard-shell, .listing-index { padding-left: 16px; padding-right: 16px; }
   .wizard-section { gap: 26px; padding: 28px 22px; }
+  .listing-media-card { padding: 28px 22px; }
+  .listing-media-grid { grid-template-columns: 1fr; }
+  .listing-media-upload { align-items: start; grid-template-columns: 1fr; }
+  .listing-media-status { grid-column: 1; }
   .wizard-fields.two { grid-template-columns: 1fr; }
   .wizard-fields .full { grid-column: 1; }
   .wizard-submit, .listing-index-bar { align-items: flex-start; flex-direction: column; gap: 20px; padding: 24px 22px; }

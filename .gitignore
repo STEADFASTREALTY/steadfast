@@ -9,6 +9,7 @@ out/
 build/
 dist/
 coverage/
+.media-test-build/
 output/
 .playwright-cli/
 *.tsbuildinfo

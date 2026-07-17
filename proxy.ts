@@ -18,15 +18,27 @@ function getSupabaseConnectSources() {
   }
 }
 
+function getSupabaseImageSource() {
+  const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!configuredUrl) return "";
+  try {
+    const url = new URL(configuredUrl);
+    return url.protocol === "https:" && url.hostname.endsWith(".supabase.co") ? ` ${url.origin}` : "";
+  } catch {
+    return "";
+  }
+}
+
 export async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const isDevelopment = process.env.NODE_ENV === "development";
   const supabaseConnectSources = getSupabaseConnectSources();
+  const supabaseImageSource = getSupabaseImageSource();
   const policy = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""};
     style-src 'self' 'nonce-${nonce}';
-    img-src 'self' blob: data:;
+    img-src 'self' blob: data:${supabaseImageSource};
     font-src 'self';
     connect-src 'self'${supabaseConnectSources};
     object-src 'none';
