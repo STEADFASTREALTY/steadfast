@@ -7,6 +7,7 @@ import {
   updateProfileAction,
 } from "@/app/actions/onboarding";
 import { getActiveMembershipContext } from "@/lib/auth/session";
+import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
 export const metadata: Metadata = { title: "My account", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -39,16 +40,19 @@ export default async function AccountPage({
       .order("created_at", { ascending: false }),
   ]);
 
-  const canManageAgents = context.roles.includes("broker") || context.permissions.some(
-    (permission) => permission.permission_key === "agent.manage" && permission.effect === "allow",
-  );
+  const access = deriveWorkspaceAccess({
+    hasMembership: Boolean(context.membership),
+    roles: context.roles,
+    permissions: context.permissions,
+    platformRoles: context.platformRoles,
+  });
   const openApplication = applications?.some((application) =>
     ["draft", "submitted", "broker_approved"].includes(application.status),
   );
 
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} />
+      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} />
       <section className="account-hero">
         <span className="eyebrow"><i /> Your SteadFast account</span>
         <h1>Hello, {context.person.display_name}.</h1>
@@ -98,7 +102,7 @@ export default async function AccountPage({
             <p>{context.membership ? "Your brokerage controls your professional roles and listing authority." : "Browse properties freely or apply to the brokerage that referred you."}</p>
           </section>
           {context.membership ? <section><span>Brokerage</span><strong>{(context.membership.brokerages as unknown as { display_name?: string } | null)?.display_name ?? "Your brokerage"}</strong><p>Roles: {context.roles.join(", ").replaceAll("_", " ") || "member"}</p></section> : null}
-          {canManageAgents ? <Link className="solid-button" href="/broker/agents">Open agent management</Link> : null}
+          {access.hasWorkspace ? <Link className="solid-button" href="/workspace">Open your workspace</Link> : null}
         </aside>
       </div>
     </main>

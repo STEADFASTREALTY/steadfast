@@ -206,6 +206,19 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .departure-form label > span { color: #667572; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .departure-form input:not([type="checkbox"]) { border: 1px solid var(--line); min-height: 46px; padding: 0 13px; width: 100%; }
 .danger-button { background: #8b3428; border: 0; border-radius: 999px; color: #fff; cursor: pointer; justify-self: start; min-height: 42px; padding: 0 18px; }
+.workspace-grid { display: grid; gap: 20px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: -38px auto 0; max-width: 1250px; padding: 0 28px 90px; position: relative; }
+.workspace-card { background: var(--paper); border: 1px solid var(--line); display: flex; flex-direction: column; min-height: 275px; padding: 30px; }
+.workspace-card.active { border-top: 4px solid var(--lime); }
+.workspace-card > span:first-child, .denied-card > span { color: #74837f; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.workspace-card h2 { font-family: Georgia, serif; font-size: 29px; font-weight: 400; margin: 20px 0 10px; }
+.workspace-card p { color: #657572; font-size: 12px; line-height: 1.65; margin: 0 0 24px; }
+.workspace-card .solid-button, .workspace-state { margin-top: auto; }
+.workspace-state { color: #71807c; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.denied-card { background: var(--paper); border-top: 4px solid #bd4b36; margin: 70px auto; max-width: 720px; padding: clamp(34px, 6vw, 64px); }
+.denied-card h1 { font-family: Georgia, serif; font-size: clamp(38px, 6vw, 58px); font-weight: 400; letter-spacing: -.04em; margin: 22px 0 14px; }
+.denied-card p { color: #657572; line-height: 1.65; }
+.denied-card > div { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.denied-card .solid-button, .denied-card .outline-dark-button { align-items: center; display: inline-flex; text-decoration: none; }
 .outline-dark-button { background: transparent; border: 1px solid var(--ink); color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 700; }
 .mini-list { display: flex; flex-direction: column; margin-top: 18px; }
 .mini-list > div { border-top: 1px solid var(--line); padding: 15px 0; }
@@ -215,6 +228,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
   .auth-intro { min-height: 480px; }
   .auth-card { margin: 45px auto; width: calc(100% - 48px); }
   .account-layout, .management-layout { grid-template-columns: 1fr; }
+  .workspace-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .account-sidebar, .management-aside { grid-row: auto; }
 }
 
@@ -229,6 +243,10 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
   .account-hero { padding-left: 28px; padding-right: 28px; }
   .account-layout, .management-layout { padding-left: 16px; padding-right: 16px; }
   .account-card { padding: 24px; }
+  .account-header { align-items: flex-start; flex-wrap: wrap; gap: 16px; padding-bottom: 18px; padding-top: 18px; }
+  .account-header nav { flex-wrap: wrap; gap: 16px; order: 3; width: 100%; }
+  .account-header > form { margin-left: auto; padding-left: 16px; }
+  .workspace-grid { grid-template-columns: 1fr; padding-left: 16px; padding-right: 16px; }
   .record-list article { align-items: start; grid-template-columns: 1fr; }
   .record-status { justify-self: start; }
   .decision-form { grid-template-columns: 1fr; }

@@ -6,6 +6,7 @@ import { InvitationForm } from "@/app/components/invitation-form";
 import { StaffCapabilityPanel } from "@/app/components/staff-capability-panel";
 import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
+import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 
 export const metadata: Metadata = { title: "Agent management", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -13,11 +14,12 @@ export const dynamic = "force-dynamic";
 export default async function BrokerAgentsPage({ searchParams }: { searchParams: Promise<{ error?: string; notice?: string }> }) {
   const params = await searchParams;
   const context = await getActiveMembershipContext();
-  if (!context.membership) redirect("/account?error=An+active+brokerage+membership+is+required.");
+  if (!context.membership) redirect("/access-denied?reason=brokerage-membership");
 
+  const access = deriveWorkspaceAccess({ hasMembership: true, roles: context.roles, permissions: context.permissions, platformRoles: context.platformRoles });
   const isBroker = context.roles.includes("broker");
-  const canManageAgents = isBroker || context.permissions.some((permission) => permission.permission_key === "agent.manage" && permission.effect === "allow");
-  if (!canManageAgents) redirect("/account?error=You+do+not+have+agent+management+permission.");
+  const canManageAgents = access.canManageAgents;
+  if (!canManageAgents) redirect("/access-denied?reason=agent-management");
   const canInvite = isBroker || context.permissions.some((permission) => permission.permission_key === "staff.manage_limited" && permission.effect === "allow");
 
   const [{ data: applications }, { data: members }, { data: invitations }] = await Promise.all([
@@ -29,7 +31,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} />
+      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} />
       <section className="account-hero compact"><span className="eyebrow"><i /> Brokerage control</span><h1>Agents and access.</h1><p>{brokerage?.display_name ?? "Your brokerage"}</p></section>
       <div className="management-layout">
         <div>

@@ -23,11 +23,20 @@ export async function requireAccount(nextPath = "/account") {
 
 export async function getActiveMembershipContext() {
   const account = await requireAccount();
-  const { data: memberships } = await account.supabase
-    .from("brokerage_memberships")
-    .select("id, brokerage_id, status, starts_at, brokerages(id, display_name, slug, status)")
-    .eq("status", "active")
-    .limit(1);
+  const [{ data: memberships }, { data: internalRoles }] = await Promise.all([
+    account.supabase
+      .from("brokerage_memberships")
+      .select("id, brokerage_id, status, starts_at, brokerages(id, display_name, slug, status)")
+      .eq("status", "active")
+      .limit(1),
+    account.supabase
+      .from("person_platform_roles")
+      .select("role_key")
+      .eq("person_id", account.person.id)
+      .is("ends_at", null),
+  ]);
+
+  const platformRoles = internalRoles?.map((role) => role.role_key) ?? [];
 
   const membership = memberships?.[0] ?? null;
   if (!membership) {
@@ -36,6 +45,7 @@ export async function getActiveMembershipContext() {
       membership: null,
       roles: [] as string[],
       permissions: [] as Array<{ permission_key: string; effect: string }>,
+      platformRoles,
     };
   }
 
@@ -57,5 +67,6 @@ export async function getActiveMembershipContext() {
     membership,
     roles: roles?.map((role) => role.role_key) ?? [],
     permissions: permissions ?? [],
+    platformRoles,
   };
 }
