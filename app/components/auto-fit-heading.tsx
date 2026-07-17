@@ -1,8 +1,8 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 
-export function AutoFitHeading({ children, className }: { children: string; className?: string }) {
+export function AutoFitHeading({ children, className, style }: { children: string; className?: string; style?: CSSProperties }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useLayoutEffect(() => {
@@ -24,5 +24,5 @@ export function AutoFitHeading({ children, className }: { children: string; clas
     return () => observer.disconnect();
   }, []);
 
-  return <h1 className={className} ref={headingRef}>{children}</h1>;
+  return <h1 className={className} ref={headingRef} style={style}>{children}</h1>;
 }
