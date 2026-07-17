@@ -5,10 +5,12 @@ export function AccountHeader({
   displayName,
   hasWorkspace = false,
   canManageAgents = false,
+  canManageListings = false,
 }: {
   displayName: string;
   hasWorkspace?: boolean;
   canManageAgents?: boolean;
+  canManageListings?: boolean;
 }) {
   return (
     <header className="account-header">
@@ -20,6 +22,7 @@ export function AccountHeader({
       <nav aria-label="Account navigation">
         <Link href="/properties">Properties</Link>
         {hasWorkspace ? <Link href="/workspace">Workspace</Link> : null}
+        {canManageListings ? <Link href="/workspace/listings">Listings</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}
         <Link href="/account">My account</Link>
         <Link href="/account/security">Security</Link>
