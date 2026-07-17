@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { getAppUrl, safeInternalPath } from "@/lib/app-url";
 import {
   forgotPasswordSchema,
@@ -15,6 +16,13 @@ import { createClient } from "@/lib/supabase/server";
 function readText(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+async function steadfastCookieDomain() {
+  const host = (await headers()).get("x-forwarded-host")?.split(",")[0]?.trim().toLowerCase();
+  return host === "steadfast.rockhillinnovation.com" || host?.endsWith(".steadfast.rockhillinnovation.com")
+    ? ".steadfast.rockhillinnovation.com"
+    : undefined;
 }
 
 export async function signInAction(formData: FormData) {
@@ -31,6 +39,7 @@ export async function signInAction(formData: FormData) {
 
   const rememberDevice = parsed.data.rememberDevice === "on";
   const cookieStore = await cookies();
+  const cookieDomain = await steadfastCookieDomain();
   if (rememberDevice) {
     cookieStore.set("sf_remember_device", "1", {
       httpOnly: true,
@@ -38,12 +47,13 @@ export async function signInAction(formData: FormData) {
       sameSite: "lax",
       path: "/",
       maxAge: 400 * 24 * 60 * 60,
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     });
   } else {
     cookieStore.delete("sf_remember_device");
   }
 
-  const supabase = await createClient({ persistentSession: rememberDevice });
+  const supabase = await createClient({ persistentSession: rememberDevice, cookieDomain });
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -95,7 +105,9 @@ export async function signOutAction(formData: FormData) {
     redirect("/account/security?notice=Other+device+sessions+have+been+signed+out.");
   }
   const cookieStore = await cookies();
+  const cookieDomain = await steadfastCookieDomain();
   cookieStore.delete("sf_remember_device");
+  if (cookieDomain) cookieStore.delete({ name: "sf_remember_device", domain: cookieDomain });
   redirect(`/sign-in?notice=${parsed.data.scope === "global" ? "You+have+been+signed+out+on+all+machines." : "You+have+been+signed+out+on+this+machine."}`);
 }
 

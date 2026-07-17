@@ -55,6 +55,9 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("Content-Security-Policy", policy);
 
   const hostname = request.nextUrl.hostname.toLowerCase();
+  const cookieDomain = hostname === "steadfast.rockhillinnovation.com" || hostname.endsWith(".steadfast.rockhillinnovation.com")
+    ? ".steadfast.rockhillinnovation.com"
+    : undefined;
   const subdomainMatch = hostname.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.steadfast\.rockhillinnovation\.com$/);
   const rewriteUrl = subdomainMatch && request.nextUrl.pathname === "/"
     ? new URL(`/sites/${subdomainMatch[1]}`, request.url)
@@ -79,13 +82,13 @@ export async function proxy(request: NextRequest) {
             : NextResponse.next({ request: { headers: requestHeaders } });
           cookiesToSet.forEach(({ name, value, options }) => {
             if (persistentSession) {
-              response.cookies.set(name, value, options);
+              response.cookies.set(name, value, { ...options, ...(cookieDomain ? { domain: cookieDomain } : {}) });
               return;
             }
             const { maxAge: _maxAge, expires: _expires, ...sessionOptions } = options;
             void _maxAge;
             void _expires;
-            response.cookies.set(name, value, sessionOptions);
+            response.cookies.set(name, value, { ...sessionOptions, ...(cookieDomain ? { domain: cookieDomain } : {}) });
           });
           Object.entries(responseHeaders).forEach(([key, value]) => {
             response.headers.set(key, value);
