@@ -43,7 +43,7 @@ function firstParameter(value: string | string[] | undefined) {
 function safeSearchWords(value: string | string[] | undefined) {
   return firstParameter(value).slice(0, 80).replace(/[^\p{L}\p{N}\s'-]/gu, " ").replace(/\s+/g, " ").trim();
 }
-function wholeNumber(value: string | string[] | undefined, maximum = 1_000_000_000) { const parsed = Number(firstParameter(value)); return Number.isFinite(parsed) && parsed >= 0 && parsed <= maximum ? Math.floor(parsed) : null; }
+function wholeNumber(value: string | string[] | undefined, maximum = 1_000_000_000) { const raw = firstParameter(value); if (!raw) return null; const parsed = Number(raw); return Number.isFinite(parsed) && parsed >= 0 && parsed <= maximum ? Math.floor(parsed) : null; }
 
 function formatPrice(listing: PublicListing) {
   const amount = new Intl.NumberFormat("en-JM", {
