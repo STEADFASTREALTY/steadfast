@@ -59,4 +59,4 @@ Production and preview environments must use separate data before pilot testing 
 
 ## Verification
 
-The database suite covers authorized application submission and approval, atomic membership creation, dual-role invitation acceptance, mismatched-email rejection, non-persistence of command rows, anonymous denial, and audit-event creation. The complete suite currently contains 51 pgTAP tests.
+The database suite covers authorized application submission and approval, atomic membership creation, dual-role invitation acceptance, mismatched-email rejection, non-persistence of command rows, anonymous denial, audit-event creation, and hosted security-definer execution restrictions. The complete suite currently contains 53 pgTAP tests.
