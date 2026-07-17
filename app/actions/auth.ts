@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getAppUrl, safeInternalPath } from "@/lib/app-url";
-import { registerSchema, signInSchema } from "@/lib/auth/validation";
+import { passwordSetupSchema, registerSchema, signInSchema } from "@/lib/auth/validation";
 import { createClient } from "@/lib/supabase/server";
 
 function readText(formData: FormData, key: string) {
@@ -65,4 +65,29 @@ export async function signOutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut({ scope: "local" });
   redirect("/sign-in?notice=You+have+been+signed+out.");
+}
+
+export async function setPasswordAction(formData: FormData) {
+  const parsed = passwordSetupSchema.safeParse({
+    password: readText(formData, "password"),
+    confirmPassword: readText(formData, "confirmPassword"),
+  });
+
+  if (!parsed.success) {
+    const message = parsed.error.issues[0]?.message ?? "Please check the password fields.";
+    redirect(`/set-password?error=${encodeURIComponent(message)}`);
+  }
+
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    redirect("/sign-in?error=Your+invitation+session+has+expired.+Please+request+a+new+invitation.");
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) {
+    redirect("/set-password?error=Your+password+could+not+be+saved.+Please+try+again.");
+  }
+
+  redirect("/account?notice=Your+password+has+been+set.");
 }

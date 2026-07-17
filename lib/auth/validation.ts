@@ -1,7 +1,13 @@
 import { z } from "zod";
 
 const email = z.string().trim().toLowerCase().email().max(320);
-const password = z.string().min(10).max(128);
+const password = z
+  .string()
+  .min(10, "Use at least 10 characters.")
+  .max(128, "Password is too long.")
+  .regex(/[a-z]/, "Include a lowercase letter.")
+  .regex(/[A-Z]/, "Include an uppercase letter.")
+  .regex(/[0-9]/, "Include a number.");
 
 export const signInSchema = z.object({ email, password });
 
@@ -12,6 +18,16 @@ export const registerSchema = z
     password,
     confirmPassword: password,
     privacyAccepted: z.literal("on"),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+export const passwordSetupSchema = z
+  .object({
+    password,
+    confirmPassword: password,
   })
   .refine((value) => value.password === value.confirmPassword, {
     message: "Passwords do not match.",
