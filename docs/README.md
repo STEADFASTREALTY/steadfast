@@ -16,6 +16,7 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Implemented listing submission and brokerage approval](./LISTING_SUBMISSION_AND_APPROVAL.md)
 - [Implemented workflow notifications](./WORKFLOW_NOTIFICATIONS.md)
 - [Implemented public listing activation and search](./PUBLIC_LISTING_ACTIVATION_AND_SEARCH.md)
+- [Implemented visitor inquiry routing](./VISITOR_INQUIRY_ROUTING.md)
 - [Visual identity and color system](./VISUAL_IDENTITY_AND_COLOR_SYSTEM.md)
 - [Database Design v0.1](./SteadFast_Database_Design_v0.1.docx)
 - [Database Design v0.1 - technical source](./SteadFast_Database_Design_v0.1.md)

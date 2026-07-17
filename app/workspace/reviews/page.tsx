@@ -40,7 +40,7 @@ export default async function ListingReviewsPage({ searchParams }: { searchParam
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
 
   return <main className="account-page">
-    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings />
+    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings canManageInquiries={access.canManageInquiries} />
     <section className="account-hero compact"><span className="eyebrow"><i /> Brokerage control</span><h1>Listing review.</h1><p>{brokerage?.display_name ?? "Your brokerage"}</p></section>
     <div className="listing-index review-queue">
       <div className="listing-index-bar"><div><span>Awaiting decision</span><strong>{queue.length} submission{queue.length === 1 ? "" : "s"}</strong></div><Link className="outline-dark-button review-back" href="/workspace/listings">All listings</Link></div>

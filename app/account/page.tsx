@@ -52,7 +52,7 @@ export default async function AccountPage({
 
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} />
+      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageInquiries={access.canManageInquiries} />
       <section className="account-hero">
         <span className="eyebrow"><i /> Your SteadFast account</span>
         <h1>Hello, {context.person.display_name}.</h1>

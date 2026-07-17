@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { randomUUID } from "node:crypto";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -6,16 +7,21 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { BrandLogo } from "@/app/components/brand-logo";
 import { StructuredData } from "@/app/components/structured-data";
+import { StatusMessage } from "@/app/components/status-message";
+import { createInquiryAction } from "@/app/actions/inquiries";
 import { publicPageMetadata, STEADFAST_SITE_URL } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
-type RouteProps = { params: Promise<{ listingId: string }> };
+type RouteProps = {
+  params: Promise<{ listingId: string }>;
+  searchParams?: Promise<{ error?: string; notice?: string }>;
+};
 
 async function getPublicListing(listingId: string) {
   if (!z.string().uuid().safeParse(listingId).success) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("public_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at").eq("listing_id", listingId).maybeSingle();
+  const { data } = await supabase.from("public_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_person_id,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at").eq("listing_id", listingId).maybeSingle();
   return data;
 }
 
@@ -30,9 +36,10 @@ export async function generateMetadata({ params }: RouteProps): Promise<Metadata
   });
 }
 
-export default async function PublicListingPage({ params }: RouteProps) {
+export default async function PublicListingPage({ params, searchParams }: RouteProps) {
   const listing = await getPublicListing((await params).listingId);
   if (!listing) notFound();
+  const query = await searchParams;
   const price = new Intl.NumberFormat("en-JM", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price);
   const location = listing.public_location_label ?? listing.administrative_area_name;
   const supabase = await createClient();
@@ -66,7 +73,27 @@ export default async function PublicListingPage({ params }: RouteProps) {
         <section className="public-listing-facts"><div><span>Bedrooms</span><strong>{listing.bedrooms ?? "—"}</strong></div><div><span>Bathrooms</span><strong>{listing.bathrooms ?? "—"}</strong></div><div><span>Building</span><strong>{listing.building_area ? `${listing.building_area} ${listing.area_unit?.replace("_", " ") ?? ""}` : "—"}</strong></div><div><span>Land</span><strong>{listing.land_area ? `${listing.land_area} ${listing.area_unit?.replace("_", " ") ?? ""}` : "—"}</strong></div></section>
         <section className="public-description"><span>About this property</span><h2>Property details</h2><p>{listing.description}</p></section>
       </div>
-      <aside className="public-agent-card"><span>Listing representative</span><h2>{listing.assigned_agent_name}</h2><p>{listing.brokerage_name}</p><div><strong>Agent-led service</strong><p>The secure inquiry and contact-choice workflow will be connected next. SteadFast does not expose private agent contact details without an approved public preference.</p></div><Link className="outline-dark-button" href="/properties">Continue searching</Link></aside>
+      <aside className="public-agent-card" id="contact-agent">
+        <span>Contact the listing representative</span>
+        <h2>{listing.assigned_agent_name}</h2>
+        <p>{listing.brokerage_name}</p>
+        <StatusMessage error={query?.error} notice={query?.notice} />
+        <form action={createInquiryAction} className="public-inquiry-form" noValidate data-prompt-title={`Send your inquiry to ${listing.assigned_agent_name}?`} data-prompt-message="Your contact details and message will be shared privately with this listing representative so they can respond about this property." data-prompt-confirm="Send inquiry">
+          <input type="hidden" name="requestId" value={randomUUID()} />
+          <input type="hidden" name="listingId" value={listing.listing_id} />
+          <input type="hidden" name="selectedAgentPersonId" value={listing.assigned_agent_person_id} />
+          <label><span>Your name</span><input name="requesterName" autoComplete="name" maxLength={120} /></label>
+          <label><span>Email</span><input name="requesterEmail" type="email" inputMode="email" autoComplete="email" maxLength={320} /></label>
+          <label><span>Phone <small>optional for email replies</small></span><input name="requesterPhone" type="tel" inputMode="tel" autoComplete="tel" maxLength={30} /></label>
+          <label><span>How should the agent reply?</span><select name="contactPreference" defaultValue="email"><option value="email">Email</option><option value="phone">Phone</option><option value="either">Email or phone</option></select></label>
+          <label><span>Your message</span><textarea name="message" maxLength={2000} rows={5} placeholder="Ask about availability, a viewing, or the property details." /></label>
+          <label className="inquiry-consent"><input name="consentToContact" type="checkbox" /><span>I agree that this listing representative may contact me about this property.</span></label>
+          <label className="inquiry-honeypot" aria-hidden="true"><span>Website</span><input name="website" tabIndex={-1} autoComplete="off" /></label>
+          <button className="solid-button" type="submit">Send secure inquiry</button>
+          <small className="inquiry-privacy">Your details stay inside the professional inquiry workspace and are not displayed publicly.</small>
+        </form>
+        <Link className="outline-dark-button" href="/properties">Continue searching</Link>
+      </aside>
     </div>
   </main>;
 }

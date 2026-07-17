@@ -215,6 +215,19 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .public-agent-card > div strong { font-size: 11px; }
 .public-agent-card > div p { color: #657572; font-size: 10px; line-height: 1.6; }
 .public-agent-card .outline-dark-button { align-items: center; display: inline-flex; min-height: 43px; padding: 0 16px; }
+.public-agent-card .status-message { margin: 22px 0 0; }
+.public-inquiry-form { border-bottom: 1px solid var(--line); border-top: 1px solid var(--line); display: grid; gap: 15px; margin: 25px 0; padding: 25px 0; }
+.public-inquiry-form label:not(.inquiry-consent):not(.inquiry-honeypot) { display: grid; gap: 7px; }
+.public-inquiry-form label > span { color: #52635f; font-size: 9px; font-weight: 700; letter-spacing: .05em; }
+.public-inquiry-form label > span small { color: #82908c; font-size: 8px; font-weight: 400; }
+.public-inquiry-form input:not([type="checkbox"]), .public-inquiry-form select, .public-inquiry-form textarea { background: #fff; border: 1px solid var(--line); border-radius: 0; color: var(--charcoal); font: inherit; font-size: 11px; padding: 12px; width: 100%; }
+.public-inquiry-form textarea { line-height: 1.55; resize: vertical; }
+.public-inquiry-form input:focus-visible, .public-inquiry-form select:focus-visible, .public-inquiry-form textarea:focus-visible { border-color: var(--teal-strong); outline: 3px solid rgba(22,140,145,.18); outline-offset: 1px; }
+.inquiry-consent { align-items: flex-start; color: #52635f; display: flex; font-size: 9px; gap: 10px; line-height: 1.5; }
+.inquiry-consent input { accent-color: var(--teal-strong); margin-top: 2px; }
+.inquiry-honeypot { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
+.public-inquiry-form .solid-button { cursor: pointer; justify-self: stretch; min-height: 46px; }
+.inquiry-privacy { color: #7b8985; font-size: 8px; line-height: 1.5; }
 .solid-button { background: var(--ink); border: 1px solid var(--ink); color: #fff; }
 .solid-button:hover { background: #20433f; }
 
@@ -476,6 +489,32 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .notification-actions .solid-button { align-items: center; display: inline-flex; min-height: 40px; padding: 0 15px; }
 .notification-actions .text-button { color: var(--ink); cursor: pointer; font-size: 10px; text-decoration: underline; text-underline-offset: 3px; }
 .notification-read-state { color: #7f8c88; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.inquiry-shell { margin: -38px auto 0; max-width: 1100px; padding: 0 28px 90px; position: relative; }
+.inquiry-shell > .status-message { margin-bottom: 14px; }
+.inquiry-toolbar { align-items: center; background: var(--ink); color: #fff; display: flex; justify-content: space-between; min-height: 88px; padding: 22px 26px; }
+.inquiry-toolbar span, .inquiry-toolbar strong { display: block; }
+.inquiry-toolbar span { color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.inquiry-toolbar strong { font-family: Georgia, serif; font-size: 21px; font-weight: 400; margin-top: 7px; }
+.inquiry-toolbar p { color: rgba(255,255,255,.68); font-size: 9px; line-height: 1.55; margin: 0; max-width: 390px; text-align: right; }
+.inquiry-list { display: grid; gap: 14px; margin-top: 14px; }
+.inquiry-list > article { background: var(--paper); border: 1px solid var(--line); padding: 28px; }
+.inquiry-list article > header { align-items: flex-start; display: flex; gap: 22px; justify-content: space-between; }
+.inquiry-list header span { background: var(--sage); color: var(--ink); display: inline-block; font-size: 8px; font-weight: 700; letter-spacing: .09em; padding: 7px 9px; text-transform: uppercase; }
+.inquiry-list h2 { font-family: Georgia, serif; font-size: 25px; font-weight: 400; margin: 12px 0 5px; }
+.inquiry-list header p, .inquiry-list header small { color: #71807c; font-size: 9px; margin: 0; }
+.inquiry-list header small { white-space: nowrap; }
+.inquiry-contact-grid { display: grid; gap: 1px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 22px; }
+.inquiry-contact-grid > div { background: var(--cream); min-width: 0; padding: 15px; }
+.inquiry-contact-grid span, .inquiry-message > span { color: #74817e; display: block; font-size: 8px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.inquiry-contact-grid strong { display: block; font-size: 10px; font-weight: 600; margin-top: 7px; overflow-wrap: anywhere; text-transform: capitalize; }
+.inquiry-contact-grid > div:nth-child(2) strong { text-transform: none; }
+.inquiry-message { border-left: 3px solid var(--teal-strong); margin-top: 20px; padding: 5px 0 5px 18px; }
+.inquiry-message p { color: #465651; font-size: 11px; line-height: 1.7; margin: 8px 0 0; white-space: pre-wrap; }
+.inquiry-list article > footer { align-items: center; border-top: 1px solid var(--line); display: flex; gap: 20px; justify-content: space-between; margin-top: 24px; padding-top: 20px; }
+.inquiry-list footer > span { color: #85918e; font-size: 8px; letter-spacing: .08em; }
+.inquiry-list footer > div { display: flex; gap: 9px; }
+.inquiry-list footer form { margin: 0; }
+.inquiry-list footer button { cursor: pointer; min-height: 40px; padding: 0 15px; }
 
 @media (max-width: 960px) {
   .auth-page { grid-template-columns: 1fr; }
@@ -514,6 +553,11 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
   .workspace-grid { grid-template-columns: 1fr; padding-left: 16px; padding-right: 16px; }
   .security-layout { padding-left: 16px; padding-right: 16px; }
   .notification-shell { padding-left: 16px; padding-right: 16px; }
+  .inquiry-shell { padding-left: 16px; padding-right: 16px; }
+  .inquiry-toolbar { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .inquiry-toolbar p { text-align: left; }
+  .inquiry-contact-grid { grid-template-columns: 1fr 1fr; }
+  .inquiry-list article > footer { align-items: flex-start; flex-direction: column; }
   .notification-toolbar { align-items: flex-start; flex-direction: column; gap: 18px; }
   .notification-list article { align-items: flex-start; grid-template-columns: 8px 1fr; }
   .notification-actions { align-items: flex-start; grid-column: 2; }

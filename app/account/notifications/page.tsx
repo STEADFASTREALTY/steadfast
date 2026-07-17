@@ -46,6 +46,7 @@ export default async function NotificationsPage() {
         canManageAgents={access.canManageAgents}
         canManageListings={access.isAgent || access.canReviewListings}
         canReviewListings={access.canReviewListings}
+        canManageInquiries={access.canManageInquiries}
       />
       <section className="account-hero compact">
         <span className="eyebrow"><i /> Updates for you</span>
@@ -80,6 +81,11 @@ export default async function NotificationsPage() {
                   {notification.target_type === "listing" ? (
                     <Link className="solid-button" href={`/workspace/listings/${notification.target_id}`}>
                       Open listing
+                    </Link>
+                  ) : null}
+                  {notification.target_type === "inquiry" ? (
+                    <Link className="solid-button" href="/workspace/inquiries">
+                      Open inquiry
                     </Link>
                   ) : null}
                   {!notification.read_at ? (

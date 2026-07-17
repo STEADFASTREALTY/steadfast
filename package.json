@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "check:metadata": "node scripts/check-page-metadata.mjs",
     "typecheck": "tsc --noEmit",
-    "test:media": "tsc -p tsconfig.media-tests.json && node --test .media-test-build/tests/image-validation.test.js .media-test-build/tests/public-image-derivatives.test.js",
+    "test:media": "tsc -p tsconfig.media-tests.json && node --test .media-test-build/tests/image-validation.test.js .media-test-build/tests/public-image-derivatives.test.js .media-test-build/tests/inquiry-validation.test.js",
     "ci": "npm run lint && npm run check:metadata && npm run typecheck && npm run test:media && npm run build",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",

@@ -31,7 +31,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} />
+      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageInquiries={access.canManageInquiries} />
       <section className="account-hero compact"><span className="eyebrow"><i /> Brokerage control</span><h1>Agents and access.</h1><p>{brokerage?.display_name ?? "Your brokerage"}</p></section>
       <div className="management-layout">
         <div>

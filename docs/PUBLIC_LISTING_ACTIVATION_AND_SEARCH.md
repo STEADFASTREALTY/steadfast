@@ -68,9 +68,12 @@ Public pages request `/media/listings/{opaqueId}/{variant}.webp`. The server fir
 
 New uploads create derivatives before the media record becomes `ready`. Activation also repairs missing derivatives for previously validated images before submitting the transactional publication command. Database activation fails closed unless all three variants exist for every approved image.
 
+## Visitor contact
+
+Active property pages include privacy-preserving contact routing to the currently assigned listing representative. The database revalidates public eligibility and assignment at submission time, stores consent evidence in a private professional record, and emits only privacy-safe notifications. See [Visitor inquiry routing](./VISITOR_INQUIRY_ROUTING.md).
+
 ## Deferred controls
 
-- Secure visitor inquiry with selected-agent contact routing.
 - Material changes to active listings and approved unpublication actions.
 - Interactive individual markers, clusters, geocoding, and provider licensing.
 - Brokerage and agent website publication surfaces.

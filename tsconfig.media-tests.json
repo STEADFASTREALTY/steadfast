@@ -13,7 +13,9 @@
     "lib/media/constants.ts",
     "lib/media/image-validation.ts",
     "lib/media/public-image-derivatives.ts",
+    "lib/inquiries/validation.ts",
     "tests/image-validation.test.ts",
-    "tests/public-image-derivatives.test.ts"
+    "tests/public-image-derivatives.test.ts",
+    "tests/inquiry-validation.test.ts"
   ]
 }

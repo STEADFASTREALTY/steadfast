@@ -118,7 +118,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   }))).filter((media): media is NonNullable<typeof media> => Boolean(media));
 
   return <main className="account-page">
-    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} />
+    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} />
     <section className="account-hero compact"><span className="eyebrow"><i /> Private listing</span><h1>{version?.title ?? "Listing record"}</h1><p>{brokerage?.display_name ?? "Your brokerage"} · {listing.lifecycle_state.replaceAll("_", " ")}</p></section>
     <div className="listing-wizard-shell">
       <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>{initial ? "Autosave on · private draft" : "Read only"}</span></div>
