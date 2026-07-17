@@ -36,15 +36,15 @@ button, input, select, textarea { font: inherit; }
   background: var(--ink);
   color: #fff;
   display: flex;
-  height: 86px;
+  height: 95px;
   justify-content: space-between;
   padding: 0 clamp(24px, 5vw, 76px);
 }
-.brand-logo { align-items: center; background: transparent; border: 0; display: flex; flex: 0 0 auto; height: 78px; justify-content: center; width: 180px; }
+.brand-logo { align-items: center; background: transparent; border: 0; display: flex; flex: 0 0 auto; height: 86px; justify-content: center; width: 198px; }
 .brand-logo img { display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.18)); height: 100%; object-fit: contain; width: 100%; }
 .brand-logo.compact { height: 54px; width: 90px; }
 .desktop-nav { display: flex; gap: 34px; margin-left: auto; margin-right: auto; }
-.desktop-nav a { color: rgba(255,255,255,.72); font-size: 13px; transition: color .2s; }
+.desktop-nav a { color: rgba(255,255,255,.78); font-size: 15px; transition: color .2s; }
 .desktop-nav a:hover { color: #fff; }
 .header-actions { align-items: center; display: flex; gap: 18px; }
 .launch-note { color: var(--lime); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
@@ -721,8 +721,8 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 }
 
 @media (max-width: 620px) {
-  .site-header { height: 74px; }
-  .brand-logo { height: 62px; width: 140px; }
+  .site-header { height: 82px; }
+  .brand-logo { height: 68px; width: 154px; }
   .brand-logo.compact { height: 50px; width: 82px; }
   .header-actions .outline-button { display: none; }
   .hero h1 { font-size: 64px; }

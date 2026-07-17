@@ -53,6 +53,10 @@ function wholeNumber(value: string | string[] | null | undefined, maximum = 1_00
   return Number.isFinite(parsed) && parsed >= 0 && parsed <= maximum ? Math.floor(parsed) : null;
 }
 
+function maximumPrice(value: string | string[] | null | undefined) {
+  return firstParameter(value) === "500000000+" ? null : wholeNumber(value);
+}
+
 function safeSlug(value: string | string[] | null | undefined) {
   return firstParameter(value).toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 100);
 }
@@ -63,7 +67,7 @@ export function parsePropertySearchParams(params: Record<string, string | string
     requestedType: firstParameter(params.type).toLowerCase().slice(0, 30),
     category: firstParameter(params.category).toLowerCase(),
     minPrice: wholeNumber(params.minPrice),
-    maxPrice: wholeNumber(params.maxPrice),
+    maxPrice: maximumPrice(params.maxPrice),
     minimumBeds: wholeNumber(params.beds, 20),
     minimumSize: wholeNumber(params.minSize, 10_000_000),
     maximumSize: wholeNumber(params.maxSize, 10_000_000),
