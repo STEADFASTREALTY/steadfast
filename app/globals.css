@@ -231,7 +231,8 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .testimonial-dots button { background: rgba(255,255,255,.4); border: 0; border-radius: 99px; cursor: pointer; height: 7px; padding: 0; width: 7px; }.testimonial-dots button[aria-current="true"] { background: var(--site-accent, var(--gold)); width: 24px; }
 .professional-site-contact { text-align: center; }.professional-site-contact a { color: var(--site-primary, var(--evergreen)); display: block; font-weight: 700; margin: 10px 0; }.professional-site-contact > a:last-child { background: var(--site-primary, var(--evergreen)); color: #fff; display: inline-block; margin-top: 20px; padding: 12px 18px; text-decoration: none; }
 .area-clusters { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 30px; }
-.area-clusters a { align-items: center; background: var(--paper); border: 1px solid rgba(28,48,43,.18); display: flex; gap: 11px; padding: 10px 12px; }
+.area-clusters a, .area-clusters button { align-items: center; background: var(--paper); border: 1px solid rgba(28,48,43,.18); cursor: pointer; display: flex; gap: 11px; padding: 10px 12px; }
+.search-results-error { background: #f7e5e2; border: 1px solid #d9a39a; color: #742b20; font-size: 13px; margin: 0; padding: 12px 14px; }
 .area-clusters span { font-size: 10px; }
 .area-clusters strong { align-items: center; background: var(--lime); border-radius: 50%; display: flex; font-size: 9px; height: 24px; justify-content: center; width: 24px; }
 .area-clusters small { color: #64746f; font-size: 10px; }
