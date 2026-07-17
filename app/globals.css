@@ -396,7 +396,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .account-layout, .management-layout { display: grid; gap: 34px; grid-template-columns: minmax(0, 1fr) 320px; margin: -38px auto 0; max-width: 1250px; padding: 0 28px 90px; position: relative; }
 .management-layout { grid-template-columns: minmax(0, 1fr) 380px; }
 .account-main, .management-layout > div, .management-aside { display: flex; flex-direction: column; gap: 26px; }
-.settings-main { margin: -38px auto 0; max-width: 1120px; padding: 0 28px 90px; position: relative; }
+.settings-main { margin: -38px auto 0; max-width: 900px; padding: 0 28px 90px; position: relative; }
 .account-card { background: var(--paper); border: 1px solid var(--line); padding: 34px; }
 .accent-card { border-top: 4px solid var(--lime); }
 .account-card > p { color: #657572; font-size: 13px; line-height: 1.65; }
