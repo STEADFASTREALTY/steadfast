@@ -284,7 +284,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .professional-site-footer nav { display: flex; gap: 18px; }
 .professional-site-footer nav a { color: var(--site-text, var(--charcoal)); font-weight: 700; }
 .professional-site-footer nav a:hover { color: var(--site-primary, var(--evergreen)); text-decoration: underline; text-underline-offset: 4px; }
-.professional-site-hero { background: var(--site-primary, var(--ink)); color: #fff; padding: clamp(70px,10vw,140px) clamp(28px,8vw,120px); }
+.professional-site-hero { background: var(--site-primary, var(--ink)); color: #fff; padding: clamp(28px, 3vw, 52px) clamp(28px, 8vw, 120px) clamp(70px, 8vw, 120px); }
 .professional-site-hero > span, .professional-site-intro span { color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .professional-site-hero h1 { color: var(--ivory); font-family: Georgia,serif; font-size: clamp(52px,8vw,104px); font-weight: 400; letter-spacing: -.055em; margin: 22px 0 18px; max-width: 980px; }
 .professional-site-hero p { color: rgba(255,255,255,.66); font-family: Georgia,serif; font-size: clamp(17px,2vw,25px); line-height: 1.5; max-width: 720px; }
