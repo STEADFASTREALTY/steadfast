@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:media": "tsc -p tsconfig.media-tests.json && node --test .media-test-build/tests/image-validation.test.js",
+    "test:media": "tsc -p tsconfig.media-tests.json && node --test .media-test-build/tests/image-validation.test.js .media-test-build/tests/public-image-derivatives.test.js",
     "ci": "npm run lint && npm run typecheck && npm run test:media && npm run build",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
@@ -26,6 +26,7 @@
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "server-only": "0.0.1",
+    "sharp": "0.35.3",
     "zod": "4.4.3"
   },
   "devDependencies": {

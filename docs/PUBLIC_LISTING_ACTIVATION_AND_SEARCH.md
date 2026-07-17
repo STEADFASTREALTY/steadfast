@@ -12,7 +12,8 @@ An approved listing remains `approved_inactive` until an authorized brokerage re
 - active assigned representative with an active agent role and account;
 - property duplicate-review clearance;
 - approved public location rule; and
-- at least one validated property image.
+- at least one validated property image; and
+- a complete privacy-safe derivative set for every validated image.
 
 If every guard passes, the listing becomes `active`, receives a marketplace publication record, produces a sanitized public snapshot, and appends lifecycle and audit events. Any failed guard rolls back the complete activation.
 
@@ -34,7 +35,7 @@ Row-level security allows read-only access to `anon` and `authenticated`. A priv
 
 ## Automatic removal
 
-When an active listing leaves an eligible public lifecycle, its snapshot is deleted and its publication record is retained as removed. The dynamic read guard also hides stale projections immediately if the brokerage, representative, or approved version becomes ineligible. The existing agent-departure service therefore removes affected inventory from public search without waiting for a background job.
+When an active listing leaves an eligible public lifecycle, its snapshot and public media projection are deleted and its publication record is retained as removed. The dynamic read guard also hides stale projections immediately if the brokerage, representative, or approved version becomes ineligible. The existing agent-departure service therefore removes affected inventory and image access from public search without waiting for a background job.
 
 ## Search and area view
 
@@ -53,11 +54,22 @@ The projection stores approved latitude and longitude only when an approved publ
 
 ## Public media boundary
 
-Validated private media is required before activation, but source media is not exposed publicly. Public-safe derivatives must strip metadata, use governed formats and dimensions, and be delivered without revealing private source paths. Until that derivative pipeline is enabled, public pages show the validated image count without serving source files.
+Validated private media is required before activation, but source media is never exposed publicly. After byte-signature and dimension validation, the server decodes each photograph, applies its orientation, discards EXIF/GPS/ICC/XMP metadata, and writes three WebP derivatives:
+
+| Variant | Maximum dimensions | Purpose |
+| --- | --- | --- |
+| `thumbnail` | 480 × 360 | Small previews |
+| `card` | 960 × 720 | Search and website cards |
+| `gallery` | 1920 × 1440 | Public listing galleries |
+
+Derivatives are stored in the private `listing-public-derivatives` bucket. The public database projection exposes only opaque derivative IDs, display dimensions, variant, and approved order. It never exposes source filenames, original paths, derivative storage paths, embedded metadata, or service credentials.
+
+Public pages request `/media/listings/{opaqueId}/{variant}.webp`. The server first queries the anonymous RLS-protected projection, then uses its server-only client to retrieve the private derivative. Ineligible, withdrawn, unassigned, or otherwise removed listings return no image. Responses use an exact WebP content type, `nosniff`, a sandbox content policy, and no shared caching so eligibility is rechecked.
+
+New uploads create derivatives before the media record becomes `ready`. Activation also repairs missing derivatives for previously validated images before submitting the transactional publication command. Database activation fails closed unless all three variants exist for every approved image.
 
 ## Deferred controls
 
-- Public-safe image derivative generation and delivery.
 - Secure visitor inquiry with selected-agent contact routing.
 - Material changes to active listings and approved unpublication actions.
 - Interactive individual markers, clusters, geocoding, and provider licensing.

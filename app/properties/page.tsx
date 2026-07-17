@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { BrandLogo } from "@/app/components/brand-logo";
@@ -71,6 +72,15 @@ export default async function Properties({ searchParams }: { searchParams: Searc
 
   const { data } = await listingsQuery;
   const listings = (data ?? []) as PublicListing[];
+  const listingIds = listings.map((listing) => listing.listing_id);
+  const { data: covers } = listingIds.length
+    ? await supabase.from("public_listing_media")
+      .select("id,listing_id,variant,width,height")
+      .in("listing_id", listingIds)
+      .eq("variant", "card")
+      .eq("position", 1)
+    : { data: [] };
+  const coverByListing = new Map((covers ?? []).map((cover) => [cover.listing_id, cover]));
   const areaCounts = Array.from(listings.reduce((areas, listing) => {
     areas.set(listing.administrative_area_name, (areas.get(listing.administrative_area_name) ?? 0) + 1);
     return areas;
@@ -96,10 +106,10 @@ export default async function Properties({ searchParams }: { searchParams: Searc
 
       <div className="marketplace-layout">
         <section className="marketplace-results" aria-label="Property results">
-          {listings.length ? listings.map((listing) => <article className="property-result-card" key={listing.listing_id}>
-            <Link className="property-card-visual" href={`/properties/${listing.listing_id}`} aria-label={`View ${listing.title}`}><span>{listing.property_subtype ?? listing.property_type}</span><strong>{listing.administrative_area_name}</strong><small>{listing.ready_media_count} validated {listing.ready_media_count === 1 ? "photo" : "photos"}</small></Link>
+          {listings.length ? listings.map((listing) => { const cover = coverByListing.get(listing.listing_id); return <article className="property-result-card" key={listing.listing_id}>
+            <Link className="property-card-visual" href={`/properties/${listing.listing_id}`} aria-label={`View ${listing.title}`}>{cover ? <Image src={`/media/listings/${cover.id}/card.webp`} alt="" width={cover.width} height={cover.height} sizes="(max-width: 700px) 100vw, 42vw" unoptimized /> : null}<span>{listing.property_subtype ?? listing.property_type}</span><strong>{listing.administrative_area_name}</strong><small>{listing.ready_media_count} validated {listing.ready_media_count === 1 ? "photo" : "photos"}</small></Link>
             <div className="property-card-copy"><span>{listing.purpose === "sale" ? "For sale" : "Long-term rental"} · {listing.lifecycle_state.replaceAll("_", " ")}</span><h2><Link href={`/properties/${listing.listing_id}`}>{listing.title}</Link></h2><strong>{formatPrice(listing)}</strong><p>{listing.bedrooms === null ? "" : `${listing.bedrooms} bed · `}{listing.bathrooms === null ? "" : `${listing.bathrooms} bath · `}{listing.public_location_label ?? listing.administrative_area_name}</p><small>Represented by {listing.assigned_agent_name} · {listing.brokerage_name}</small></div>
-          </article>) : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active, brokerage-approved listings appear here. Change the location or property type to see other available properties.</p><Link className="solid-button" href={intent === "rent" ? "/properties?intent=rent" : "/properties"}>Clear filters</Link></div>}
+          </article>; }) : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active, brokerage-approved listings appear here. Change the location or property type to see other available properties.</p><Link className="solid-button" href={intent === "rent" ? "/properties?intent=rent" : "/properties"}>Clear filters</Link></div>}
         </section>
 
         <aside className="area-map-panel" aria-label="Listings grouped by area">

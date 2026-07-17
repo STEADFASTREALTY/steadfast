@@ -12,6 +12,8 @@
   "include": [
     "lib/media/constants.ts",
     "lib/media/image-validation.ts",
-    "tests/image-validation.test.ts"
+    "lib/media/public-image-derivatives.ts",
+    "tests/image-validation.test.ts",
+    "tests/public-image-derivatives.test.ts"
   ]
 }

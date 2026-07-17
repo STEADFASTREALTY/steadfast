@@ -1,0 +1,63 @@
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+export const dynamic = "force-dynamic";
+
+type RouteContext = { params: Promise<{ derivativeId: string; filename: string }> };
+
+export async function GET(request: NextRequest, { params }: RouteContext) {
+  const route = await params;
+  if (!z.string().uuid().safeParse(route.derivativeId).success) return new NextResponse(null, { status: 404 });
+
+  const supabase = await createClient();
+  const { data: publicMedia } = await supabase
+    .from("public_listing_media")
+    .select("id,variant")
+    .eq("id", route.derivativeId)
+    .maybeSingle();
+  if (!publicMedia || route.filename !== `${publicMedia.variant}.webp`) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  const admin = createAdminClient();
+  const { data: projection } = await admin
+    .from("public_listing_media")
+    .select("derivative_id")
+    .eq("id", route.derivativeId)
+    .single();
+  if (!projection) return new NextResponse(null, { status: 404 });
+
+  const { data: derivative } = await admin
+    .from("listing_media_derivatives")
+    .select("bucket_id,object_path,content_hash")
+    .eq("id", projection.derivative_id)
+    .single();
+  if (!derivative) return new NextResponse(null, { status: 404 });
+
+  const etag = `"${derivative.content_hash}"`;
+  if (request.headers.get("if-none-match") === etag) {
+    return new NextResponse(null, { status: 304, headers: responseHeaders(etag) });
+  }
+  const { data: image, error } = await admin.storage
+    .from(derivative.bucket_id)
+    .download(derivative.object_path);
+  if (error || !image) return new NextResponse(null, { status: 404 });
+
+  return new NextResponse(await image.arrayBuffer(), {
+    status: 200,
+    headers: responseHeaders(etag),
+  });
+}
+
+function responseHeaders(etag: string) {
+  return {
+    "Cache-Control": "private, no-store",
+    "Content-Disposition": "inline; filename=steadfast-property.webp",
+    "Content-Security-Policy": "default-src 'none'; sandbox",
+    "Content-Type": "image/webp",
+    ETag: etag,
+    "X-Content-Type-Options": "nosniff",
+  };
+}

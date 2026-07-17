@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -12,7 +13,7 @@ type RouteProps = { params: Promise<{ listingId: string }> };
 async function getPublicListing(listingId: string) {
   if (!z.string().uuid().safeParse(listingId).success) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("public_listing_snapshots").select("listing_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at").eq("listing_id", listingId).maybeSingle();
+  const { data } = await supabase.from("public_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at").eq("listing_id", listingId).maybeSingle();
   return data;
 }
 
@@ -27,6 +28,13 @@ export default async function PublicListingPage({ params }: RouteProps) {
   if (!listing) notFound();
   const price = new Intl.NumberFormat("en-JM", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price);
   const location = listing.public_location_label ?? listing.administrative_area_name;
+  const supabase = await createClient();
+  const { data: gallery } = await supabase.from("public_listing_media")
+    .select("id,variant,position,width,height")
+    .eq("listing_id", listing.listing_id)
+    .eq("approved_version_id", listing.approved_version_id)
+    .eq("variant", "gallery")
+    .order("position");
 
   return <main className="public-listing-page">
     <header className="site-header search-header"><BrandLogo /><Link className="outline-button" href="/properties">Back to search</Link></header>
@@ -36,7 +44,7 @@ export default async function PublicListingPage({ params }: RouteProps) {
     </section>
     <div className="public-listing-layout">
       <div className="public-listing-main">
-        <section className="public-media-hold"><span>{listing.property_subtype ?? listing.property_type}</span><strong>{listing.ready_media_count} validated {listing.ready_media_count === 1 ? "photo" : "photos"}</strong><p>Public-safe image derivatives are the next delivery step. Private source files and their storage paths are never exposed here.</p></section>
+        {gallery?.length ? <section className="public-media-gallery" aria-label="Property photographs">{gallery.map((photo, index) => <Image key={photo.id} src={`/media/listings/${photo.id}/gallery.webp`} alt={`${listing.title} photograph ${index + 1}`} width={photo.width} height={photo.height} sizes={index === 0 ? "(max-width: 900px) 100vw, 65vw" : "(max-width: 700px) 100vw, 32vw"} priority={index === 0} unoptimized />)}</section> : <section className="public-media-hold"><span>{listing.property_subtype ?? listing.property_type}</span><strong>Photographs are being prepared</strong><p>The listing remains protected until its privacy-safe public images are available.</p></section>}
         <section className="public-listing-facts"><div><span>Bedrooms</span><strong>{listing.bedrooms ?? "—"}</strong></div><div><span>Bathrooms</span><strong>{listing.bathrooms ?? "—"}</strong></div><div><span>Building</span><strong>{listing.building_area ? `${listing.building_area} ${listing.area_unit?.replace("_", " ") ?? ""}` : "—"}</strong></div><div><span>Land</span><strong>{listing.land_area ? `${listing.land_area} ${listing.area_unit?.replace("_", " ") ?? ""}` : "—"}</strong></div></section>
         <section className="public-description"><span>About this property</span><h2>Property details</h2><p>{listing.description}</p></section>
       </div>

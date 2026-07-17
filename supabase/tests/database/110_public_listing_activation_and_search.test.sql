@@ -1,9 +1,11 @@
 begin;
-select plan(30);
+select plan(36);
 
 select has_table('public', 'public_listing_snapshots', 'sanitized public listing projection exists');
 select has_table('public', 'publication_records', 'publication history table exists');
 select has_table('public', 'activate_public_listing_commands', 'write-only public activation boundary exists');
+select has_table('public', 'listing_media_derivatives', 'private derivative inventory exists');
+select has_table('public', 'public_listing_media', 'eligibility-gated public media projection exists');
 select hasnt_column('public','public_listing_snapshots','address_line_1', 'public projection has no raw street address column');
 select hasnt_column('public','public_listing_snapshots','object_path', 'public projection has no private media path column');
 
@@ -33,6 +35,12 @@ insert into public.authorize_listing_media_upload_commands (media_id,listing_id,
 ('9a000000-0000-4000-8000-000000000001','8a000000-0000-4000-8000-000000000001','public-home.jpg','image/jpeg',2500,'6a000000-0000-4000-8000-000000000001/8a000000-0000-4000-8000-000000000001/9a000000-0000-4000-8000-000000000001/original.jpg');
 reset role;
 update public.listing_media set status='ready',detected_mime_type='image/jpeg',actual_byte_size=2500,width=1400,height=900,validated_at=now(),updated_at=now() where id='9a000000-0000-4000-8000-000000000001';
+insert into public.listing_media_derivatives
+  (listing_id,media_id,variant,object_path,byte_size,width,height,content_hash)
+values
+  ('8a000000-0000-4000-8000-000000000001','9a000000-0000-4000-8000-000000000001','thumbnail','8a000000-0000-4000-8000-000000000001/9a000000-0000-4000-8000-000000000001/thumbnail.webp',1200,480,309,repeat('a',64)),
+  ('8a000000-0000-4000-8000-000000000001','9a000000-0000-4000-8000-000000000001','card','8a000000-0000-4000-8000-000000000001/9a000000-0000-4000-8000-000000000001/card.webp',1800,960,617,repeat('b',64)),
+  ('8a000000-0000-4000-8000-000000000001','9a000000-0000-4000-8000-000000000001','gallery','8a000000-0000-4000-8000-000000000001/9a000000-0000-4000-8000-000000000001/gallery.webp',2600,1400,900,repeat('c',64));
 
 set local role authenticated;
 select set_config('request.jwt.claims','{"sub":"5a000000-0000-4000-8000-000000000001","role":"authenticated"}',true);
@@ -76,10 +84,13 @@ select results_eq($$select public_latitude is null,public_longitude is null from
 select results_eq($$select status,surface,removed_at is null from public.publication_records where listing_id='8a000000-0000-4000-8000-000000000001'$$,$$values ('active'::text,'marketplace'::text,true)$$,'marketplace publication history records the active approved version');
 select results_eq($$select count(*)::bigint from public.listing_state_events where listing_id='8a000000-0000-4000-8000-000000000001' and from_state='approved_inactive' and to_state='active'$$,$$values (1::bigint)$$,'activation appends a lifecycle event');
 select results_eq($$select count(*)::bigint from public.audit_events where target_id='8a000000-0000-4000-8000-000000000001' and action='listing.activated'$$,$$values (1::bigint)$$,'activation appends a safe attributed audit event');
+select results_eq($$select count(*)::bigint from public.public_listing_media where listing_id='8a000000-0000-4000-8000-000000000001'$$,$$values (3::bigint)$$,'activation publishes all three safe variants');
 
 set local role anon;
 select results_eq($$select listing_id,title,price from public.public_listing_snapshots$$,$$values ('8a000000-0000-4000-8000-000000000001'::uuid,'Approved public family home'::text,48500000.00::numeric)$$,'visitors can read the eligible sanitized snapshot');
 select results_eq($$select count(*)::bigint from public.public_listing_snapshots where search_document @@ websearch_to_tsquery('simple','Saint Andrew house')$$,$$values (1::bigint)$$,'public search document supports location and property queries');
+select results_eq($$select count(*)::bigint from public.public_listing_media$$,$$values (3::bigint)$$,'visitors can discover opaque derivative identifiers for eligible listings');
+select hasnt_column('public','public_listing_media','object_path','public media projection contains no derivative storage paths');
 select throws_like($$select * from public.property_addresses$$,'%permission denied%','visitors cannot query raw addresses');
 select throws_like($$select * from public.listing_versions$$,'%permission denied%','visitors cannot query raw versions');
 select throws_like($$update public.public_listing_snapshots set title='Changed'$$,'%permission denied%','visitors cannot mutate the public projection');
@@ -100,6 +111,7 @@ insert into public.agent_departure_commands (membership_id,reason) values ('7a00
 reset role;
 select results_eq($$select lifecycle_state,current_assignment_id is null from public.listings where id='8a000000-0000-4000-8000-000000000001'$$,$$values ('unassigned'::text,true)$$,'agent departure immediately removes the active representative');
 select results_eq($$select count(*)::bigint from public.public_listing_snapshots where listing_id='8a000000-0000-4000-8000-000000000001'$$,$$values (0::bigint)$$,'ineligible lifecycle transition removes the public snapshot');
+select results_eq($$select count(*)::bigint from public.public_listing_media where listing_id='8a000000-0000-4000-8000-000000000001'$$,$$values (0::bigint)$$,'ineligible lifecycle transition revokes all public image projections');
 select results_eq($$select status,removed_at is not null from public.publication_records where listing_id='8a000000-0000-4000-8000-000000000001'$$,$$values ('removed'::text,true)$$,'publication history retains the automatic removal');
 select results_eq($$select count(*)::bigint from public.notifications where target_id='8a000000-0000-4000-8000-000000000001' and body_safe like '%Private Address%'$$,$$values (0::bigint)$$,'no notification leaks the raw property address');
 

@@ -15,6 +15,10 @@ import {
   validateImageBytes,
 } from "@/lib/media/image-validation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  ensureApprovedVersionDerivatives,
+  generateAndStoreMediaDerivatives,
+} from "@/lib/media/publication-pipeline";
 
 function readText(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -250,6 +254,13 @@ export async function finalizeListingMediaUploadAction(mediaIdInput: unknown): P
       return { status: "rejected", error: rejectionMessage(result.code) };
     }
 
+    await generateAndStoreMediaDerivatives(admin, {
+      id: media.id,
+      listing_id: media.listing_id,
+      bucket_id: media.bucket_id,
+      object_path: media.object_path,
+    }, bytes);
+
     const validatedAt = new Date().toISOString();
     const { error: readyError } = await admin.from("listing_media").update({
       status: "ready",
@@ -414,6 +425,16 @@ export async function activatePublicListingAction(formData: FormData) {
     || context.permissions.some((permission) => permission.permission_key === "listing.review" && permission.effect === "allow")
   );
   if (!canPublish) redirect(`/workspace/listings/${parsed.data.listingId}?error=You+do+not+have+listing+publication+authority.`);
+
+  try {
+    await ensureApprovedVersionDerivatives(
+      createAdminClient(),
+      parsed.data.listingId,
+      parsed.data.approvedVersionId,
+    );
+  } catch {
+    redirect(`/workspace/listings/${parsed.data.listingId}?error=Privacy-safe+photographs+could+not+be+prepared.+Please+try+activation+again.`);
+  }
 
   const { error } = await context.supabase.from("activate_public_listing_commands").insert({
     request_id: randomUUID(),
