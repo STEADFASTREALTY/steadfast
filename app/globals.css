@@ -313,7 +313,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .professional-site-footer nav a { color: var(--site-text, var(--charcoal)); font-weight: 700; }
 .professional-site-footer nav a:hover { color: var(--site-primary, var(--evergreen)); text-decoration: underline; text-underline-offset: 4px; }
 .professional-site-hero { background: var(--site-primary, var(--ink)); color: #fff; overflow: hidden; padding: clamp(28px, 3vw, 52px) clamp(28px, 8vw, 120px) clamp(70px, 8vw, 120px); position: relative; }
-.professional-site-hero-surface { inset: 0; pointer-events: none; position: absolute; z-index: 0; }
+.professional-site-hero-surface { display: block; height: 100%; inset: 0; pointer-events: none; position: absolute; width: 100%; z-index: 0; }
 .brokerage-site-hero { padding-bottom: clamp(32px, 4vw, 56px); }
 .professional-site-hero-content { max-width: 1500px; position: relative; z-index: 1; }
 .brokerage-site-hero .professional-site-hero-content { align-items: center; display: flex; gap: clamp(34px, 5vw, 90px); }
