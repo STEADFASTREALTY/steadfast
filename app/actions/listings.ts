@@ -385,9 +385,52 @@ export async function decideListingReviewAction(
   revalidatePath("/workspace/reviews");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
   const notice = parsed.data.decision === "approved"
-    ? "Listing approved. Public activation remains safely off until the publishing milestone."
+    ? "Listing approved. An authorized reviewer can now complete the separate public activation check."
     : parsed.data.decision === "changes_requested"
       ? "Changes requested. A new editable draft is ready for the agent."
       : "Submission rejected and retained in its review history.";
   redirect(`/workspace/reviews?notice=${encodeURIComponent(notice)}`);
+}
+
+const activatePublicListingSchema = z.object({
+  listingId: z.string().uuid(),
+  approvedVersionId: z.string().uuid(),
+  expectedLockVersion: z.coerce.number().int().positive(),
+  confirmPublication: z.literal("yes"),
+});
+
+export async function activatePublicListingAction(formData: FormData) {
+  const parsed = activatePublicListingSchema.safeParse({
+    listingId: readText(formData, "listingId"),
+    approvedVersionId: readText(formData, "approvedVersionId"),
+    expectedLockVersion: readText(formData, "expectedLockVersion"),
+    confirmPublication: readText(formData, "confirmPublication"),
+  });
+  if (!parsed.success) redirect("/workspace/listings?error=Confirm+the+public+activation+request.");
+
+  const context = await getActiveMembershipContext(`/workspace/listings/${parsed.data.listingId}`);
+  const canPublish = Boolean(context.membership) && (
+    context.roles.includes("broker")
+    || context.permissions.some((permission) => permission.permission_key === "listing.review" && permission.effect === "allow")
+  );
+  if (!canPublish) redirect(`/workspace/listings/${parsed.data.listingId}?error=You+do+not+have+listing+publication+authority.`);
+
+  const { error } = await context.supabase.from("activate_public_listing_commands").insert({
+    request_id: randomUUID(),
+    listing_id: parsed.data.listingId,
+    approved_version_id: parsed.data.approvedVersionId,
+    expected_lock_version: parsed.data.expectedLockVersion,
+    confirm_publication: true,
+  });
+  if (error) {
+    redirect(`/workspace/listings/${parsed.data.listingId}?error=Public+activation+failed.+Check+the+approved+visibility,+representative,+media,+and+brokerage+eligibility.`);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/properties");
+  revalidatePath(`/properties/${parsed.data.listingId}`);
+  revalidatePath("/workspace");
+  revalidatePath("/workspace/listings");
+  revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
+  redirect(`/workspace/listings/${parsed.data.listingId}?notice=Listing+is+now+active+in+the+public+marketplace.`);
 }

@@ -29,6 +29,6 @@ No email is sent in this milestone. An email provider, worker credentials, retry
 
 The database suite verifies recipient isolation, reviewer selection, deduplication, safe notification text, read commands, outbox privacy, one outbox item per notification, and self-approval behavior.
 
-## Next dependency
+## Publication dependency
 
-Public listing activation and the authorized search projection remain fail closed. Those controls must be implemented before approved listings can appear in public search, agent sites, or brokerage sites.
+Public marketplace activation and the authorized search projection are now implemented; see [Public listing activation and search](./PUBLIC_LISTING_ACTIVATION_AND_SEARCH.md). Agent and brokerage website surfaces remain deferred.

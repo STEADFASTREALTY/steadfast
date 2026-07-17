@@ -55,7 +55,7 @@ export default async function Home() {
           <a href="#platform">For professionals</a>
         </nav>
         <div className="header-actions">
-          <span className="launch-note">Private preview</span>
+          <span className="launch-note">Jamaica marketplace</span>
           <Link className="outline-button" href="/sign-in">Sign in</Link>
         </div>
       </header>

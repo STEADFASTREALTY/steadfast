@@ -8,6 +8,7 @@ import { ListingMediaUploader } from "@/app/components/listing-media-uploader";
 import { ListingSubmissionPanel } from "@/app/components/listing-submission-panel";
 import { ReviewDecisionForm } from "@/app/components/review-decision-form";
 import { StatusMessage } from "@/app/components/status-message";
+import { activatePublicListingAction } from "@/app/actions/listings";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 import { LISTING_MEDIA_BUCKET } from "@/lib/media/constants";
@@ -49,7 +50,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   if (!access.isAgent && !access.canReviewListings) redirect("/access-denied?reason=listing-workspace");
 
   const [{ data: listing }, { data: parishes }] = await Promise.all([
-    context.supabase.from("listings").select("id,lifecycle_state,lock_version,updated_at,properties(property_addresses(administrative_area_id,address_line_1,address_line_2,postal_code)),listing_versions(id,version_number,revision_state,purpose,property_type,property_subtype,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,visibility,public_location_precision)").eq("id", route.listingId).single(),
+    context.supabase.from("listings").select("id,lifecycle_state,lock_version,current_approved_version_id,updated_at,properties(property_addresses(administrative_area_id,address_line_1,address_line_2,postal_code)),listing_versions(id,version_number,revision_state,purpose,property_type,property_subtype,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,visibility,public_location_precision)").eq("id", route.listingId).single(),
     context.supabase.from("administrative_areas").select("id,name").eq("area_type", "parish").order("name"),
   ]);
   if (!listing) redirect("/access-denied?reason=listing-record");
@@ -144,6 +145,17 @@ export default async function ListingDraftPage({ params, searchParams }: { param
         {listing.lifecycle_state === "pending_initial_approval" && access.canReviewListings ? <ReviewDecisionForm listingId={listing.id} listingVersionId={version.id} /> : <section className="locked-listing-card"><span>{listing.lifecycle_state === "pending_initial_approval" ? "Brokerage review pending" : version?.revision_state.replaceAll("_", " ")}</span><h2>{listing.lifecycle_state === "pending_initial_approval" ? "This version is awaiting a brokerage decision." : "This listing version is retained as reviewed."}</h2><p>{listing.lifecycle_state === "pending_initial_approval" ? "The assigned agent cannot change the submitted snapshot. An authorized reviewer can approve it, request corrections, or reject it." : "Approved, returned, and rejected submissions remain immutable for a complete brokerage history."}</p></section>}
       </>}
       {reviews.length ? <section className="listing-review-history"><div><span>Decision history</span><h2>Brokerage reviews</h2></div>{reviews.map((review) => <article key={`${review.listing_version_id}:${review.decided_at}`}><strong>{review.decision.replaceAll("_", " ")}</strong><small>{new Date(review.decided_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })}{review.is_self_approval ? " · authorized self-approval" : ""}</small>{review.comment ? <p>{review.comment}</p> : null}</article>)}</section> : null}
+      {listing.lifecycle_state === "approved_inactive" && listing.current_approved_version_id && access.canReviewListings ? <section className="activation-panel">
+        <div><span>Final publication check</span><h2>Activate in the public marketplace</h2><p>This separately verifies the approved public visibility, active brokerage, active agent representative, cleared property record, validated media, and current listing version.</p></div>
+        <form action={activatePublicListingAction}>
+          <input type="hidden" name="listingId" value={listing.id} />
+          <input type="hidden" name="approvedVersionId" value={listing.current_approved_version_id} />
+          <input type="hidden" name="expectedLockVersion" value={listing.lock_version} />
+          <label><input type="checkbox" name="confirmPublication" value="yes" required /><span>I confirm this approved listing should be publicly searchable.</span></label>
+          <button className="solid-button" type="submit">Activate public listing</button>
+        </form>
+      </section> : null}
+      {listing.lifecycle_state === "active" ? <section className="activation-panel active-publication"><div><span>Public marketplace</span><h2>This listing is active.</h2><p>The public page is generated only from the approved safe projection. Private addresses, drafts, review comments, audit records, and source media paths remain excluded.</p></div><Link className="solid-button" href={`/properties/${listing.id}`}>View public listing</Link></section> : null}
     </div>
   </main>;
 }

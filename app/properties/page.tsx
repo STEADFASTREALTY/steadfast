@@ -1,51 +1,112 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Property Search",
-  description: "Search property listings with SteadFast Realty.",
+  description: "Search brokerage-approved property listings across Jamaica with SteadFast Realty.",
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+type PublicListing = {
+  listing_id: string;
+  lifecycle_state: string;
+  purpose: string;
+  property_type: string;
+  property_subtype: string | null;
+  currency: string;
+  price: number;
+  price_period: string | null;
+  title: string;
+  description: string;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  administrative_area_name: string;
+  public_location_label: string | null;
+  brokerage_name: string;
+  assigned_agent_name: string;
+  ready_media_count: number;
+};
 
-function cleanParameter(value: string | string[] | undefined, maxLength: number) {
-  const first = Array.isArray(value) ? value[0] : value;
-  return first?.trim().slice(0, maxLength) ?? "";
+function firstParameter(value: string | string[] | undefined) {
+  return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
+}
+
+function safeSearchWords(value: string | string[] | undefined) {
+  return firstParameter(value).slice(0, 80).replace(/[^\p{L}\p{N}\s'-]/gu, " ").replace(/\s+/g, " ").trim();
+}
+
+function formatPrice(listing: PublicListing) {
+  const amount = new Intl.NumberFormat("en-JM", {
+    style: "currency",
+    currency: listing.currency,
+    maximumFractionDigits: 0,
+  }).format(listing.price);
+  return listing.price_period ? `${amount} / ${listing.price_period}` : amount;
 }
 
 export default async function Properties({ searchParams }: { searchParams: SearchParams }) {
   await connection();
   const params = await searchParams;
-  const location = cleanParameter(params.location, 80);
-  const type = cleanParameter(params.type, 30);
-  const intent = cleanParameter(params.intent, 12) === "rent" ? "rent" : "buy";
+  const location = safeSearchWords(params.location);
+  const requestedType = firstParameter(params.type).toLowerCase().slice(0, 30);
+  const intent = firstParameter(params.intent) === "rent" ? "rent" : "buy";
+  const supabase = await createClient();
+
+  let listingsQuery = supabase
+    .from("public_listing_snapshots")
+    .select("listing_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,administrative_area_name,public_location_label,brokerage_name,assigned_agent_name,ready_media_count")
+    .eq("purpose", intent === "rent" ? "long_term_rent" : "sale")
+    .order("published_at", { ascending: false })
+    .limit(24);
+
+  if (location) listingsQuery = listingsQuery.textSearch("search_document", location, { config: "simple", type: "websearch" });
+  if (["commercial", "land", "development"].includes(requestedType)) {
+    listingsQuery = listingsQuery.eq("property_type", requestedType);
+  } else if (["house", "apartment", "townhouse"].includes(requestedType)) {
+    listingsQuery = listingsQuery.eq("property_type", "residential").ilike("property_subtype", requestedType);
+  }
+
+  const { data } = await listingsQuery;
+  const listings = (data ?? []) as PublicListing[];
+  const areaCounts = Array.from(listings.reduce((areas, listing) => {
+    areas.set(listing.administrative_area_name, (areas.get(listing.administrative_area_name) ?? 0) + 1);
+    return areas;
+  }, new Map<string, number>())).sort((a, b) => b[1] - a[1]);
 
   return (
     <main className="search-page">
       <header className="site-header search-header">
-        <Link className="brand" href="/" aria-label="SteadFast Realty home">
-          <span className="brand-mark" aria-hidden="true">S</span>
-          <span>SteadFast</span>
-          <small>Realty</small>
-        </Link>
-        <Link className="outline-button" href="/">Back home</Link>
+        <Link className="brand" href="/" aria-label="SteadFast Realty home"><span className="brand-mark" aria-hidden="true">S</span><span>SteadFast</span><small>Realty</small></Link>
+        <nav className="desktop-nav" aria-label="Property search navigation"><Link href="/properties">Buy</Link><Link href="/properties?intent=rent">Rent</Link></nav>
+        <Link className="outline-button" href="/sign-in">Sign in</Link>
       </header>
-      <section className="search-stage">
-        <span className="eyebrow dark"><i /> Property search preview</span>
-        <h1>{location ? `Exploring ${location}` : `Find a place to ${intent}`}</h1>
-        <p>
-          {type ? `${type.charAt(0).toUpperCase()}${type.slice(1)} listings` : "All property types"} will appear here after the first brokerage inventory is approved.
-        </p>
-        <div className="empty-state">
-          <div className="empty-state-icon"><span /></div>
-          <div>
-            <strong>The search experience is ready.</strong>
-            <p>We&apos;re connecting the approved listing database next—no placeholder properties, no misleading results.</p>
-          </div>
-        </div>
-        <Link className="solid-button" href="/">Refine your search</Link>
+
+      <section className="marketplace-heading">
+        <div><span className="eyebrow dark"><i /> Brokerage-approved inventory</span><h1>{location ? `Property in ${location}` : `A place to ${intent}.`}</h1><p>{listings.length} active {listings.length === 1 ? "listing" : "listings"} from eligible Jamaican brokerages.</p></div>
+        <form className="marketplace-filters" action="/properties" method="get">
+          <input type="hidden" name="intent" value={intent === "rent" ? "rent" : "buy"} />
+          <label><span>Location</span><input name="location" defaultValue={location} maxLength={80} placeholder="Parish or area" /></label>
+          <label><span>Property type</span><select name="type" defaultValue={requestedType}><option value="">Any property</option><option value="house">House</option><option value="apartment">Apartment</option><option value="townhouse">Townhouse</option><option value="land">Land</option><option value="commercial">Commercial</option><option value="development">Development</option></select></label>
+          <button className="solid-button" type="submit">Search</button>
+        </form>
       </section>
+
+      <div className="marketplace-layout">
+        <section className="marketplace-results" aria-label="Property results">
+          {listings.length ? listings.map((listing) => <article className="property-result-card" key={listing.listing_id}>
+            <Link className="property-card-visual" href={`/properties/${listing.listing_id}`} aria-label={`View ${listing.title}`}><span>{listing.property_subtype ?? listing.property_type}</span><strong>{listing.administrative_area_name}</strong><small>{listing.ready_media_count} validated {listing.ready_media_count === 1 ? "photo" : "photos"}</small></Link>
+            <div className="property-card-copy"><span>{listing.purpose === "sale" ? "For sale" : "Long-term rental"} · {listing.lifecycle_state.replaceAll("_", " ")}</span><h2><Link href={`/properties/${listing.listing_id}`}>{listing.title}</Link></h2><strong>{formatPrice(listing)}</strong><p>{listing.bedrooms === null ? "" : `${listing.bedrooms} bed · `}{listing.bathrooms === null ? "" : `${listing.bathrooms} bath · `}{listing.public_location_label ?? listing.administrative_area_name}</p><small>Represented by {listing.assigned_agent_name} · {listing.brokerage_name}</small></div>
+          </article>) : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active, brokerage-approved listings appear here. Change the location or property type to see other available properties.</p><Link className="solid-button" href={intent === "rent" ? "/properties?intent=rent" : "/properties"}>Clear filters</Link></div>}
+        </section>
+
+        <aside className="area-map-panel" aria-label="Listings grouped by area">
+          <div className="area-map-grid" aria-hidden="true" />
+          <span>Zoomed-out area view</span><h2>Jamaica by parish</h2><p>Results are grouped by approved public area. Exact map points will appear only when approved coordinates exist.</p>
+          <div className="area-clusters">{areaCounts.length ? areaCounts.map(([area, count]) => <Link href={`/properties?intent=${intent === "rent" ? "rent" : "buy"}&location=${encodeURIComponent(area)}`} key={area}><span>{area}</span><strong>{count}</strong></Link>) : <small>No area groups match this search.</small>}</div>
+        </aside>
+      </div>
     </main>
   );
 }

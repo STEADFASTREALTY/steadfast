@@ -11,7 +11,7 @@ export function ReviewDecisionForm({ listingId, listingVersionId }: { listingId:
     <input type="hidden" name="listingVersionId" value={listingVersionId} />
     <div><span>Brokerage decision</span><h2>Review this submission</h2><p>The submitted snapshot cannot be edited. Return it to the agent when corrections are needed.</p></div>
     <fieldset><legend>Decision</legend>
-      <label><input type="radio" name="decision" value="approved" checked={decision === "approved"} onChange={() => setDecision("approved")} /><span><strong>Approve</strong><small>Establish this as the canonical approved version. Public activation stays off for now.</small></span></label>
+      <label><input type="radio" name="decision" value="approved" checked={decision === "approved"} onChange={() => setDecision("approved")} /><span><strong>Approve</strong><small>Establish this as the canonical version. Public activation remains separate and requires a final eligibility check.</small></span></label>
       <label><input type="radio" name="decision" value="changes_requested" checked={decision === "changes_requested"} onChange={() => setDecision("changes_requested")} /><span><strong>Request changes</strong><small>Retain this submission and create a new editable version for correction.</small></span></label>
       <label><input type="radio" name="decision" value="rejected" checked={decision === "rejected"} onChange={() => setDecision("rejected")} /><span><strong>Reject</strong><small>Close this proposal while retaining its complete history.</small></span></label>
     </fieldset>

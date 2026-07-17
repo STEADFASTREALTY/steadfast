@@ -14,6 +14,7 @@ This directory contains the approved planning documents for the SteadFast platfo
 - [Implemented secure listing media pipeline](./LISTING_MEDIA_PIPELINE.md)
 - [Implemented listing submission and brokerage approval](./LISTING_SUBMISSION_AND_APPROVAL.md)
 - [Implemented workflow notifications](./WORKFLOW_NOTIFICATIONS.md)
+- [Implemented public listing activation and search](./PUBLIC_LISTING_ACTIVATION_AND_SEARCH.md)
 - [Database Design v0.1](./SteadFast_Database_Design_v0.1.docx)
 - [Database Design v0.1 - technical source](./SteadFast_Database_Design_v0.1.md)
 - [Application and API Architecture v0.1](./SteadFast_Application_and_API_Architecture_v0.1.docx)
