@@ -399,10 +399,11 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .brokerage-site-hero .professional-site-hero-copy { flex: 1 1 460px; }
 .brokerage-site-hero .site-logo { flex: 0 1 auto; margin: 0; }
 .professional-site-page .agent-site-hero { background: #fff; color: var(--site-text, var(--charcoal)); overflow: visible; padding: 0 0 clamp(34px, 5vw, 70px); }
-.agent-site-ocean-banner { background-image: linear-gradient(180deg, rgba(8, 30, 34, .16), rgba(8, 30, 34, .28)), url('/jamaica-ocean-view-agent-hero.png'); background-position: center; background-repeat: no-repeat; background-size: cover; height: clamp(250px, 25vw, 390px); overflow: hidden; position: relative; }
+.agent-site-ocean-banner { background: #fff; height: clamp(250px, 25vw, 390px); overflow: hidden; position: relative; }
 .agent-site-ocean-banner.has-custom-image { background-color: var(--site-primary, var(--evergreen)); background-image: none; }
 .agent-site-ocean-image { height: 100%; inset: 0; object-fit: cover; position: absolute; width: 100%; }
 .agent-site-ocean-banner::after { background: linear-gradient(180deg, rgba(8, 30, 34, .16), rgba(8, 30, 34, .28)); content: ""; inset: 0; position: absolute; }
+.agent-site-ocean-banner:not(.has-custom-image)::after { display: none; }
 .agent-site-profile-panel { align-items: center; display: flex; flex-direction: column; margin: calc(clamp(250px, 25vw, 390px) * -0.30) auto 0; max-width: 1040px; padding: 0 clamp(24px, 5vw, 72px); position: relative; text-align: center; z-index: 1; }
 .agent-site-hero .site-profile-photo { background: #fff; border: 3px solid var(--site-accent, var(--gold)); border-radius: 50%; box-shadow: 0 16px 42px rgba(13, 31, 29, .20); height: clamp(210px, 19vw, 300px); margin: 0; object-fit: cover; padding: 0; width: clamp(210px, 19vw, 300px); }
 .agent-site-hero .professional-site-hero-copy { margin-top: 20px; max-width: 900px; }
