@@ -400,7 +400,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .brokerage-site-hero .site-logo { flex: 0 1 auto; margin: 0; }
 .professional-site-page .agent-site-hero { background: #fff; color: var(--site-text, var(--charcoal)); overflow: visible; padding: 0 0 clamp(34px, 5vw, 70px); }
 .agent-site-ocean-banner { background: #fff; height: clamp(250px, 25vw, 390px); overflow: hidden; position: relative; }
-.agent-site-ocean-banner.has-custom-image { background-color: var(--site-primary, var(--evergreen)); background-image: none; }
+.agent-site-ocean-banner.has-custom-image { background-color: #fff; background-image: none; }
 .agent-site-ocean-image { height: 100%; inset: 0; object-fit: cover; position: absolute; width: 100%; }
 .agent-site-ocean-banner::after { background: linear-gradient(180deg, rgba(8, 30, 34, .16), rgba(8, 30, 34, .28)); content: ""; inset: 0; position: absolute; }
 .agent-site-ocean-banner:not(.has-custom-image)::after { display: none; }
