@@ -260,7 +260,6 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .professional-site-page .professional-site-hero { background: var(--site-primary, var(--evergreen)); color: #fff; }
 .professional-site-page .professional-site-hero > span, .professional-site-page .professional-site-listings > .section-heading span, .professional-site-testimonials > span, .professional-site-search > span, .professional-site-contact > span { color: var(--site-accent, var(--gold)); }
 .site-profile-photo, .site-logo { border: 3px solid var(--site-accent, var(--gold)); display: block; height: 112px; margin: 0 0 22px; object-fit: cover; width: 112px; }
-.site-profile-photo { border-radius: 50%; }
 .site-logo { background: #fff; height: clamp(200px, 21vw, 260px); max-width: 560px; object-fit: contain; padding: 12px; width: min(41vw, 560px); }
 .site-rich-content { line-height: 1.75; max-width: 680px; }
 .site-strengths { border-left: 3px solid var(--site-accent, var(--gold)); display: grid; gap: 4px; margin-top: 22px; padding-left: 14px; }
@@ -364,11 +363,12 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .professional-site-footer nav a:hover { color: var(--site-primary, var(--evergreen)); text-decoration: underline; text-underline-offset: 4px; }
 .professional-site-hero { background: var(--site-primary, var(--ink)); color: #fff; overflow: hidden; padding: clamp(28px, 3vw, 52px) clamp(28px, 8vw, 120px) clamp(70px, 8vw, 120px); position: relative; }
 .professional-site-hero-surface { display: block; height: 100%; inset: 0; pointer-events: none; position: absolute; width: 100%; z-index: 0; }
-.brokerage-site-hero { padding-bottom: clamp(32px, 4vw, 56px); }
+.brokerage-site-hero, .agent-site-hero { padding-bottom: clamp(32px, 4vw, 56px); }
 .professional-site-hero-content { max-width: 1500px; position: relative; z-index: 1; }
-.brokerage-site-hero .professional-site-hero-content { align-items: center; display: flex; gap: clamp(34px, 5vw, 90px); }
-.brokerage-site-hero .professional-site-hero-copy { flex: 1 1 460px; }
-.brokerage-site-hero .site-logo { flex: 0 1 auto; margin: 0; }
+.brokerage-site-hero .professional-site-hero-content, .agent-site-hero .professional-site-hero-content { align-items: center; display: flex; gap: clamp(34px, 5vw, 90px); }
+.brokerage-site-hero .professional-site-hero-copy, .agent-site-hero .professional-site-hero-copy { flex: 1 1 460px; }
+.brokerage-site-hero .site-logo, .agent-site-hero .site-profile-photo { flex: 0 1 auto; margin: 0; }
+.agent-site-hero .site-profile-photo { border-radius: 0; height: clamp(210px, 23vw, 300px); max-width: 560px; width: min(38vw, 500px); }
 .professional-site-hero > span, .professional-site-intro span { color: var(--gold); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .professional-site-hero h1 { color: var(--site-on-primary, var(--ivory)); font-family: Georgia,serif; font-size: clamp(52px,8vw,104px); font-weight: 400; letter-spacing: -.055em; margin: 22px 0 18px; max-width: 980px; }
 .brokerage-site-hero .brokerage-site-title { font-size: clamp(30px, 5.5vw, 82px); max-width: none; overflow: hidden; text-overflow: clip; white-space: nowrap; width: 100%; }
@@ -770,8 +770,9 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 }
 
 @media (max-width: 900px) {
-  .brokerage-site-hero .professional-site-hero-content { align-items: flex-start; flex-direction: column; }
+  .brokerage-site-hero .professional-site-hero-content, .agent-site-hero .professional-site-hero-content { align-items: flex-start; flex-direction: column; }
   .brokerage-site-hero .site-logo { height: clamp(200px, 42vw, 300px); width: min(82vw, 560px); }
+  .agent-site-hero .site-profile-photo { height: clamp(230px, 55vw, 360px); width: min(82vw, 560px); }
   .brokerage-site-hero .brokerage-site-title { font-size: clamp(24px, 8vw, 60px); }
   .desktop-nav, .launch-note { display: none; }
   .hero { grid-template-columns: 1fr; }
