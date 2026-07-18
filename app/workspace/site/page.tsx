@@ -4,6 +4,7 @@ import { SiteBuilderTabs } from "@/app/components/site-builder";
 import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = {
   title: "Website builder",
@@ -18,6 +19,7 @@ export default async function SiteBuilderPage({
 }) {
   const query = await searchParams;
   const context = await getActiveMembershipContext("/workspace/site");
+  const admin = createAdminClient();
   const access = deriveWorkspaceAccess({
     hasMembership: Boolean(context.membership),
     roles: context.roles,
@@ -73,7 +75,7 @@ export default async function SiteBuilderPage({
               "listing_id,title,purpose,price,currency,brokerage_id,assigned_agent_person_id,published_at",
             )
             .order("published_at", { ascending: false }),
-          context.supabase
+          admin
             .from("listing_shares")
             .select("listing_id,displaying_agent_person_id")
             .eq("status", "active"),
