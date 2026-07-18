@@ -156,11 +156,9 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .filter-range span { align-self: center; color: #657572; font-size: 10px; text-align: center; }
 .filter-range select { min-width: 0; }
 .marketplace-layout { align-items: start; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); margin: 0 auto; max-width: 1480px; padding: 0 32px 90px; }
-.marketplace-layout.map-results-layout { grid-template-columns: minmax(0, 1.65fr) minmax(360px, .85fr); }
-.listing-map { border: 1px solid var(--line); min-height: 620px; overflow: hidden; position: sticky; top: 18px; }
+.listing-map { border: 1px solid var(--line); min-height: 620px; overflow: hidden; position: relative; width: 100%; }
 .listing-map-toolbar { align-items: center; background: var(--sage); color: var(--evergreen); display: flex; font-size: 13px; justify-content: space-between; min-height: 52px; padding: 0 16px; }.listing-map-toolbar strong { font-size: 15px; }.listing-map-toolbar span { color: #53625f; }.listing-map-toolbar button { background: #fff; border: 1px solid var(--evergreen); color: var(--evergreen); cursor: pointer; font-size: 15px; min-height: 34px; padding: 0 12px; }
 .jamaica-map { height: 568px; width: 100%; }.listing-cluster-label { background: transparent; border: 0; box-shadow: none; color: #fff; font-size: 13px; font-weight: 700; margin: 0; }.listing-cluster-label::before { display: none; }
-.map-results-layout .property-card-grid.cards-6, .map-results-layout .property-card-grid.cards-4 { grid-template-columns: 1fr; }.map-results-layout .property-card-visual { aspect-ratio: 16 / 8; }
 .marketplace-results { display: grid; gap: 18px; }
 .property-results-toolbar { align-items: center; display: flex; justify-content: space-between; min-height: 42px; }
 .property-results-toolbar p { color: #657572; font-size: 12px; margin: 0; }
@@ -197,7 +195,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 11px; }
 .area-map-panel { background: var(--sage); border: 1px solid rgba(22,140,145,.18); min-height: 280px; overflow: hidden; padding: 34px; position: relative; }
 @media (max-width: 1180px) {
   .marketplace-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .marketplace-layout.map-results-layout { grid-template-columns: 1fr; }.listing-map { position: relative; top: auto; }.jamaica-map { height: 480px; }
+  .listing-map { position: relative; top: auto; }.jamaica-map { height: 480px; }
   .property-card-grid.cards-6 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .professional-card-grid.cards-6 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

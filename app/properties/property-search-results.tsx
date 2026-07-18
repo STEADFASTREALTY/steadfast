@@ -95,8 +95,7 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
       </form>
     </section>
 
-    <div className="marketplace-layout map-results-layout">
-      <JamaicaListingMap listings={listings} selectedIds={selectedMapListingIds} onSelect={setSelectedMapListingIds} />
+    <div className="marketplace-layout">
       <section className="marketplace-results" aria-label="Property results" aria-busy={isLoading}>
         <div className="property-results-toolbar"><p><strong>{displayedListings.length}</strong> {selectedMapListingIds ? "homes in this map area" : "properties"}</p><div aria-label="Cards per row" className="property-grid-switch"><span>View</span><button type="button" onClick={() => changeView(4)} aria-pressed={cardsPerRow === 4}>4</button><button type="button" onClick={() => changeView(6)} aria-pressed={cardsPerRow === 6}>6</button></div></div>
         {error ? <p className="search-results-error" role="alert">{error}</p> : null}
@@ -105,6 +104,7 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
           <div className="property-card-copy"><strong className="property-card-price">{formatPrice(listing)}</strong><h2><Link href={`/properties/${listing.listing_id}`}>{listing.title}</Link></h2>{facts ? <p className="property-card-facts">{facts}</p> : null}<p className="property-card-location">{listing.public_location_label ?? listing.administrative_area_name}</p></div>
         </article>; })}</div> : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active, brokerage-approved listings appear here. Change the location or property type to see other available properties.</p><button className="solid-button" type="button" onClick={() => { const form = document.querySelector<HTMLFormElement>(".marketplace-filters"); form?.reset(); if (form) void updateResults(queryFromForm(form, cardsPerRow)); }}>Clear filters</button></div>}
       </section>
+      <JamaicaListingMap listings={listings} selectedIds={selectedMapListingIds} onSelect={setSelectedMapListingIds} />
     </div>
   </>;
 }
