@@ -243,6 +243,12 @@ export function SiteBuilder({
   parishes: Parish[];
   canCreateListings: boolean;
 }) {
+  // The preview remains on the internal route so it can be embedded in the
+  // editor. The public link always opens this professional's real subdomain.
+  const publicSiteUrl =
+    process.env.NODE_ENV === "development"
+      ? `/sites/${site.slug}`
+      : `https://${site.slug}.canadasap.com`;
   const availableSections =
     site.site_type === "brokerage"
       ? allSections.filter((section) => section !== "testimonials")
@@ -1099,7 +1105,7 @@ export function SiteBuilder({
       <aside className="site-builder-preview">
         <div>
           <span>Live website preview</span>
-          <a href={`/sites/${site.slug}`} target="_blank" rel="noreferrer">
+          <a href={publicSiteUrl} target="_blank" rel="noreferrer">
             Open site
           </a>
         </div>
