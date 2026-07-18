@@ -107,11 +107,15 @@ export async function createSiteTestimonialAction(formData: FormData) {
   const hasFile = file instanceof File && file.size > 0;
   if (!parsed.success || (hasFile && (!(file instanceof File) || file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(file.type)))) redirect("/workspace/site?error=Check+the+testimonial+details+and+optional+image.");
   const { admin, site } = await requireOwnedSite(parsed.data.siteId);
-  const { data: existing, error: existingError } = await admin.from("site_testimonials").select("position").eq("site_id", site.id).eq("is_active", true);
+  const { data: existing, error: existingError } = await admin.from("site_testimonials").select("id,position,asset_id,is_active").eq("site_id", site.id);
   if (existingError) redirect("/workspace/site?error=The+testimonial+could+not+be+saved.");
-  const usedPositions = new Set((existing ?? []).map((item) => item.position));
+  const usedPositions = new Set((existing ?? []).filter((item) => item.is_active).map((item) => item.position));
   const position = Array.from({ length: 10 }, (_, index) => index + 1).find((value) => !usedPositions.has(value));
   if (!position) redirect("/workspace/site?error=You+can+display+up+to+ten+testimonials.");
+  // A removed testimonial remains in the database so its history is retained. Its
+  // unique display position can therefore be safely reused instead of trying to
+  // insert a second row for the same site and position.
+  const retiredTestimonial = (existing ?? []).find((item) => !item.is_active && item.position === position);
   let assetId: string | null = null;
   let objectPath: string | null = null;
   try {
@@ -127,8 +131,16 @@ export async function createSiteTestimonialAction(formData: FormData) {
       const { error: assetError } = await admin.from("site_assets").insert({ id: assetId, site_id: site.id, placement: "testimonial_photo", object_path: objectPath, original_filename: file.name.slice(0, 180), byte_size: bytes.length, width: output.width, height: output.height });
       if (assetError) throw assetError;
     }
-    const { error: testimonialError } = await admin.from("site_testimonials").insert({ site_id: site.id, author_name: parsed.data.authorName, author_context: parsed.data.authorContext || null, quote: parsed.data.quote, asset_id: assetId, position, is_active: true });
+    const testimonialRecord = { author_name: parsed.data.authorName, author_context: parsed.data.authorContext || null, quote: parsed.data.quote, asset_id: assetId, position, is_active: true };
+    const { error: testimonialError } = retiredTestimonial
+      ? await admin.from("site_testimonials").update(testimonialRecord).eq("id", retiredTestimonial.id).eq("site_id", site.id)
+      : await admin.from("site_testimonials").insert({ site_id: site.id, ...testimonialRecord });
     if (testimonialError) throw testimonialError;
+    if (retiredTestimonial?.asset_id) {
+      const { data: retiredAsset } = await admin.from("site_assets").select("object_path").eq("id", retiredTestimonial.asset_id).maybeSingle();
+      await admin.from("site_assets").update({ status: "removed", removed_at: new Date().toISOString() }).eq("id", retiredTestimonial.asset_id);
+      if (retiredAsset?.object_path) await admin.storage.from("professional-site-assets").remove([retiredAsset.object_path]);
+    }
   } catch {
     if (assetId) await admin.from("site_assets").delete().eq("id", assetId);
     if (objectPath) await admin.storage.from("professional-site-assets").remove([objectPath]);
