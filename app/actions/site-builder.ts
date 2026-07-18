@@ -41,16 +41,17 @@ async function requireOwnedSite(siteId: string) {
 
 export async function saveSiteBuilderAction(formData: FormData) {
   const siteId = z.string().uuid().safeParse(text(formData, "siteId"));
+  const headline = z.string().trim().max(240).safeParse(text(formData, "headline"));
   const sectionOrder = z.array(z.enum(sections)).length(sections.length).safeParse(JSON.parse(text(formData, "sectionOrder") || "[]"));
   const content = contentSchema.safeParse(JSON.parse(text(formData, "content") || "{}"));
   const theme = z.object({ primary: hex, accent: hex, background: hex, text: hex }).safeParse(JSON.parse(text(formData, "theme") || "{}"));
-  if (!siteId.success || !sectionOrder.success || new Set(sectionOrder.data).size !== sections.length || !content.success || !theme.success) {
+  if (!siteId.success || !headline.success || !sectionOrder.success || new Set(sectionOrder.data).size !== sections.length || !content.success || !theme.success) {
     redirect("/workspace/site?error=Please+check+your+website+settings.");
   }
   const { admin, site } = await requireOwnedSite(siteId.data);
   const safeContent = { ...content.data, aboutHtml: sanitizeSiteRichText(content.data.aboutHtml) };
   const { error } = await admin.from("professional_sites").update({
-    layout: { sectionOrder: sectionOrder.data }, content: safeContent, theme: { ...theme.data, managedBy: "site-builder" },
+    headline: headline.data || null, layout: { sectionOrder: sectionOrder.data }, content: safeContent, theme: { ...theme.data, managedBy: "site-builder" },
   }).eq("id", site.id);
   if (error) redirect("/workspace/site?error=Your+website+could+not+be+saved.");
   revalidatePath(`/agents/${site.slug}`); revalidatePath(`/brokerages/${site.slug}`); revalidatePath(`/sites/${site.slug}`); revalidatePath("/workspace/site");
