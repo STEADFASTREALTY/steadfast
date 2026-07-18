@@ -51,6 +51,7 @@ export async function signInAction(formData: FormData) {
     });
   } else {
     cookieStore.delete("sf_remember_device");
+    if (cookieDomain) cookieStore.delete({ name: "sf_remember_device", domain: cookieDomain });
   }
 
   const supabase = await createClient({ persistentSession: rememberDevice, cookieDomain });

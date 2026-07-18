@@ -81,6 +81,19 @@ export async function proxy(request: NextRequest) {
             ? NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } })
             : NextResponse.next({ request: { headers: requestHeaders } });
           cookiesToSet.forEach(({ name, value, options }) => {
+            // Remove any legacy host-only version before issuing the shared
+            // domain cookie. This prevents conflicting tokens after a server
+            // action or a visit to an agent/broker subdomain.
+            if (cookieDomain) {
+              const { domain: _domain, ...hostOnlyOptions } = options;
+              void _domain;
+              response.cookies.set(name, "", {
+                ...hostOnlyOptions,
+                path: hostOnlyOptions.path ?? "/",
+                maxAge: 0,
+                expires: new Date(0),
+              });
+            }
             if (persistentSession) {
               response.cookies.set(name, value, { ...options, ...(cookieDomain ? { domain: cookieDomain } : {}) });
               return;
