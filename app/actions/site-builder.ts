@@ -12,6 +12,7 @@ import { sanitizeSiteRichText } from "@/lib/sites/rich-text";
 const sections = ["hero", "about", "search", "listings", "testimonials", "contact"] as const;
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 const contentSchema = z.object({
+  aboutHeading: z.string().trim().max(160).optional(),
   aboutHtml: z.string().max(20000).optional().default(""),
   contactEmail: z.string().trim().email().max(320).optional().or(z.literal("")),
   contactPhone: z.string().trim().max(40).optional(),
@@ -41,6 +42,7 @@ async function requireOwnedSite(siteId: string) {
 
 export async function saveSiteBuilderAction(formData: FormData) {
   const siteId = z.string().uuid().safeParse(text(formData, "siteId"));
+  const returnTab = z.enum(["agent", "broker"]).catch("agent").parse(text(formData, "returnTab"));
   const headline = z.string().trim().max(240).safeParse(text(formData, "headline"));
   const sectionOrder = z.array(z.enum(sections)).length(sections.length).safeParse(JSON.parse(text(formData, "sectionOrder") || "[]"));
   const content = contentSchema.safeParse(JSON.parse(text(formData, "content") || "{}"));
@@ -55,7 +57,7 @@ export async function saveSiteBuilderAction(formData: FormData) {
   }).eq("id", site.id);
   if (error) redirect("/workspace/site?error=Your+website+could+not+be+saved.");
   revalidatePath(`/agents/${site.slug}`); revalidatePath(`/brokerages/${site.slug}`); revalidatePath(`/sites/${site.slug}`); revalidatePath("/workspace/site");
-  redirect(`/workspace/site?notice=${encodeURIComponent("Website changes saved.")}`);
+  redirect(`/workspace/site?tab=${returnTab}&notice=${encodeURIComponent("Website changes saved.")}`);
 }
 
 export async function uploadSiteAssetAction(formData: FormData) {
