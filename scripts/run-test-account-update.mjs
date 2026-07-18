@@ -26,7 +26,8 @@ const users = usersPage.users;
 const { data: people, error: peopleError } = await supabase.from("people").select("id,auth_user_id,display_name,primary_email");
 if (peopleError) throw peopleError;
 
-const resolved = requestedAccounts.map((account) => {
+const resolved = [];
+for (const account of requestedAccounts) {
   const person = people.find((candidate) => {
     const values = [normal(candidate.display_name), normal(candidate.primary_email), normal(users.find((user) => user.id === candidate.auth_user_id)?.email)];
     return values.some(account.matches);
@@ -35,12 +36,17 @@ const resolved = requestedAccounts.map((account) => {
     const available = people.filter((candidate) => candidate.auth_user_id).map((candidate) => `${candidate.display_name} <${candidate.primary_email ?? "no email"}>`).slice(0, 50).join(", ");
     throw new Error(`Could not identify the existing ${account.label} test account. Available test identities: ${available}`);
   }
-  const user = users.find((candidate) => candidate.id === person.auth_user_id || normal(candidate.email) === normal(person.primary_email));
-  if (!user) throw new Error(`The ${account.label} profile has no matching Supabase Auth user.`);
-  const conflicting = users.find((candidate) => normal(candidate.email) === account.email && candidate.id !== user.id);
+  let user = users.find((candidate) => candidate.id === person.auth_user_id || normal(candidate.email) === normal(person.primary_email));
+  const conflicting = users.find((candidate) => normal(candidate.email) === account.email && candidate.id !== user?.id);
   if (conflicting) throw new Error(`${account.email} is already used by a different account.`);
-  return { ...account, person, user };
-});
+  if (!user) {
+    const { data, error } = await supabase.auth.admin.createUser({ email: account.email, password, email_confirm: true });
+    if (error || !data.user) throw error ?? new Error(`Could not create the ${account.label} sign-in.`);
+    user = data.user;
+    users.push(user);
+  }
+  resolved.push({ ...account, person, user });
+}
 
 const john = resolved[0];
 const karen = resolved[1];
