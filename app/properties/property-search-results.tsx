@@ -37,6 +37,14 @@ function queryFromForm(form: HTMLFormElement, cardsPerRow: 4 | 6) {
   return query;
 }
 
+function PropertyCard({ listing, cover }: { listing: PublicListing; cover?: ListingCover }) {
+  const facts = [listing.bedrooms === null ? null : `${listing.bedrooms} bd`, listing.bathrooms === null ? null : `${listing.bathrooms} ba`, listing.building_area === null ? null : `${new Intl.NumberFormat("en-JM").format(listing.building_area)} sq ft`].filter(Boolean).join(" · ");
+  return <article className="property-result-card" key={listing.listing_id}>
+    <Link className="property-card-visual" href={`/properties/${listing.listing_id}`} aria-label={`View ${listing.title}`}>{cover ? <Image src={`/media/listings/${cover.id}/card.webp`} alt={`${listing.title} property view`} width={cover.width} height={cover.height} sizes="(max-width: 680px) 100vw, (max-width: 1050px) 33vw, 17vw" unoptimized /> : <span className="property-card-placeholder">Photo preparing</span>}<span className="property-card-badge">{listing.purpose === "sale" ? "For sale" : "For rent"}</span></Link>
+    <div className="property-card-copy"><strong className="property-card-price">{formatPrice(listing)}</strong><h2><Link href={`/properties/${listing.listing_id}`}>{listing.title}</Link></h2>{facts ? <p className="property-card-facts">{facts}</p> : null}<p className="property-card-location">{listing.public_location_label ?? listing.administrative_area_name}</p></div>
+  </article>;
+}
+
 export function PropertySearchResults({ initialListings, initialCovers, initialFilters, initialCardsPerRow, locationOptions }: Props) {
   const [listings, setListings] = useState(initialListings);
   const [covers, setCovers] = useState(initialCovers);
@@ -44,8 +52,13 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedMapListingIds, setSelectedMapListingIds] = useState<string[] | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const coverByListing = useMemo(() => new Map(covers.map((cover) => [cover.listing_id, cover])), [covers]);
-  const displayedListings = selectedMapListingIds ? listings.filter((listing) => selectedMapListingIds.includes(listing.listing_id)) : listings;
+  const mapListings = selectedMapListingIds ? listings.filter((listing) => selectedMapListingIds.includes(listing.listing_id)) : [];
+  const pageSize = cardsPerRow * 3;
+  const totalPages = Math.max(1, Math.ceil(listings.length / pageSize));
+  const visiblePage = Math.min(currentPage, totalPages);
+  const pageListings = listings.slice((visiblePage - 1) * pageSize, visiblePage * pageSize);
 
   async function updateResults(query: URLSearchParams) {
     setIsLoading(true);
@@ -57,6 +70,7 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
       setListings(data.listings);
       setCovers(data.covers);
       setSelectedMapListingIds(null);
+      setCurrentPage(1);
       window.history.replaceState(null, "", `/properties?${query.toString()}`);
     } catch {
       setError("We could not update the listings. Please try again.");
@@ -72,6 +86,7 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
 
   function changeView(nextView: 4 | 6) {
     setCardsPerRow(nextView);
+    setCurrentPage(1);
     const form = document.querySelector<HTMLFormElement>(".marketplace-filters");
     if (!form) return;
     const query = queryFromForm(form, nextView);
@@ -95,15 +110,18 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
       </form>
     </section>
 
+    <section className="property-search-card-section" aria-label="Property results" aria-busy={isLoading}>
+      <div className="property-results-toolbar"><p><strong>{listings.length}</strong> properties</p><div aria-label="Cards per row" className="property-grid-switch"><span>View</span><button type="button" onClick={() => changeView(4)} aria-pressed={cardsPerRow === 4}>4</button><button type="button" onClick={() => changeView(6)} aria-pressed={cardsPerRow === 6}>6</button></div></div>
+      {error ? <p className="search-results-error" role="alert">{error}</p> : null}
+      {listings.length ? <><div className={`property-card-grid cards-${cardsPerRow}`}>{pageListings.map((listing) => <PropertyCard key={listing.listing_id} listing={listing} cover={coverByListing.get(listing.listing_id)} />)}</div>{totalPages > 1 ? <nav className="property-pagination" aria-label="Property result pages"><button type="button" disabled={visiblePage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}>Previous</button><span>Page {visiblePage} of {totalPages}</span><button type="button" disabled={visiblePage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}>Next</button></nav> : null}</> : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active listings appear here. Change the location or property type to see other available properties.</p><button className="solid-button" type="button" onClick={() => { const form = document.querySelector<HTMLFormElement>(".marketplace-filters"); form?.reset(); if (form) void updateResults(queryFromForm(form, cardsPerRow)); }}>Clear filters</button></div>}
+    </section>
+
+    <div className="property-map-separator" aria-hidden="true"><span>Explore listings on the map</span></div>
     <div className="marketplace-layout map-results-layout">
       <JamaicaListingMap listings={listings} selectedIds={selectedMapListingIds} onSelect={setSelectedMapListingIds} />
       <section className="marketplace-results" aria-label="Property results" aria-busy={isLoading}>
-        <div className="property-results-toolbar"><p><strong>{displayedListings.length}</strong> {selectedMapListingIds ? "homes in this map area" : "properties"}</p></div>
-        {error ? <p className="search-results-error" role="alert">{error}</p> : null}
-        {displayedListings.length ? <div className={`property-card-grid cards-${cardsPerRow}`}>{displayedListings.map((listing) => { const cover = coverByListing.get(listing.listing_id); const facts = [listing.bedrooms === null ? null : `${listing.bedrooms} bd`, listing.bathrooms === null ? null : `${listing.bathrooms} ba`, listing.building_area === null ? null : `${new Intl.NumberFormat("en-JM").format(listing.building_area)} sq ft`].filter(Boolean).join(" · "); return <article className="property-result-card" key={listing.listing_id}>
-          <Link className="property-card-visual" href={`/properties/${listing.listing_id}`} aria-label={`View ${listing.title}`}>{cover ? <Image src={`/media/listings/${cover.id}/card.webp`} alt={`${listing.title} property view`} width={cover.width} height={cover.height} sizes="(max-width: 680px) 100vw, (max-width: 1050px) 33vw, 17vw" unoptimized /> : <span className="property-card-placeholder">Photo preparing</span>}<span className="property-card-badge">{listing.purpose === "sale" ? "For sale" : "For rent"}</span></Link>
-          <div className="property-card-copy"><strong className="property-card-price">{formatPrice(listing)}</strong><h2><Link href={`/properties/${listing.listing_id}`}>{listing.title}</Link></h2>{facts ? <p className="property-card-facts">{facts}</p> : null}<p className="property-card-location">{listing.public_location_label ?? listing.administrative_area_name}</p></div>
-        </article>; })}</div> : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active, brokerage-approved listings appear here. Change the location or property type to see other available properties.</p><button className="solid-button" type="button" onClick={() => { const form = document.querySelector<HTMLFormElement>(".marketplace-filters"); form?.reset(); if (form) void updateResults(queryFromForm(form, cardsPerRow)); }}>Clear filters</button></div>}
+        <div className="property-results-toolbar"><p>{selectedMapListingIds ? <><strong>{mapListings.length}</strong> homes in this map area</> : "Choose a number on the map"}</p></div>
+        {mapListings.length ? <div className="property-card-grid cards-6">{mapListings.map((listing) => <PropertyCard key={listing.listing_id} listing={listing} cover={coverByListing.get(listing.listing_id)} />)}</div> : <div className="map-results-placeholder">Select a numbered location to see its listings here.</div>}
       </section>
     </div>
   </>;
