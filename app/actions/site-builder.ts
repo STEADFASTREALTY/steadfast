@@ -35,7 +35,7 @@ async function requireOwnedSite(siteId: string) {
     .select("id,slug,site_type,owner_person_id,owner_brokerage_id")
     .eq("id", siteId).maybeSingle();
   const ownsAgentSite = site?.owner_person_id === context.person.id;
-  const ownsBrokerageSite = Boolean(site?.owner_brokerage_id && context.membership?.brokerage_id === site.owner_brokerage_id && context.roles.includes("broker"));
+  const ownsBrokerageSite = Boolean(site?.owner_brokerage_id && context.membership?.brokerage_id === site.owner_brokerage_id && (context.roles.includes("broker") || context.roles.includes("broker_staff") || context.permissions.some((permission) => permission.permission_key === "brokerage.profile" && permission.effect === "allow")));
   if (!site || (!ownsAgentSite && !ownsBrokerageSite)) redirect("/access-denied?reason=site-builder");
   return { context, admin, site };
 }
@@ -67,9 +67,10 @@ export async function saveSiteBuilderAction(formData: FormData) {
 export async function uploadSiteAssetAction(formData: FormData) {
   const siteId = z.string().uuid().safeParse(text(formData, "siteId"));
   const placement = z.enum(["profile_photo", "brokerage_logo", "hero_background"]).safeParse(text(formData, "placement"));
+  const returnTo = text(formData, "returnTo") === "/account/profile" ? "/account/profile" : "/workspace/site";
   const file = formData.get("asset");
   if (!siteId.success || !placement.success || !(file instanceof File) || file.size < 1 || file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-    redirect("/workspace/site?error=Choose+a+JPEG,+PNG,+or+WebP+image+under+5+MB.");
+    redirect(`${returnTo}?error=Choose+a+JPEG,+PNG,+or+WebP+image+under+5+MB.`);
   }
   const { admin, site } = await requireOwnedSite(siteId.data);
   if (placement.data === "hero_background" && site.site_type !== "agent") redirect("/workspace/site?error=Only+agent+websites+can+use+a+hero+background+image.");
@@ -109,11 +110,11 @@ export async function uploadSiteAssetAction(formData: FormData) {
   } catch {
     if (objectPath) await admin.storage.from("professional-site-assets").remove([objectPath]);
     redirect(placement.data === "hero_background"
-      ? "/workspace/site?error=Use+a+wide+hero+image+at+least+1500+x+500+pixels+(recommended:+2400+x+800+pixels)."
-      : "/workspace/site?error=The+image+could+not+be+prepared.+Use+a+clear+still+photograph+or+logo.");
+      ? `${returnTo}?error=Use+a+wide+hero+image+at+least+1500+x+500+pixels+(recommended:+2400+x+800+pixels).`
+      : `${returnTo}?error=The+image+could+not+be+prepared.+Use+a+clear+still+photograph+or+logo.`);
   }
   revalidatePath(`/agents/${site.slug}`); revalidatePath(`/brokerages/${site.slug}`); revalidatePath("/workspace/site");
-  redirect(`/workspace/site?notice=${encodeURIComponent(placement.data === "hero_background" ? "Your agent website background image was prepared and saved." : "Your website image was prepared and saved.")}`);
+  redirect(`${returnTo}?notice=${encodeURIComponent(placement.data === "hero_background" ? "Your agent website background image was prepared and saved." : "Your website image was prepared and saved.")}`);
 }
 
 export async function createSiteTestimonialAction(formData: FormData) {

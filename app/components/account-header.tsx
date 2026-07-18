@@ -32,6 +32,7 @@ export function AccountHeader({
         {canManageInquiries ? <Link href="/workspace/inquiries">Inquiries</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}
         <Link href="/account/notifications">Notifications</Link>
+        <Link href="/account/profile">Profile</Link>
         <Link href="/account">My account</Link>
         <Link href="/account/security">Security</Link>
       </nav>

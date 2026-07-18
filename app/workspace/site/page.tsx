@@ -12,7 +12,8 @@ export default async function SiteBuilderPage({ searchParams }: { searchParams: 
   const access = deriveWorkspaceAccess({ hasMembership: Boolean(context.membership), roles: context.roles, permissions: context.permissions, platformRoles: context.platformRoles });
   const siteQuery = context.supabase.from("professional_sites").select("id,site_type,owner_person_id,owner_brokerage_id,display_name,headline,slug,theme,layout,content").eq("status", "active");
   const { data: allSites } = await siteQuery;
-  const sites = (allSites ?? []).filter((site) => site.owner_person_id === context.person.id || (context.roles.includes("broker") && site.owner_brokerage_id === context.membership?.brokerage_id));
+  const canEditBrokerageWebsite = context.roles.includes("broker") || context.roles.includes("broker_staff") || context.permissions.some((permission) => permission.permission_key === "brokerage.profile" && permission.effect === "allow");
+  const sites = (allSites ?? []).filter((site) => site.owner_person_id === context.person.id || (canEditBrokerageWebsite && site.owner_brokerage_id === context.membership?.brokerage_id));
   const [testimonialResult, assetResult] = sites.length ? await Promise.all([
     context.supabase.from("site_testimonials").select("id,site_id,author_name,author_context,quote,asset_id,position,created_at").in("site_id", sites.map((site) => site.id)).eq("is_active", true).order("position"),
     context.supabase.from("site_assets").select("id,site_id,placement").in("site_id", sites.map((site) => site.id)).eq("status", "ready"),
