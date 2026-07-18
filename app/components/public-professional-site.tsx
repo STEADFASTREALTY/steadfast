@@ -8,6 +8,7 @@ import { TestimonialRotator, type Testimonial } from "@/app/components/testimoni
 import { ProfessionalListingGrid } from "@/app/components/professional-listing-grid";
 import { PropertySearchCard } from "@/app/components/property-search-card";
 import { AutoFitHeading } from "@/app/components/auto-fit-heading";
+import { PublicSiteLiveRefresh } from "@/app/components/public-site-live-refresh";
 
 type SiteListing = {
   listing_id: string; title: string; purpose: string; property_type: string;
@@ -32,7 +33,7 @@ function AgentHeroName({ name, color }: { name: string; color: string }) {
 
 export async function getProfessionalSite(slug: string, expectedType?: "agent" | "brokerage") {
   const supabase = await createClient();
-  let query = supabase.from("professional_sites").select("id,site_type,owner_person_id,owner_brokerage_id,slug,display_name,headline,bio,theme,layout,content,status").eq("slug", slug).eq("status", "active");
+  let query = supabase.from("professional_sites").select("id,site_type,owner_person_id,owner_brokerage_id,slug,display_name,headline,bio,theme,layout,content,status,updated_at").eq("slug", slug).eq("status", "active");
   if (expectedType) query = query.eq("site_type", expectedType);
   const { data } = await query.maybeSingle();
   return data;
@@ -84,6 +85,7 @@ function SiteShell({ site, listings, media, assets, testimonials }: { site: NonN
     contact: <section key="contact" className="professional-site-contact"><span>Start a conversation</span><h2>Ready when you are.</h2>{content.contactEmail ? <a href={`mailto:${encodeURIComponent(String(content.contactEmail))}`}>{String(content.contactEmail)}</a> : null}{content.contactPhone ? <p>{String(content.contactPhone)}</p> : null}<Link href="/properties">Browse all properties</Link></section>,
   } as Record<string, ReactNode>;
   return <main className="professional-site-page" style={style}>
+    <PublicSiteLiveRefresh slug={site.slug} updatedAt={site.updated_at} />
     <style>{`.professional-site-page { background: ${palette.background} !important; color: ${palette.text} !important; }.professional-site-page .brokerage-site-hero { background: ${palette.primary} !important; }.professional-site-page .professional-site-hero h1 { color: ${heroTextColor} !important; -webkit-text-fill-color: ${heroTextColor} !important; }.professional-site-page .professional-site-hero p { color: ${heroSecondaryTextColor} !important; -webkit-text-fill-color: ${heroSecondaryTextColor} !important; }.professional-site-page .professional-site-hero .site-join-button { color: ${heroTextColor} !important; -webkit-text-fill-color: ${heroTextColor} !important; }`}</style>
     {order.map((name: string) => section[name])}
     <footer className="professional-site-footer"><nav aria-label="Professional website navigation"><Link href="/properties">All properties</Link><Link href="/sign-in">Professional sign in</Link></nav><span>SteadFast Realty</span><a href="https://canadasap.com">canadasap.com</a><span>© {new Date().getFullYear()} SteadFast Realty. All rights reserved.</span></footer>
