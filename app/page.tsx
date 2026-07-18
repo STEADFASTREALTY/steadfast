@@ -1,122 +1,32 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { BrandLogo } from "@/app/components/brand-logo";
-import { PropertySearchCard } from "@/app/components/property-search-card";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { publicPageMetadata } from "@/lib/seo/metadata";
+import { HomeSearch } from "@/app/components/home-search";
+import { HomeAgentRotator, type HomeAgent } from "@/app/components/home-agent-rotator";
+import { PublicFooter, PublicHeader } from "@/app/components/public-chrome";
 
-export const metadata = publicPageMetadata({
-  title: "Property, connected",
-  description: "Discover Jamaican property and work with trusted agents and brokerages through SteadFast Realty.",
-  path: "/",
-  keywords: ["Jamaica real estate", "Jamaica property", "Jamaica real estate agents"],
-});
-
-const platformHighlights = [
-  {
-    number: "01",
-    title: "Listings that move with confidence",
-    body: "A clear brokerage approval trail keeps every price, status, and major edit accountable.",
-  },
-  {
-    number: "02",
-    title: "Your brand, beautifully presented",
-    body: "Agents and brokerages receive focused web experiences designed to make their inventory shine.",
-  },
-  {
-    number: "03",
-    title: "Built for trusted collaboration",
-    body: "Share approved listings across agent websites while preserving ownership and contact choice.",
-  },
-];
+export const metadata = publicPageMetadata({ title: "Jamaica Property Search", description: "Search Jamaica property listings and discover trusted real estate professionals through SteadFast.", path: "/", keywords: ["Jamaica property search", "Jamaica real estate", "Jamaica brokers"] });
 
 export default async function Home() {
   await connection();
-
-  return (
-    <main>
-      <header className="site-header">
-        <BrandLogo />
-        <nav className="desktop-nav" aria-label="Primary navigation">
-          <Link href="/properties">Buy</Link>
-          <Link href="/properties?intent=rent">Rent</Link>
-          <a href="#platform">For professionals</a>
-        </nav>
-        <div className="header-actions">
-          <span className="launch-note">Jamaica marketplace</span>
-          <Link className="outline-button" href="/sign-in">Sign in</Link>
-        </div>
-      </header>
-
-      <section className="hero">
-        <div className="hero-copy">
-          <span className="eyebrow"><i /> Built for Jamaica</span>
-          <h1>Property,<br /><em>connected.</em></h1>
-          <p className="hero-intro">
-            A calmer, clearer way to discover property and work with trusted real estate professionals.
-          </p>
-
-          <PropertySearchCard />
-
-          <div className="hero-footnote">
-            <span>Verified brokerage workflow</span>
-            <span>Agent-led service</span>
-            <span>International-ready</span>
-          </div>
-        </div>
-
-        <div className="island-panel" aria-label="Stylized map of Jamaica">
-          <div className="map-grid" />
-          <div className="map-label map-label-one"><i /> Kingston</div>
-          <div className="map-label map-label-two"><i /> Montego Bay</div>
-          <div className="map-label map-label-three"><i /> Ocho Rios</div>
-          <div className="island-shape">
-            <div className="island-glow" />
-          </div>
-          <div className="map-card">
-            <span>From local reach</span>
-            <strong>to global discovery.</strong>
-            <p>Structured for international listing connections as SteadFast grows.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="platform-section" id="platform">
-        <div className="section-heading">
-          <span className="eyebrow dark"><i /> One connected platform</span>
-          <h2>Real estate should feel<br />easy to move through.</h2>
-          <p>SteadFast brings the work of agents and brokerages into one thoughtful, approval-led experience.</p>
-        </div>
-        <div className="highlight-grid">
-          {platformHighlights.map((item) => (
-            <article key={item.number}>
-              <span>{item.number}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="roles-strip">
-        <div>
-          <span>For property seekers</span>
-          <strong>Search simply. Choose your agent.</strong>
-        </div>
-        <div>
-          <span>For agents</span>
-          <strong>Present every listing at its best.</strong>
-        </div>
-        <div>
-          <span>For brokerages</span>
-          <strong>Lead your people and inventory.</strong>
-        </div>
-      </section>
-
-      <footer>
-        <BrandLogo compact />
-        <p>Jamaica&apos;s modern real estate platform.</p>
-        <span>Prototype release · 2026</span>
-      </footer>
-    </main>
-  );
+  const admin = createAdminClient();
+  const [{ data: places }, { data: featured }, { data: memberships }] = await Promise.all([
+    admin.from("public_listing_snapshots").select("public_location_label,administrative_area_name").limit(1000),
+    admin.from("platform_featured_brokerages").select("brokerage_id,display_rank").eq("is_active", true).order("display_rank").limit(4),
+    admin.from("brokerage_memberships").select("person_id,brokerage_id,brokerages(display_name)").eq("status", "active"),
+  ]);
+  const locationOptions = Array.from(new Set((places ?? []).flatMap((row) => [row.public_location_label, row.administrative_area_name]).filter((value): value is string => Boolean(value?.trim())).map((value) => value.trim()))).sort((a, b) => a.localeCompare(b, "en-JM"));
+  const featuredIds = (featured ?? []).map((row) => row.brokerage_id);
+  const { data: brokerageSites } = featuredIds.length ? await admin.from("professional_sites").select("owner_brokerage_id,slug,display_name,headline,id").eq("site_type", "brokerage").eq("status", "active").in("owner_brokerage_id", featuredIds) : { data: [] };
+  const { data: brokerAssets } = brokerageSites?.length ? await admin.from("site_assets").select("site_id,id").eq("placement", "brokerage_logo").eq("status", "ready").in("site_id", brokerageSites.map((site) => site.id)) : { data: [] };
+  const people = [...new Set((memberships ?? []).map((membership) => membership.person_id))];
+  const { data: agentSites } = people.length ? await admin.from("professional_sites").select("id,slug,display_name,owner_person_id").eq("site_type", "agent").eq("status", "active").in("owner_person_id", people) : { data: [] };
+  const { data: agentAssets } = agentSites?.length ? await admin.from("site_assets").select("site_id,id").eq("placement", "profile_photo").eq("status", "ready").in("site_id", agentSites.map((site) => site.id)) : { data: [] };
+  const brokerageNameByPerson = new Map((memberships ?? []).map((membership) => [membership.person_id, (membership.brokerages as unknown as { display_name?: string } | null)?.display_name ?? "SteadFast brokerage"]));
+  const agentPhotoBySite = new Map((agentAssets ?? []).map((asset) => [asset.site_id, asset.id]));
+  const shuffledAgents = (agentSites ?? []).map((site) => ({ id: site.id, slug: site.slug, name: site.display_name, brokerage: brokerageNameByPerson.get(site.owner_person_id) ?? "SteadFast brokerage", photoAssetId: agentPhotoBySite.get(site.id) ?? null }) satisfies HomeAgent).sort(() => Math.random() - .5).slice(0, 12);
+  const brokerAssetsBySite = new Map((brokerAssets ?? []).map((asset) => [asset.site_id, asset.id]));
+  const brokerages = (featured ?? []).flatMap((featuredBroker) => { const site = brokerageSites?.find((candidate) => candidate.owner_brokerage_id === featuredBroker.brokerage_id); return site ? [{ ...site, logoAssetId: brokerAssetsBySite.get(site.id) ?? null }] : []; });
+  return <main className="home-page"><PublicHeader /><section className="home-search-hero"><span>Jamaica property search</span><h1>Find your next place.</h1><p>Search brokerage-approved homes, land, rentals, and commercial opportunities across Jamaica.</p><HomeSearch locations={locationOptions} /></section><section className="home-recommendations"><div className="home-section-heading"><span>Recommended</span><h2>Brokerages to know.</h2></div><div className="home-recommendation-grid">{brokerages.map((broker) => <Link key={broker.id} href={`/brokerages/${broker.slug}`} className="home-recommendation-card broker"><div className="home-broker-logo">{broker.logoAssetId ? <img src={`/media/listings/${broker.logoAssetId}/card.webp?v=${broker.logoAssetId}`} alt={`${broker.display_name} logo`} /> : <span>{broker.display_name.slice(0, 1)}</span>}</div><strong>{broker.display_name}</strong><small>{broker.headline ?? "View brokerage profile"}</small></Link>)}</div>{!brokerages.length ? <p className="home-empty">Recommended brokerages will appear here.</p> : null}</section><section className="home-recommendations agents"><div className="home-section-heading"><span>Recommended</span><h2>Meet local agents.</h2></div><HomeAgentRotator agents={shuffledAgents} /></section><section className="home-final-call"><h2>Ready to search?</h2><Link className="solid-button" href="/properties">Browse all properties</Link></section><PublicFooter /></main>;
 }

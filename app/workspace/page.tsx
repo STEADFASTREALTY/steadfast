@@ -39,8 +39,7 @@ export default async function WorkspacePage() {
         {access.canReviewListings ? <article className="workspace-card active"><span>Approvals</span><h2>Listing review</h2><p>Review immutable agent submissions, request corrections, reject proposals, or establish approved content.</p><Link className="solid-button" href="/workspace/reviews">Open review queue</Link></article> : null}
         {access.canManageAgents ? <article className="workspace-card active"><span>Brokerage</span><h2>Agents and access</h2><p>Review applications, invite team members, manage capabilities, and process departures.</p><Link className="solid-button" href="/broker/agents">Open team management</Link></article> : null}
         {access.canManageBrokerage ? <article className="workspace-card"><span>Brokerage</span><h2>Company website</h2><p>Branding, offices, and the brokerage website will be added after listing management.</p><span className="workspace-state">Planned</span></article> : null}
-        {access.isOperations ? <article className="workspace-card"><span>SteadFast</span><h2>Operations</h2><p>Customer service, billing support, delivery monitoring, and flags will appear here.</p><span className="workspace-state">Planned</span></article> : null}
-        {access.isAdmin ? <article className="workspace-card"><span>SteadFast</span><h2>Administration</h2><p>Restricted platform configuration and internal access management will appear here.</p><span className="workspace-state">Planned</span></article> : null}
+        {access.isOperations || access.isAdmin ? <article className="workspace-card active"><span>SteadFast</span><h2>Homepage recommendations</h2><p>Choose the ranked brokerages featured on the public home page.</p><Link className="solid-button" href="/workspace/recommendations">Manage recommendations</Link></article> : null}
       </section>
     </main>
   );

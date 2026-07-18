@@ -1,0 +1,1 @@
+import { PublicInformationPage, informationMetadata } from "@/app/components/public-information-page"; export const metadata = informationMetadata("feedback"); export default function Feedback(){ return <PublicInformationPage slug="feedback"/>; }

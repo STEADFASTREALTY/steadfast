@@ -1,0 +1,1 @@
+import { PublicInformationPage, informationMetadata } from "@/app/components/public-information-page"; export const metadata = informationMetadata("terms"); export default function Terms(){ return <PublicInformationPage slug="terms"/>; }
