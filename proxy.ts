@@ -44,6 +44,7 @@ export async function proxy(request: NextRequest) {
     object-src 'none';
     base-uri 'self';
     form-action 'self';
+    frame-src 'self';
     frame-ancestors 'self';
     upgrade-insecure-requests;
   `

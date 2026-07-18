@@ -70,6 +70,7 @@ type Listing = {
   assigned_agent_person_id: string;
   published_at: string;
 };
+type ListingShare = { listing_id: string; displaying_agent_person_id: string };
 type Parish = { id: string; name: string };
 const themeFields: { key: keyof SiteTheme; label: string; help: string }[] = [
   {
@@ -141,6 +142,7 @@ export function SiteBuilderTabs({
   testimonials,
   assets,
   listings,
+  shares,
   parishes,
   canCreateListings,
   initialTab,
@@ -149,6 +151,7 @@ export function SiteBuilderTabs({
   testimonials: Testimonial[];
   assets: SiteAsset[];
   listings: Listing[];
+  shares: ListingShare[];
   parishes: Parish[];
   canCreateListings: boolean;
   initialTab?: string;
@@ -214,6 +217,7 @@ export function SiteBuilderTabs({
           )}
           assets={assets.filter((asset) => asset.site_id === activeSite.id)}
           listings={listings}
+          shares={shares}
           parishes={parishes}
           canCreateListings={canCreateListings}
         />
@@ -227,6 +231,7 @@ export function SiteBuilder({
   testimonials,
   assets,
   listings,
+  shares,
   parishes,
   canCreateListings,
 }: {
@@ -234,6 +239,7 @@ export function SiteBuilder({
   testimonials: Testimonial[];
   assets: SiteAsset[];
   listings: Listing[];
+  shares: ListingShare[];
   parishes: Parish[];
   canCreateListings: boolean;
 }) {
@@ -404,10 +410,15 @@ export function SiteBuilder({
   const selectPanel = (key: string) => {
     setActivePanel(key);
   };
+  const sharedListingIds = new Set(
+    shares
+      .filter((share) => share.displaying_agent_person_id === site.owner_person_id)
+      .map((share) => share.listing_id),
+  );
   const siteListings = listings.filter((listing) =>
     site.site_type === "brokerage"
       ? listing.brokerage_id === site.owner_brokerage_id
-      : listing.assigned_agent_person_id === site.owner_person_id,
+      : listing.assigned_agent_person_id === site.owner_person_id || sharedListingIds.has(listing.listing_id),
   );
   return (
     <section className="site-builder-workspace">

@@ -45,7 +45,7 @@ export default async function SiteBuilderPage({
       (canEditBrokerageWebsite &&
         site.owner_brokerage_id === context.membership?.brokerage_id),
   );
-  const [testimonialResult, assetResult, listingResult, parishResult] =
+  const [testimonialResult, assetResult, listingResult, shareResult, parishResult] =
     sites.length
       ? await Promise.all([
           context.supabase
@@ -74,12 +74,16 @@ export default async function SiteBuilderPage({
             )
             .order("published_at", { ascending: false }),
           context.supabase
+            .from("listing_shares")
+            .select("listing_id,displaying_agent_person_id")
+            .eq("status", "active"),
+          context.supabase
             .from("administrative_areas")
             .select("id,name")
             .eq("area_type", "parish")
             .order("name"),
         ])
-      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
+      : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }];
   const testimonials = testimonialResult.data ?? [];
   const assets = assetResult.data ?? [];
   return (
@@ -105,8 +109,9 @@ export default async function SiteBuilderPage({
           <SiteBuilderTabs
             sites={sites}
             testimonials={testimonials}
-            assets={assets}
-            listings={listingResult.data ?? []}
+          assets={assets}
+          listings={listingResult.data ?? []}
+          shares={shareResult.data ?? []}
             parishes={parishResult.data ?? []}
             canCreateListings={access.isAgent}
             initialTab={query.tab}
