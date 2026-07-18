@@ -31,12 +31,12 @@ const resolved = requestedAccounts.map((account) => {
     const values = [normal(candidate.display_name), normal(candidate.primary_email), normal(users.find((user) => user.id === candidate.auth_user_id)?.email)];
     return values.some(account.matches);
   });
-  if (!person?.auth_user_id) {
+  if (!person) {
     const available = people.filter((candidate) => candidate.auth_user_id).map((candidate) => `${candidate.display_name} <${candidate.primary_email ?? "no email"}>`).slice(0, 50).join(", ");
     throw new Error(`Could not identify the existing ${account.label} test account. Available test identities: ${available}`);
   }
-  const user = users.find((candidate) => candidate.id === person.auth_user_id);
-  if (!user) throw new Error(`The ${account.label} account has no matching Supabase Auth user.`);
+  const user = users.find((candidate) => candidate.id === person.auth_user_id || normal(candidate.email) === normal(person.primary_email));
+  if (!user) throw new Error(`The ${account.label} profile has no matching Supabase Auth user.`);
   const conflicting = users.find((candidate) => normal(candidate.email) === account.email && candidate.id !== user.id);
   if (conflicting) throw new Error(`${account.email} is already used by a different account.`);
   return { ...account, person, user };
@@ -115,7 +115,7 @@ if (!existingAdminRole) {
 for (const account of resolved) {
   const { error: authUpdateError } = await supabase.auth.admin.updateUserById(account.user.id, { email: account.email, email_confirm: true, password });
   if (authUpdateError) throw authUpdateError;
-  const { error: personUpdateError } = await supabase.from("people").update({ primary_email: account.email }).eq("id", account.person.id);
+  const { error: personUpdateError } = await supabase.from("people").update({ auth_user_id: account.user.id, primary_email: account.email }).eq("id", account.person.id);
   if (personUpdateError) throw personUpdateError;
 }
 
