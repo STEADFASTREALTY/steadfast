@@ -59,19 +59,25 @@ export async function saveSiteBuilderAction(formData: FormData) {
 
 export async function uploadSiteAssetAction(formData: FormData) {
   const siteId = z.string().uuid().safeParse(text(formData, "siteId"));
-  const placement = z.enum(["profile_photo", "brokerage_logo"]).safeParse(text(formData, "placement"));
+  const placement = z.enum(["profile_photo", "brokerage_logo", "hero_background"]).safeParse(text(formData, "placement"));
   const file = formData.get("asset");
   if (!siteId.success || !placement.success || !(file instanceof File) || file.size < 1 || file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
     redirect("/workspace/site?error=Choose+a+JPEG,+PNG,+or+WebP+image+under+5+MB.");
   }
   const { admin, site } = await requireOwnedSite(siteId.data);
+  if (placement.data === "hero_background" && site.site_type !== "agent") redirect("/workspace/site?error=Only+agent+websites+can+use+a+hero+background+image.");
   let objectPath: string | null = null;
   let previous: { id: string; object_path: string }[] = [];
   try {
     const image = sharp(Buffer.from(await file.arrayBuffer()), { animated: false }).rotate();
     const metadata = await image.metadata();
     if (!metadata.width || !metadata.height || metadata.width < 128 || metadata.height < 128 || metadata.width * metadata.height > 40_000_000) throw new Error("invalid dimensions");
-    const bytes = await image.resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true }).webp({ quality: 84 }).toBuffer();
+    const isHeroBackground = placement.data === "hero_background";
+    if (isHeroBackground && (metadata.width < 1500 || metadata.height < 500 || metadata.width / metadata.height < 2.5 || metadata.width / metadata.height > 3.5)) throw new Error("invalid hero dimensions");
+    const bytes = await (isHeroBackground
+      ? image.resize({ width: 2400, height: 800, fit: "cover", position: "attention" })
+      : image.resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true })
+    ).webp({ quality: 84 }).toBuffer();
     const output = await sharp(bytes).metadata();
     const assetId = randomUUID(); const pathPlacement = placement.data.replaceAll("_", "-");
     objectPath = `${site.id}/${pathPlacement}/${assetId}.webp`;
@@ -95,10 +101,12 @@ export async function uploadSiteAssetAction(formData: FormData) {
     }
   } catch {
     if (objectPath) await admin.storage.from("professional-site-assets").remove([objectPath]);
-    redirect("/workspace/site?error=The+image+could+not+be+prepared.+Use+a+clear+still+photograph+or+logo.");
+    redirect(placement.data === "hero_background"
+      ? "/workspace/site?error=Use+a+wide+hero+image+at+least+1500+x+500+pixels+(recommended:+2400+x+800+pixels)."
+      : "/workspace/site?error=The+image+could+not+be+prepared.+Use+a+clear+still+photograph+or+logo.");
   }
   revalidatePath(`/agents/${site.slug}`); revalidatePath(`/brokerages/${site.slug}`); revalidatePath("/workspace/site");
-  redirect("/workspace/site?notice=Your+website+image+was+prepared+and+saved.");
+  redirect(`/workspace/site?notice=${encodeURIComponent(placement.data === "hero_background" ? "Your agent website background image was prepared and saved." : "Your website image was prepared and saved.")}`);
 }
 
 export async function createSiteTestimonialAction(formData: FormData) {
