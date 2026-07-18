@@ -572,7 +572,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .wizard-section { display: grid; gap: 38px; grid-template-columns: 245px minmax(0, 1fr); padding: 42px; }
 .wizard-section + .wizard-section { border-top: 1px solid var(--line); }
 .wizard-step { align-items: flex-start; display: flex; gap: 16px; }
-.wizard-step > span { align-items: center; background: var(--lime); border-radius: 50%; display: flex; flex: 0 0 auto; font-family: Georgia, serif; font-size: 15px; height: 38px; justify-content: center; width: 38px; }
+.wizard-step > span { align-items: center; background: var(--lime); border-radius: 50%; display: flex; flex: 0 0 auto; font-family: Georgia, serif; font-size: 15px !important; font-weight: 700; height: 38px; justify-content: center; line-height: 1; width: 38px; }
 .wizard-step strong { display: block; font-family: Georgia, serif; font-size: 21px; font-weight: 400; line-height: 1.15; }
 .wizard-step p { color: #71807c; font-size: 15px; line-height: 1.55; margin: 9px 0 0; }
 .wizard-fields { display: grid; gap: 20px; }
@@ -580,6 +580,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .wizard-fields .full { grid-column: 1 / -1; }
 .wizard-fields label { display: flex; flex-direction: column; gap: 8px; }
 .wizard-fields label > span, .visibility-options legend { color: #667572; font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.wizard-fields.two > label:not(.full) > span { display: flex; min-height: 38px; }
 .wizard-fields input, .wizard-fields select, .wizard-fields textarea { background: #fff; border: 1px solid var(--line); border-radius: 2px; color: var(--ink); min-height: 50px; outline: 0; padding: 0 15px; width: 100%; }
 .wizard-fields textarea { line-height: 1.6; min-height: 150px; padding-bottom: 13px; padding-top: 13px; resize: vertical; }
 .wizard-fields input:focus, .wizard-fields select:focus, .wizard-fields textarea:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(216,167,46,.28); }
