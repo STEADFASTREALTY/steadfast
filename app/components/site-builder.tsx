@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { createSiteTestimonialAction, removeSiteTestimonialAction, saveSiteBuilderAction, uploadSiteAssetAction } from "@/app/actions/site-builder";
+import { createSiteTestimonialAction, removeSiteTestimonialAction, saveSiteBuilderAction, updateSiteTestimonialAction, uploadSiteAssetAction } from "@/app/actions/site-builder";
 import { compressListingImage } from "@/lib/media/client-image-compression";
 
 const labels: Record<string, string> = { hero: "Hero", about: "About", search: "Property search", listings: "Listings", testimonials: "Testimonials", contact: "Contact" };
 const allSections = ["hero", "about", "search", "listings", "testimonials", "contact"];
 type Site = { id: string; site_type: string; display_name: string; slug: string; theme: Record<string, unknown> | null; layout: Record<string, unknown> | null; content: Record<string, unknown> | null };
 type SiteTheme = { primary: string; accent: string; background: string; text: string };
-type Testimonial = { id: string; author_name: string; author_context: string | null; quote: string; asset_id: string | null; position: number };
+type Testimonial = { id: string; author_name: string; author_context: string | null; quote: string; asset_id: string | null; position: number; created_at: string };
 const themeFields: { key: keyof SiteTheme; label: string; help: string }[] = [
   { key: "primary", label: "Hero background", help: "The large banner at the top of your public website." },
   { key: "accent", label: "Accent color", help: "Buttons, highlights, and small premium details." },
@@ -34,6 +34,8 @@ export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: 
   const [imageError, setImageError] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
   const [testimonialFileName, setTestimonialFileName] = useState("");
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [editTestimonialFileName, setEditTestimonialFileName] = useState("");
   const editor = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
   useEffect(() => { if (editor.current && !initialized.current) { editor.current.innerHTML = aboutHtml; initialized.current = true; } }, [aboutHtml]);
@@ -51,7 +53,7 @@ export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: 
     setAboutHtml(editor.current?.innerHTML ?? "");
   };
   const compress = async (event: React.ChangeEvent<HTMLInputElement>) => { const selected = event.target.files?.[0]; if (!selected) return; try { const compressed = await compressListingImage(selected); const transfer = new DataTransfer(); transfer.items.add(compressed); event.target.files = transfer.files; setSelectedFileName(selected.name); setImageError(""); } catch { event.target.value = ""; setSelectedFileName(""); setImageError("Choose a clear still image at least 300 pixels wide and high."); } };
-  const compressTestimonial = async (event: React.ChangeEvent<HTMLInputElement>) => { const selected = event.target.files?.[0]; if (!selected) return; try { const compressed = await compressListingImage(selected); const transfer = new DataTransfer(); transfer.items.add(compressed); event.target.files = transfer.files; setTestimonialFileName(selected.name); setImageError(""); } catch { event.target.value = ""; setTestimonialFileName(""); setImageError("Choose a clear still image at least 300 pixels wide and high."); } };
+  const compressTestimonial = async (event: React.ChangeEvent<HTMLInputElement>, setFileName: (value: string) => void) => { const selected = event.target.files?.[0]; if (!selected) return; try { const compressed = await compressListingImage(selected); const transfer = new DataTransfer(); transfer.items.add(compressed); event.target.files = transfer.files; setFileName(selected.name); setImageError(""); } catch { event.target.value = ""; setFileName(""); setImageError("Choose a clear still image at least 300 pixels wide and high."); } };
   return <section className="account-card site-builder-card">
     <div className="card-heading"><span>{site.site_type === "brokerage" ? "Broker's website" : "Agent's website"}</span><h2>{site.display_name}</h2></div>
     <p>Arrange sections, write your story, and choose a color system. Changes are saved only when you confirm below.</p>
@@ -70,10 +72,10 @@ export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: 
         <input type="hidden" name="siteId" value={site.id} />
         <label className="full"><span>Client name</span><input name="authorName" required maxLength={120} /></label>
         <label className="full"><span>Testimonial</span><textarea name="quote" required minLength={10} maxLength={1200} rows={4} placeholder="Write the client’s testimonial exactly as approved for public display." /></label>
-        <label className="site-file-picker full"><span>Optional client photo</span><input className="site-file-input" name="testimonialAsset" type="file" accept="image/jpeg,image/png,image/webp" onChange={compressTestimonial} /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">{testimonialFileName || "No file chosen"}</span></span></label>
+        <label className="site-file-picker full"><span>Optional client photo</span><input className="site-file-input" name="testimonialAsset" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void compressTestimonial(event, setTestimonialFileName)} /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">{testimonialFileName || "No file chosen"}</span></span></label>
         <button className="solid-button full" type="submit">Add testimonial</button>
       </form>
-      {testimonials.length ? <div className="testimonial-records">{testimonials.map((testimonial) => <article key={testimonial.id}><div><strong>{testimonial.author_name}</strong>{testimonial.author_context ? <span>{testimonial.author_context}</span> : null}<p>“{testimonial.quote}”</p></div><form action={removeSiteTestimonialAction} data-prompt-title="Remove this testimonial?" data-prompt-message="It will no longer appear on the public website." data-prompt-confirm="Remove testimonial" data-prompt-variant="danger"><input type="hidden" name="siteId" value={site.id} /><input type="hidden" name="testimonialId" value={testimonial.id} /><button className="outline-dark-button" type="submit">Remove</button></form></article>)}</div> : null}
+      {testimonials.length ? <div className="testimonial-records"><table><thead><tr><th>Client name</th><th>Date</th><th>Image</th><th><span className="sr-only">Edit</span></th><th><span className="sr-only">Delete</span></th></tr></thead><tbody>{testimonials.map((testimonial) => <tr key={testimonial.id}><td>{testimonial.author_name}</td><td>{new Intl.DateTimeFormat("en-JM", { day: "numeric", month: "short", year: "numeric" }).format(new Date(testimonial.created_at))}</td><td><span className={`image-status ${testimonial.asset_id ? "has-image" : "no-image"}`} title={testimonial.asset_id ? "Image uploaded" : "No image uploaded"} aria-label={testimonial.asset_id ? "Image uploaded" : "No image uploaded"}>{testimonial.asset_id ? "✓" : "×"}</span></td><td><button className="icon-action" type="button" aria-label={`Edit testimonial from ${testimonial.author_name}`} title="Edit testimonial" onClick={() => { setEditingTestimonial(testimonial); setEditTestimonialFileName(""); }}>✎</button></td><td><form action={removeSiteTestimonialAction} data-prompt-title="Remove this testimonial?" data-prompt-message="It will no longer appear on the public website." data-prompt-confirm="Delete testimonial" data-prompt-variant="danger"><input type="hidden" name="siteId" value={site.id} /><input type="hidden" name="testimonialId" value={testimonial.id} /><button className="icon-action delete" type="submit" aria-label={`Delete testimonial from ${testimonial.author_name}`} title="Delete testimonial">⌫</button></form></td></tr>)}</tbody></table></div> : null}
     </section>
     <section className="site-asset-section">
       <div className="card-heading"><span>Professional presence</span><h2>{site.site_type === "brokerage" ? "Brokerage logo" : "Professional photo"}</h2></div>
@@ -84,5 +86,6 @@ export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: 
       </form>
     </section>
     <button className="solid-button site-builder-save" form={`site-builder-save-${site.id}`} type="submit">Save website</button>
+    {editingTestimonial ? <div className="testimonial-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditingTestimonial(null); }}><section className="testimonial-modal" role="dialog" aria-modal="true" aria-labelledby="edit-testimonial-title"><div className="card-heading"><span>Client story</span><h2 id="edit-testimonial-title">Edit testimonial</h2></div><form action={updateSiteTestimonialAction} className="stack-form testimonial-form" data-prompt-title="Save testimonial changes?" data-prompt-message="The revised client story will update on the public website." data-prompt-confirm="Save changes"><input type="hidden" name="siteId" value={site.id} /><input type="hidden" name="testimonialId" value={editingTestimonial.id} /><label className="full"><span>Client name</span><input name="authorName" required maxLength={120} defaultValue={editingTestimonial.author_name} /></label><label className="full"><span>Testimonial</span><textarea name="quote" required minLength={10} maxLength={1200} rows={4} defaultValue={editingTestimonial.quote} /></label><label className="site-file-picker full"><span>Replace client photo (optional)</span><input className="site-file-input" name="testimonialAsset" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void compressTestimonial(event, setEditTestimonialFileName)} /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">{editTestimonialFileName || (editingTestimonial.asset_id ? "Current image kept" : "No file chosen")}</span></span></label><div className="testimonial-modal-actions full"><button className="outline-dark-button" type="button" onClick={() => setEditingTestimonial(null)}>Cancel</button><button className="solid-button" type="submit">Save</button></div></form></section></div> : null}
   </section>;
 }
