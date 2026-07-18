@@ -10,6 +10,7 @@ const allSections = ["hero", "about", "search", "listings", "testimonials", "con
 type Site = { id: string; site_type: string; display_name: string; headline: string | null; slug: string; theme: Record<string, unknown> | null; layout: Record<string, unknown> | null; content: Record<string, unknown> | null };
 type SiteTheme = { primary: string; accent: string; background: string; text: string };
 type Testimonial = { id: string; author_name: string; author_context: string | null; quote: string; asset_id: string | null; position: number; created_at: string };
+type SiteAsset = { id: string; site_id: string; placement: string };
 const themeFields: { key: keyof SiteTheme; label: string; help: string }[] = [
   { key: "primary", label: "Hero background", help: "The large banner at the top of your public website." },
   { key: "accent", label: "Accent color", help: "Buttons, highlights, and small premium details." },
@@ -31,7 +32,7 @@ function AddTestimonialButton() {
   </button>;
 }
 
-export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: Testimonial[] }) {
+export function SiteBuilder({ site, testimonials, assets }: { site: Site; testimonials: Testimonial[]; assets: SiteAsset[] }) {
   const savedOrder = Array.isArray(site.layout?.sectionOrder) ? site.layout.sectionOrder.filter((value): value is string => allSections.includes(String(value))) : allSections;
   const [order, setOrder] = useState(savedOrder.length === allSections.length ? savedOrder : allSections);
   const [headline, setHeadline] = useState(String(site.headline ?? ""));
@@ -45,6 +46,7 @@ export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: 
   const [testimonialFileName, setTestimonialFileName] = useState("");
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [editTestimonialFileName, setEditTestimonialFileName] = useState("");
+  const assetFor = (placement: string) => assets.find((asset) => asset.placement === placement);
   const editor = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
   useEffect(() => { if (editor.current && !initialized.current) { editor.current.innerHTML = aboutHtml; initialized.current = true; } }, [aboutHtml]);
@@ -75,7 +77,7 @@ export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: 
       <label><span>Public contact email</span><input type="email" value={contactEmail} onChange={(event) => setContactEmail(event.currentTarget.value)} /></label>
       <label><span>Public phone</span><input maxLength={40} value={contactPhone} onChange={(event) => setContactPhone(event.currentTarget.value)} /></label><label><span>Career strengths</span><input maxLength={800} value={strengths} onChange={(event) => setStrengths(event.currentTarget.value)} /></label>
     </form>
-    {site.site_type === "agent" ? <section className="site-asset-section agent-hero-background-upload"><div className="card-heading"><span>Agent website banner</span><h2>Ocean-view background</h2></div><p>The included Jamaica ocean view is the default. To use your own, upload a wide JPEG, PNG, or WebP image at <strong>2400 × 800 pixels</strong> (3:1). Files must be at least 1500 × 500 pixels and under 5 MB.</p><form action={uploadSiteAssetAction} className="stack-form site-asset-upload" data-prompt-title="Save this agent website background?" data-prompt-message="It will be compressed to WebP, stripped of metadata, and replace the default ocean-view banner on your agent website." data-prompt-confirm="Save background image"><input type="hidden" name="siteId" value={site.id} /><input type="hidden" name="placement" value="hero_background" /><label className="site-file-picker"><span>Background image</span><input className="site-file-input" name="asset" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void compressTestimonial(event, setHeroFileName)} required /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">{heroFileName || "No file chosen"}</span></span></label><ImageUploadButton /></form></section> : null}
+    {site.site_type === "agent" ? <section className="site-asset-section agent-hero-background-upload"><div className="card-heading"><span>Agent website banner</span><h2>Ocean-view background</h2></div><p>The included Jamaica ocean view is the default. To use your own, upload a wide JPEG, PNG, or WebP image at <strong>2400 × 800 pixels</strong> (3:1). Files must be at least 1500 × 500 pixels and under 5 MB.</p>{assetFor("hero_background") ? <div className="site-asset-preview banner-preview"><img src={`/media/sites/${assetFor("hero_background")!.id}/display.webp`} alt="Current agent website background" /></div> : <div className="site-asset-preview banner-preview default-banner-preview"><span>Default ocean-view banner in use</span></div>}<form action={uploadSiteAssetAction} className="stack-form site-asset-upload" data-prompt-title="Save this agent website background?" data-prompt-message="It will be compressed to WebP, stripped of metadata, and replace the default ocean-view banner on your agent website." data-prompt-confirm="Save background image"><input type="hidden" name="siteId" value={site.id} /><input type="hidden" name="placement" value="hero_background" /><label className="site-file-picker"><span>Background image</span><input className="site-file-input" name="asset" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void compressTestimonial(event, setHeroFileName)} required /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">{heroFileName || "No file chosen"}</span></span></label><ImageUploadButton /></form></section> : null}
     <section className="testimonial-builder">
       <div className="card-heading"><span>Client stories</span><h2>Testimonials</h2></div>
       <p>Add up to ten client testimonials. Each one rotates on the public {site.site_type === "brokerage" ? "brokerage" : "agent"} website.</p>
@@ -91,6 +93,7 @@ export function SiteBuilder({ site, testimonials }: { site: Site; testimonials: 
     <section className="site-asset-section">
       <div className="card-heading"><span>Professional presence</span><h2>{site.site_type === "brokerage" ? "Brokerage logo" : "Professional photo"}</h2></div>
       <p>Choose the image visitors see on your public {site.site_type === "brokerage" ? "brokerage" : "agent"} website.</p>
+      {assetFor(site.site_type === "brokerage" ? "brokerage_logo" : "profile_photo") ? <div className="site-asset-preview"><img src={`/media/sites/${assetFor(site.site_type === "brokerage" ? "brokerage_logo" : "profile_photo")!.id}/display.webp`} alt={`Current ${site.site_type === "brokerage" ? "brokerage logo" : "professional photo"}`} /></div> : <div className="site-asset-preview empty"><span>No image uploaded yet</span></div>}
       <form action={uploadSiteAssetAction} className="stack-form site-asset-upload" data-prompt-title="Save this website image?" data-prompt-message="It will be compressed to WebP, stripped of metadata, stored privately, and displayed only through SteadFast." data-prompt-confirm="Save image">
         <input type="hidden" name="siteId" value={site.id} /><input type="hidden" name="placement" value={site.site_type === "brokerage" ? "brokerage_logo" : "profile_photo"} />
         <label className="site-file-picker"><span>Choose image</span><input className="site-file-input" name="asset" type="file" accept="image/jpeg,image/png,image/webp" onChange={compress} required /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">{selectedFileName || "No file chosen"}</span></span></label>{imageError ? <p className="form-error" role="alert">{imageError}</p> : null}<ImageUploadButton />
