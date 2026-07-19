@@ -1,6 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function requireAccount(nextPath = "/account") {
@@ -24,13 +25,14 @@ export async function requireAccount(nextPath = "/account") {
 
 export async function getActiveMembershipContext(nextPath = "/account") {
   const account = await requireAccount(nextPath);
+  const admin = createAdminClient();
   const [{ data: memberships }, { data: internalRoles }] = await Promise.all([
     account.supabase
       .from("brokerage_memberships")
       .select("id, brokerage_id, status, starts_at, brokerages(id, display_name, slug, status)")
       .eq("status", "active")
       .limit(1),
-    account.supabase
+    admin
       .from("person_platform_roles")
       .select("role_key")
       .eq("person_id", account.person.id)
@@ -51,12 +53,12 @@ export async function getActiveMembershipContext(nextPath = "/account") {
   }
 
   const [{ data: roles }, { data: permissions }] = await Promise.all([
-    account.supabase
+    admin
       .from("membership_roles")
       .select("role_key")
       .eq("membership_id", membership.id)
       .is("ends_at", null),
-    account.supabase
+    admin
       .from("membership_permissions")
       .select("permission_key, effect")
       .eq("membership_id", membership.id)
