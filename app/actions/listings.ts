@@ -71,7 +71,7 @@ function toCommandPayload(data: z.infer<typeof createListingDraftSchema>) {
   };
 }
 
-export type CreateListingDraftState = { error?: string };
+export type CreateListingDraftState = { error?: string; listingId?: string; returnTo?: string };
 
 export async function createListingDraftAction(
   _previousState: CreateListingDraftState,
@@ -100,7 +100,7 @@ export async function createListingDraftAction(
   revalidatePath("/workspace");
   revalidatePath("/workspace/listings");
   revalidatePath("/workspace/site");
-  redirect(`${returnTo}?notice=Private+draft+created.+Only+you+and+authorized+brokerage+reviewers+can+see+it.`);
+  return { listingId, returnTo };
 }
 
 export type SaveListingDraftResult =

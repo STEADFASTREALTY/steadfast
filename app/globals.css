@@ -625,6 +625,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .listing-empty p { color: #657572; font-size: 15px; line-height: 1.65; max-width: 600px; }
 .listing-empty .solid-button { margin-top: 18px; }
 .listing-media-card { background: var(--paper); border: 1px solid var(--line); border-top: 0; padding: 42px; }
+.create-listing-media-card { border-top: 1px solid var(--line); padding: 28px; }
 .listing-media-heading { align-items: start; display: flex; gap: 28px; justify-content: space-between; }
 .listing-media-heading span { color: #60716d; font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .listing-media-heading h2 { font-family: Georgia, serif; font-size: 30px; font-weight: 400; margin: 8px 0; }

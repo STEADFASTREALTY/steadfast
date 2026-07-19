@@ -1,19 +1,98 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { createListingDraftAction, type CreateListingDraftState } from "@/app/actions/listings";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  authorizeListingMediaUploadAction,
+  createListingDraftAction,
+  finalizeListingMediaUploadAction,
+  type CreateListingDraftState,
+} from "@/app/actions/listings";
+import { MAX_IMAGE_BYTES, MAX_LISTING_IMAGES } from "@/lib/media/constants";
+import { compressListingImage } from "@/lib/media/client-image-compression";
+import { createClient } from "@/lib/supabase/client";
 
 type Parish = { id: string; name: string };
+type UploadState = { kind: "idle" | "uploading" | "error"; message: string };
+
+const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; returnTo?: string }) {
+  const router = useRouter();
+  const uploadStartedFor = useRef<string | null>(null);
   const [purpose, setPurpose] = useState("sale");
   const [propertyType, setPropertyType] = useState("residential");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [uploadState, setUploadState] = useState<UploadState>({ kind: "idle", message: "No images selected yet." });
   const [state, formAction, pending] = useActionState<CreateListingDraftState, FormData>(createListingDraftAction, {});
   const showRooms = propertyType === "residential" || propertyType === "development";
+  const uploading = uploadState.kind === "uploading";
+
+  function chooseImages(files: FileList | null) {
+    const images = Array.from(files ?? []);
+    if (!images.length) return;
+    if (images.length > MAX_LISTING_IMAGES) {
+      setSelectedImages([]);
+      setUploadState({ kind: "error", message: `Choose up to ${MAX_LISTING_IMAGES} images for one listing.` });
+      return;
+    }
+    if (images.some((file) => !ACCEPTED_TYPES.has(file.type) || file.size < 1 || file.size > MAX_IMAGE_BYTES)) {
+      setSelectedImages([]);
+      setUploadState({ kind: "error", message: "Choose JPEG, PNG, or WebP images no larger than 15 MB each." });
+      return;
+    }
+    setSelectedImages(images);
+    setUploadState({ kind: "idle", message: `${images.length} image${images.length === 1 ? "" : "s"} ready. They will be compressed to full-HD before upload.` });
+  }
+
+  useEffect(() => {
+    if (!state.listingId || uploadStartedFor.current === state.listingId) return;
+    uploadStartedFor.current = state.listingId;
+
+    const destination = state.returnTo || `/workspace/listings/${state.listingId}`;
+    if (!selectedImages.length) {
+      router.push(`${destination}?notice=Private+draft+created.`);
+      return;
+    }
+
+    void (async () => {
+      const supabase = createClient();
+      let completed = 0;
+      for (const sourceFile of selectedImages) {
+        setUploadState({ kind: "uploading", message: `Compressing image ${completed + 1} of ${selectedImages.length} to full-HD…` });
+        let image: File;
+        try {
+          image = await compressListingImage(sourceFile);
+        } catch {
+          router.push(`/workspace/listings/${state.listingId}?error=An+image+could+not+be+compressed.+Choose+a+different+file.`);
+          return;
+        }
+        setUploadState({ kind: "uploading", message: `Securely uploading image ${completed + 1} of ${selectedImages.length}…` });
+        const authorization = await authorizeListingMediaUploadAction({ listingId: state.listingId, filename: image.name, mimeType: image.type, byteSize: image.size });
+        if (authorization.status !== "authorized") {
+          router.push(`/workspace/listings/${state.listingId}?error=${encodeURIComponent(authorization.error)}`);
+          return;
+        }
+        const { error } = await supabase.storage.from("listing-originals").uploadToSignedUrl(authorization.path, authorization.token, image, { contentType: image.type, cacheControl: "0" });
+        if (error) {
+          router.push(`/workspace/listings/${state.listingId}?error=An+image+did+not+finish+uploading.+Please+choose+it+again.`);
+          return;
+        }
+        const finalized = await finalizeListingMediaUploadAction(authorization.mediaId);
+        if (finalized.status !== "ready") {
+          router.push(`/workspace/listings/${state.listingId}?error=${encodeURIComponent(finalized.error)}`);
+          return;
+        }
+        completed += 1;
+      }
+      router.push(`${destination}?notice=${encodeURIComponent(`Private draft created with ${completed} validated image${completed === 1 ? "" : "s"}.`)}`);
+    })();
+  }, [router, selectedImages, state.listingId, state.returnTo]);
 
   return (
-    <form action={formAction} className="listing-wizard" data-prompt-title="Create this private draft?" data-prompt-message="SteadFast will save these details inside your brokerage workspace. You can continue editing before submitting it for approval." data-prompt-confirm="Create draft">
-      {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}<section className="wizard-section">
+    <form action={formAction} className="listing-wizard" data-prompt-title="Create this private draft?" data-prompt-message="SteadFast will save the draft, compress selected property photos to full-HD, strip metadata, and securely upload them for brokerage review." data-prompt-confirm="Create draft">
+      {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
+      <section className="wizard-section">
         <div className="wizard-step"><span>01</span><div><strong>What are you marketing?</strong><p>Start with the offer and property type.</p></div></div>
         <div className="wizard-fields two">
           <label><span>Listing purpose</span><select name="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)}><option value="sale">For sale</option><option value="long_term_rent">Long-term rental</option></select></label>
@@ -48,7 +127,22 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
       </section>
 
       <section className="wizard-section">
-        <div className="wizard-step"><span>04</span><div><strong>Choose the intended audience.</strong><p>This is only a request. The draft cannot appear publicly before brokerage approval.</p></div></div>
+        <div className="wizard-step"><span>04</span><div><strong>Add property photos.</strong><p>Choose up to 30 still images. They are compressed before the secure upload begins.</p></div></div>
+        <div className={`listing-media-card create-listing-media-card upload-${uploadState.kind}`}>
+          <div className="listing-media-heading"><div><span>Property images</span><h2>Ready for review</h2><p>JPEG, PNG, or WebP only. Each source file can be up to 15 MB and is converted to a full-HD WebP image before upload.</p></div><strong>{selectedImages.length} / {MAX_LISTING_IMAGES}</strong></div>
+          <div className="listing-media-upload">
+            <label className="solid-button" aria-disabled={pending || uploading}>
+              {uploading ? "Preparing images…" : "Choose property images"}
+              <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={pending || uploading} onChange={(event) => chooseImages(event.target.files)} />
+            </label>
+            <div><strong>Up to 30 images</strong><p>Landscape photos are capped at 1920 × 1080. Portrait photos use the equivalent rotated limit.</p></div>
+            <p className="listing-media-status" role={uploadState.kind === "error" ? "alert" : "status"}>{uploadState.message}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="wizard-section">
+        <div className="wizard-step"><span>05</span><div><strong>Choose the intended audience.</strong><p>This is only a request. The draft cannot appear publicly before brokerage approval.</p></div></div>
         <fieldset className="visibility-options"><legend>Requested visibility</legend>
           <label><input type="radio" name="visibility" value="public" defaultChecked /><span><strong>Public</strong><small>Eligible for public search and websites after approval.</small></span></label>
           <label><input type="radio" name="visibility" value="professional_network" /><span><strong>Agents only</strong><small>Visible to all approved agents on CanadaSAP after approval. It will not appear in public search or public websites.</small></span></label>
@@ -56,7 +150,7 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
         </fieldset>
       </section>
 
-      <div className="wizard-submit"><div><strong>Saved as a private draft</strong><p>You will review and submit it to your broker in a later step.</p>{state.error ? <p className="inline-form-error" role="alert">{state.error}</p> : null}</div><button className="solid-button" type="submit" disabled={pending}>{pending ? "Creating draft…" : "Create private draft"}</button></div>
+      <div className="wizard-submit"><div><strong>Saved as a private draft</strong><p>{selectedImages.length ? "Selected images will be compressed and securely attached before the draft opens." : "You will review and submit it to your broker in a later step."}</p>{state.error ? <p className="inline-form-error" role="alert">{state.error}</p> : null}</div><button className="solid-button" type="submit" disabled={pending || uploading || uploadState.kind === "error"}>{pending ? "Creating draft…" : uploading ? "Uploading images…" : selectedImages.length ? "Create draft and upload images" : "Create private draft"}</button></div>
     </form>
   );
 }

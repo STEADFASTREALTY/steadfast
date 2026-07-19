@@ -4,7 +4,11 @@ export async function compressListingImage(file: File): Promise<File> {
     if (bitmap.width < 300 || bitmap.height < 300 || bitmap.width > 12000 || bitmap.height > 12000 || bitmap.width * bitmap.height > 80_000_000) {
       throw new Error("Image dimensions are outside the supported range.");
     }
-    const scale = Math.min(1, 2400 / Math.max(bitmap.width, bitmap.height));
+    // Preserve enough detail for a full-HD listing gallery while avoiding
+    // unnecessarily large uploads. Portrait photos use the rotated limit.
+    const maxWidth = bitmap.width >= bitmap.height ? 1920 : 1080;
+    const maxHeight = bitmap.width >= bitmap.height ? 1080 : 1920;
+    const scale = Math.min(1, maxWidth / bitmap.width, maxHeight / bitmap.height);
     const width = Math.max(1, Math.round(bitmap.width * scale));
     const height = Math.max(1, Math.round(bitmap.height * scale));
     const canvas = document.createElement("canvas");

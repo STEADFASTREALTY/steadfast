@@ -132,7 +132,7 @@ export function ListingMediaUploader({
             onChange={(event) => void uploadSelected(event.target.files)}
           />
         </label>
-        <div><strong>JPEG, PNG, or WebP</strong><p>Up to 15 MB each · 10 at a time · still images only</p></div>
+        <div><strong>JPEG, PNG, or WebP</strong><p>Up to 15 MB each · 30 at a time · compressed to full-HD before upload</p></div>
         <p className="listing-media-status" role={state.kind === "error" ? "alert" : "status"}>{state.message}</p>
       </div>
     </section>
