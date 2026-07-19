@@ -18,6 +18,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const metadata: Metadata = { title: "Listing", description: "Edit, review, and publish a brokerage listing record.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 const ACTIVITY_PAGE_SIZE = 5;
+const REVIEW_PAGE_SIZE = 5;
 
 type DraftVersion = {
   id: string;
@@ -53,7 +54,7 @@ function activityLabel(activity: ListingActivity) {
   return activity.action.replace("listing.", "Listing ").replaceAll("_", " ");
 }
 
-export default async function ListingDraftPage({ params, searchParams }: { params: Promise<{ listingId: string }>; searchParams: Promise<{ notice?: string; error?: string; activityPage?: string }> }) {
+export default async function ListingDraftPage({ params, searchParams }: { params: Promise<{ listingId: string }>; searchParams: Promise<{ notice?: string; error?: string; activityPage?: string; reviewPage?: string }> }) {
   const route = await params;
   const query = await searchParams;
   if (!z.string().uuid().safeParse(route.listingId).success) redirect("/access-denied?reason=listing-record");
@@ -118,7 +119,15 @@ export default async function ListingDraftPage({ params, searchParams }: { param
     .select("listing_version_id,reviewer_person_id,decision,comment,is_self_approval,decided_at")
     .in("listing_version_id", versions.map((item) => item.id))
     .order("decided_at", { ascending: false });
-  const reviews = (reviewRows ?? []) as ReviewRecord[];
+  const allReviews = (reviewRows ?? []) as ReviewRecord[];
+  const requestedReviewPage = Number.parseInt(query.reviewPage ?? "1", 10);
+  const reviewPageCount = Math.max(1, Math.ceil(allReviews.length / REVIEW_PAGE_SIZE));
+  const currentReviewPage = Math.min(
+    Math.max(Number.isFinite(requestedReviewPage) ? requestedReviewPage : 1, 1),
+    reviewPageCount,
+  );
+  const reviewStart = (currentReviewPage - 1) * REVIEW_PAGE_SIZE;
+  const reviews = allReviews.slice(reviewStart, reviewStart + REVIEW_PAGE_SIZE);
   const { data: activityRows } = await admin.from("audit_events")
     .select("action,actor_person_id,reason,after_summary,occurred_at")
     .eq("target_type", "listing")
@@ -134,7 +143,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   const activityStart = (currentActivityPage - 1) * ACTIVITY_PAGE_SIZE;
   const activities = allActivities.slice(activityStart, activityStart + ACTIVITY_PAGE_SIZE);
   const relatedPersonIds = [...new Set([
-    ...reviews.map((review) => review.reviewer_person_id),
+    ...allReviews.map((review) => review.reviewer_person_id),
     ...allActivities.flatMap((activity) => activity.actor_person_id ? [activity.actor_person_id] : []),
   ])];
   const { data: relatedPeople } = relatedPersonIds.length
@@ -215,11 +224,15 @@ export default async function ListingDraftPage({ params, searchParams }: { param
         </figure>)}</div></section> : null}
         {listing.lifecycle_state === "pending_initial_approval" && access.canReviewListings ? <ReviewDecisionForm listingId={listing.id} listingVersionId={version.id} /> : <section className="locked-listing-card"><span>{listing.lifecycle_state === "pending_initial_approval" ? "Brokerage review pending" : version?.revision_state.replaceAll("_", " ")}</span><h2>{listing.lifecycle_state === "pending_initial_approval" ? "This version is awaiting a brokerage decision." : "This listing version is retained as reviewed."}</h2><p>{listing.lifecycle_state === "pending_initial_approval" ? "The assigned agent cannot change the submitted snapshot. An authorized reviewer can approve it, request corrections, or reject it." : "Approved, returned, and rejected submissions remain immutable for a complete brokerage history."}</p></section>}
       </>}
-      {reviews.length ? <section className="listing-review-history"><div><span>Decision history</span><h2>Brokerage reviews</h2></div>{reviews.map((review) => <article key={`${review.listing_version_id}:${review.decided_at}`}><strong>{review.decision.replaceAll("_", " ")}</strong><small>{new Date(review.decided_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {namesByPersonId.get(review.reviewer_person_id) ?? "Brokerage reviewer"}{review.is_self_approval ? " · authorized self-approval" : ""}</small>{review.comment ? <p>{review.comment}</p> : null}</article>)}</section> : null}
+      {allReviews.length ? <section id="decision-history" className="listing-review-history"><div><span>Decision history · {allReviews.length} decision{allReviews.length === 1 ? "" : "s"}</span><h2>Brokerage reviews</h2></div>{reviews.map((review) => <article key={`${review.listing_version_id}:${review.decided_at}`}><strong>{review.decision.replaceAll("_", " ")}</strong><small>{new Date(review.decided_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {namesByPersonId.get(review.reviewer_person_id) ?? "Brokerage reviewer"}{review.is_self_approval ? " · authorized self-approval" : ""}</small>{review.comment ? <p>{review.comment}</p> : null}</article>)}{reviewPageCount > 1 ? <nav className="listing-pagination" aria-label="Brokerage decision pages">
+        {currentReviewPage > 1 ? <Link href={`/workspace/listings/${listing.id}?reviewPage=${currentReviewPage - 1}&activityPage=${currentActivityPage}#decision-history`}>← Previous</Link> : <span aria-disabled="true">← Previous</span>}
+        <strong>Page {currentReviewPage} of {reviewPageCount}</strong>
+        {currentReviewPage < reviewPageCount ? <Link href={`/workspace/listings/${listing.id}?reviewPage=${currentReviewPage + 1}&activityPage=${currentActivityPage}#decision-history`}>Next →</Link> : <span aria-disabled="true">Next →</span>}
+      </nav> : null}</section> : null}
       {allActivities.length ? <section id="activity-log" className="listing-review-history activity-log"><div><span>Activity log · {allActivities.length} event{allActivities.length === 1 ? "" : "s"}</span><h2>Listing record</h2></div>{activities.map((activity) => <article key={`${activity.action}:${activity.occurred_at}`}><strong>{activityLabel(activity)}</strong><small>{new Date(activity.occurred_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {activity.actor_person_id ? namesByPersonId.get(activity.actor_person_id) ?? "Brokerage member" : "ProperAP"}</small>{activity.reason ? <p>{activity.reason}</p> : null}</article>)}{activityPageCount > 1 ? <nav className="listing-pagination activity-pagination" aria-label="Activity log pages">
-        {currentActivityPage > 1 ? <Link href={`/workspace/listings/${listing.id}?activityPage=${currentActivityPage - 1}#activity-log`}>← Previous</Link> : <span aria-disabled="true">← Previous</span>}
+        {currentActivityPage > 1 ? <Link href={`/workspace/listings/${listing.id}?activityPage=${currentActivityPage - 1}&reviewPage=${currentReviewPage}#activity-log`}>← Previous</Link> : <span aria-disabled="true">← Previous</span>}
         <strong>Page {currentActivityPage} of {activityPageCount}</strong>
-        {currentActivityPage < activityPageCount ? <Link href={`/workspace/listings/${listing.id}?activityPage=${currentActivityPage + 1}#activity-log`}>Next →</Link> : <span aria-disabled="true">Next →</span>}
+        {currentActivityPage < activityPageCount ? <Link href={`/workspace/listings/${listing.id}?activityPage=${currentActivityPage + 1}&reviewPage=${currentReviewPage}#activity-log`}>Next →</Link> : <span aria-disabled="true">Next →</span>}
       </nav> : null}</section> : null}
       {listing.lifecycle_state === "approved_inactive" && listing.current_approved_version_id && access.canReviewListings ? <section className="activation-panel">
         <div><span>Final publication check</span><h2>Activate in the public marketplace</h2><p>This separately verifies the approved public visibility, active brokerage, active agent representative, cleared property record, validated media, and current listing version.</p></div>
