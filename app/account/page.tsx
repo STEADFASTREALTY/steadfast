@@ -64,8 +64,8 @@ export default async function AccountPage({
 
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
-      <section className="account-hero">
+      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
+      <section className="account-hero compact">
         <span className="eyebrow"><i /> Your SteadFast account</span>
         <h1>Hello, {context.person.display_name}.</h1>
         <p>Keep your profile current and manage how you participate in the professional network.</p>
