@@ -500,6 +500,8 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .account-header { align-items: center; background: var(--ink); border-bottom: 2px solid #fff; color: #fff; display: flex; min-height: 78px; padding: 0 clamp(24px, 5vw, 76px); }
 .account-header nav { display: flex; gap: 28px; margin-left: auto; }
 .account-header nav a { color: rgba(255,255,255,.68); font-size: 15px; }
+.account-header nav .notification-nav-link { align-items: center; display: inline-flex; gap: 7px; }
+.notification-nav-link strong { align-items: center; background: var(--coral); border: 1px solid rgba(255,255,255,.8); border-radius: 999px; color: #fff; display: inline-flex; font-size: 15px; font-weight: 800; justify-content: center; line-height: 1; min-height: 24px; min-width: 24px; padding: 3px 6px; }
 .account-session-actions { align-items: center; border-left: 1px solid rgba(255,255,255,.18); display: flex; gap: 12px; margin-left: 30px; padding-left: 30px; }
 .account-session-actions > span { color: rgba(255,255,255,.68); font-size: 15px; }
 .account-session-actions form { display: flex; }
@@ -748,6 +750,9 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .notification-mailbox { min-width: 0; }
 .notification-mailbox-toolbar { align-items: center; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; min-height: 82px; padding: 17px 24px; }
 .notification-toolbar-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 14px; }
+.desktop-notification-state { background: var(--sage); border: 1px solid #a9bdb4; color: var(--ink); font-size: 15px; font-weight: 700; padding: 9px 12px; }
+.desktop-notification-state.blocked { background: #f8e9e5; border-color: #d7a49a; color: #772d23; }
+.desktop-notification-button { min-height: 42px; }
 .notification-mailbox-toolbar span, .notification-mailbox-toolbar strong { display: block; }
 .notification-mailbox-toolbar span { color: #63746f; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; }
 .notification-mailbox-toolbar strong { font-family: Georgia, serif; font-size: 22px; font-weight: 400; margin-top: 4px; }

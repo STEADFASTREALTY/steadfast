@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/actions/auth";
 import { BrandLogo } from "@/app/components/brand-logo";
+import { NotificationNavLink } from "@/app/components/notification-nav-link";
+import { createClient } from "@/lib/supabase/server";
 
-export function AccountHeader({
+export async function AccountHeader({
   displayName,
   hasWorkspace = false,
   canManageAgents = false,
@@ -19,6 +21,13 @@ export function AccountHeader({
   canManageInquiries?: boolean;
   canShareListings?: boolean;
 }) {
+  const supabase = await createClient();
+  const { count: unreadNotificationCount } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .is("read_at", null)
+    .is("deleted_at", null);
+
   return (
     <header className="account-header">
       <BrandLogo compact />
@@ -31,7 +40,7 @@ export function AccountHeader({
         {canShareListings ? <Link href="/workspace/sharing">Sharing</Link> : null}
         {canManageInquiries ? <Link href="/workspace/inquiries">Inquiries</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}
-        <Link href="/account/notifications">Notifications</Link>
+        <NotificationNavLink initialCount={unreadNotificationCount ?? 0} />
         <Link href="/account/profile">Profile</Link>
         <Link href="/account">My account</Link>
         <Link href="/account/security">Security</Link>

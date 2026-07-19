@@ -9,6 +9,7 @@ import {
   starNotificationAction,
   unstarNotificationAction,
 } from "@/app/actions/notifications";
+import { DesktopNotificationControl } from "@/app/components/desktop-notification-control";
 
 export type InboxNotification = {
   id: string;
@@ -94,6 +95,7 @@ export function NotificationInbox({ notifications }: { notifications: InboxNotif
           <strong>{filtered.length ? `${firstVisible}–${lastVisible} of ${filtered.length}` : "0"} message{filtered.length === 1 ? "" : "s"}</strong>
           </div>
           <div className="notification-toolbar-actions">
+            <DesktopNotificationControl />
             {hasActiveFilters ? <button className="text-button notification-clear-filter" onClick={clearFilters} type="button">Clear filters</button> : null}
             {unreadCount > 0 ? <form action={markAllNotificationsReadAction}><button className="outline-dark-button" type="submit">Mark all as read</button></form> : null}
           </div>
