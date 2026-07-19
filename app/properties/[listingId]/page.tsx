@@ -22,7 +22,7 @@ type RouteProps = {
 async function getPublicListing(listingId: string) {
   if (!z.string().uuid().safeParse(listingId).success) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("public_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_person_id,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at,is_demo,demo_notice,source_url").eq("listing_id", listingId).maybeSingle();
+  const { data } = await supabase.from("public_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_person_id,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at,updated_at,is_demo,demo_notice,source_url").eq("listing_id", listingId).maybeSingle();
   return data;
 }
 
@@ -52,6 +52,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
   const fullMapUrl = hasPublicMapPoint
     ? `https://www.openstreetmap.org/?mlat=${encodeURIComponent(latitude)}&mlon=${encodeURIComponent(longitude)}#map=14/${encodeURIComponent(latitude)}/${encodeURIComponent(longitude)}`
     : null;
+  const formatListingDate = (value: string) => new Intl.DateTimeFormat("en-JM", { dateStyle: "medium", timeZone: "America/Jamaica" }).format(new Date(value));
   const supabase = await createClient();
   const { data: gallery } = await supabase.from("public_listing_media")
     .select("id,variant,position,width,height")
@@ -91,7 +92,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
     }} />
     <PublicHeader />
     <section className="public-listing-hero">
-      <div><span>{listing.purpose === "sale" ? "For sale" : "Long-term rental"} · {listing.lifecycle_state.replaceAll("_", " ")}</span><h1>{listing.title}</h1><p>{location}</p></div>
+      <div><span>{listing.purpose === "sale" ? "For sale" : "Long-term rental"} · {listing.lifecycle_state.replaceAll("_", " ")}</span><h1>{listing.title}</h1><p>{location}</p><dl className="public-listing-dates"><div><dt>Published</dt><dd>{formatListingDate(listing.published_at)}</dd></div><div><dt>Last updated</dt><dd>{formatListingDate(listing.updated_at)}</dd></div></dl></div>
       {listing.currency === "JMD" ? <CurrencyPrice priceJmd={Number(listing.price)} pricePeriod={listing.price_period} rates={exchangeRates} /> : <strong>{new Intl.NumberFormat("en-JM", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price)}{listing.price_period ? <small> / {listing.price_period}</small> : null}</strong>}
     </section>
     <div className="public-listing-layout">
