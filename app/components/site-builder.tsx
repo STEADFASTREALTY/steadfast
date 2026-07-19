@@ -250,7 +250,7 @@ export function SiteBuilder({
   const publicSiteUrl =
     process.env.NODE_ENV === "development"
       ? `/sites/${site.slug}`
-      : `https://${site.slug}.canadasap.com`;
+      : `https://${site.slug}.properap.com`;
   const availableSections =
     site.site_type === "brokerage"
       ? allSections.filter((section) => section !== "testimonials")

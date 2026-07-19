@@ -11,7 +11,7 @@ export function CookieNotice() {
   }, []);
 
   function acceptCookies() {
-    const domain = window.location.hostname === "canadasap.com" || window.location.hostname.endsWith(".canadasap.com") ? "; domain=.canadasap.com" : "";
+    const domain = window.location.hostname === "properap.com" || window.location.hostname.endsWith(".properap.com") ? "; domain=.properap.com" : "";
     document.cookie = `canadasap_cookie_notice=accepted; path=/; max-age=31536000; samesite=lax; secure${domain}`;
     setVisible(false);
   }

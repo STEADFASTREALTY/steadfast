@@ -56,9 +56,9 @@ export async function proxy(request: NextRequest) {
   // `www` is the public entry point, not a customer website slug. Keep one
   // canonical address so the wildcard subdomain rule below only handles
   // actual agent and brokerage sites.
-  if (hostname === "www.canadasap.com") {
+  if (hostname === "properap.com") {
     const canonicalUrl = new URL(request.url);
-    canonicalUrl.hostname = "canadasap.com";
+    canonicalUrl.hostname = "www.properap.com";
     const response = NextResponse.redirect(canonicalUrl, 308);
     response.headers.set("Content-Security-Policy", policy);
     return response;
@@ -68,10 +68,10 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", policy);
 
-  const cookieDomain = hostname === "canadasap.com" || hostname.endsWith(".canadasap.com")
-    ? ".canadasap.com"
+  const cookieDomain = hostname === "properap.com" || hostname.endsWith(".properap.com")
+    ? ".properap.com"
     : undefined;
-  const subdomainMatch = hostname.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.canadasap\.com$/);
+  const subdomainMatch = hostname.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.properap\.com$/);
   const rewriteUrl = subdomainMatch && request.nextUrl.pathname === "/"
     ? new URL(`/sites/${subdomainMatch[1]}`, request.url)
     : null;
@@ -127,10 +127,10 @@ export async function proxy(request: NextRequest) {
   }
 
   response.headers.set("Content-Security-Policy", policy);
-  if (!request.cookies.has("canadasap_display_currency")) {
+  if (!request.cookies.has("properap_display_currency")) {
     const country = request.headers.get("x-vercel-ip-country")?.toUpperCase();
     const displayCurrency = country === "JM" ? "JMD" : country === "CA" ? "CAD" : country === "GB" ? "GBP" : "USD";
-    response.cookies.set("canadasap_display_currency", displayCurrency, {
+    response.cookies.set("properap_display_currency", displayCurrency, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",

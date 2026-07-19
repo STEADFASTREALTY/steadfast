@@ -69,7 +69,7 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
       const saved = window.localStorage.getItem("canadasap-display-currency");
       if (saved === "JMD" || saved === "USD" || saved === "CAD" || saved === "GBP") setDisplayCurrency(saved);
       else {
-        const cookie = document.cookie.split("; ").find((item) => item.startsWith("canadasap_display_currency="))?.split("=")[1];
+        const cookie = document.cookie.split("; ").find((item) => item.startsWith("properap_display_currency="))?.split("=")[1];
         if (cookie === "JMD" || cookie === "USD" || cookie === "CAD" || cookie === "GBP") setDisplayCurrency(cookie);
         else setDisplayCurrency("USD");
       }

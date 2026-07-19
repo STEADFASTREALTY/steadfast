@@ -13,7 +13,7 @@ function savedCurrency() {
   if (typeof window === "undefined") return "JMD";
   const local = window.localStorage.getItem(storageKey);
   if (local === "JMD" || local === "USD" || local === "CAD" || local === "GBP") return local;
-  const cookie = document.cookie.split("; ").find((item) => item.startsWith("canadasap_display_currency="))?.split("=")[1];
+  const cookie = document.cookie.split("; ").find((item) => item.startsWith("properap_display_currency="))?.split("=")[1];
   return cookie === "JMD" || cookie === "USD" || cookie === "CAD" || cookie === "GBP" ? cookie : "USD";
 }
 
@@ -28,8 +28,8 @@ export function PublicCurrencySelector() {
   function changeCurrency(nextCurrency: DisplayCurrency) {
     setCurrency(nextCurrency);
     window.localStorage.setItem(storageKey, nextCurrency);
-    const domain = window.location.hostname === "canadasap.com" || window.location.hostname.endsWith(".canadasap.com") ? "; domain=.canadasap.com" : "";
-    document.cookie = `canadasap_display_currency=${nextCurrency}; path=/; max-age=31536000; samesite=lax${domain}`;
+    const domain = window.location.hostname === "properap.com" || window.location.hostname.endsWith(".properap.com") ? "; domain=.properap.com" : "";
+    document.cookie = `properap_display_currency=${nextCurrency}; path=/; max-age=31536000; samesite=lax${domain}`;
     window.dispatchEvent(new CustomEvent("canadasap:currency-change", { detail: nextCurrency }));
     router.refresh();
   }

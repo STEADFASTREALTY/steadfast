@@ -12,8 +12,8 @@ async function getSharedCookieDomain() {
     .split(":")[0]
     ?.toLowerCase();
 
-  return host === "canadasap.com" || host?.endsWith(".canadasap.com")
-    ? ".canadasap.com"
+  return host === "properap.com" || host?.endsWith(".properap.com")
+    ? ".properap.com"
     : undefined;
 }
 

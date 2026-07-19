@@ -10,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         "/sign-in", "/register", "/forgot-password", "/set-password", "/access-denied",
       ],
     },
-    sitemap: "https://canadasap.com/sitemap.xml",
+    sitemap: "https://www.properap.com/sitemap.xml",
   };
 }
