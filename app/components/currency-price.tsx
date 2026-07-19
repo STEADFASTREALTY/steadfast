@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 
 type ExchangeRateSnapshot = {
   jmd_per_usd: number;
@@ -10,8 +10,6 @@ type ExchangeRateSnapshot = {
 };
 
 type Currency = "JMD" | "USD" | "CAD" | "GBP";
-
-const currencyLabels: Record<Currency, string> = { JMD: "JMD", USD: "USD", CAD: "CAD", GBP: "GBP" };
 
 function convertedAmount(jmdAmount: number, currency: Currency, rates: ExchangeRateSnapshot) {
   if (currency === "JMD") return jmdAmount;
@@ -25,16 +23,14 @@ function formatAmount(amount: number, currency: Currency) {
 }
 
 export function CurrencyPrice({ priceJmd, pricePeriod, rates }: { priceJmd: number; pricePeriod: string | null; rates: ExchangeRateSnapshot | null }) {
-  const [currency, setCurrency] = useState<Currency>("JMD");
   const tooltipId = useId();
-  const isEstimate = currency !== "JMD" && rates;
-  const amount = rates ? convertedAmount(priceJmd, currency, rates) : priceJmd;
+  const convertedCurrencies: Currency[] = ["USD", "CAD", "GBP"];
 
   return <div className="currency-price">
-    <div className="currency-price-value"><strong>{formatAmount(amount, currency)}{pricePeriod ? <small> / {pricePeriod}</small> : null}</strong>{isEstimate ? <span className="currency-estimate">Estimated</span> : null}</div>
-    {rates ? <div className="currency-price-controls">
-      <label><span>Display currency</span><select value={currency} onChange={(event) => setCurrency(event.target.value as Currency)}>{(Object.keys(currencyLabels) as Currency[]).map((item) => <option key={item} value={item}>{currencyLabels[item]}</option>)}</select></label>
-      <span className="currency-info" tabIndex={0} aria-describedby={tooltipId}>i<span id={tooltipId} role="tooltip" className="currency-disclaimer">Converted price in your selected currency, using rates provided by <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">ExchangeRate-API</a>. Exchange rates change continuously. CanadaSAP does not guarantee that this conversion reflects the current exchange rate and is not responsible for inaccuracies. Please independently verify exchange-rate information before relying on it. Rates updated {new Intl.DateTimeFormat("en-JM", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Jamaica" }).format(new Date(rates.provider_updated_at))}.</span></span>
+    <div className="currency-price-value"><strong>{formatAmount(priceJmd, "JMD")}{pricePeriod ? <small> / {pricePeriod}</small> : null}</strong></div>
+    {rates ? <div className="currency-price-conversions">
+      {convertedCurrencies.map((currency) => <div key={currency}><span>{currency}</span><strong>{formatAmount(convertedAmount(priceJmd, currency, rates), currency)}{pricePeriod ? <small> / {pricePeriod}</small> : null}</strong><small>Estimated</small></div>)}
+      <span className="currency-info" tabIndex={0} aria-describedby={tooltipId}>i<span id={tooltipId} role="tooltip" className="currency-disclaimer">Converted prices use rates provided by <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer">ExchangeRate-API</a>. Exchange rates change continuously. CanadaSAP does not guarantee that these conversions reflect current conversion rates and is not responsible for inaccuracies. Please independently verify information before relying on it. Rates updated {new Intl.DateTimeFormat("en-JM", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Jamaica" }).format(new Date(rates.provider_updated_at))}.</span></span>
     </div> : null}
   </div>;
 }
