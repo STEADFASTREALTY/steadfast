@@ -34,7 +34,8 @@ export default async function NotificationsPage() {
   });
   const { data: notifications } = await context.supabase
     .from("notifications")
-    .select("id, source_event_id, event_type, title, body_safe, target_type, target_id, read_at, created_at")
+    .select("id, source_event_id, event_type, title, body_safe, target_type, target_id, read_at, starred_at, created_at")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(100);
   const sourceEventIds = (notifications ?? []).map((notification) => notification.source_event_id);
@@ -59,6 +60,7 @@ export default async function NotificationsPage() {
       targetType: notification.target_type,
       targetId: notification.target_id,
       readAt: notification.read_at,
+      starredAt: notification.starred_at,
       createdAt: notification.created_at,
       actorName,
       activity: activityFor(notification.event_type, actorName),
