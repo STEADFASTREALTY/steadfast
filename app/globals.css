@@ -684,7 +684,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .create-listing-image-previews figcaption { font-size: 15px; overflow: hidden; padding: 7px 8px; text-overflow: ellipsis; white-space: nowrap; }
 .approval-image-previews { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); margin-top: 16px; }
 .approval-image-previews figure { background: var(--cream); border: 1px solid var(--line); margin: 0; min-width: 0; overflow: hidden; }
-.approval-image-previews img { aspect-ratio: 1 / 1; display: block; object-fit: cover; width: 100%; }
+.approval-image-previews img { display: block; height: 120px !important; max-height: 120px; object-fit: cover; width: 100%; }
 .approval-image-previews figcaption { align-items: center; display: flex; font-size: 15px; gap: 6px; justify-content: space-between; padding: 7px 8px; white-space: nowrap; }
 .approval-image-previews figcaption span, .approval-image-previews figcaption small { font-size: 15px; overflow: hidden; text-overflow: ellipsis; }
 .approval-image-previews figcaption small { color: #788682; }
