@@ -176,7 +176,7 @@ export async function requestListingClosureAction(formData: FormData) {
   const notice = parsed.data.requestedLifecycleState === "active"
     ? "This edit will keep the listing active after brokerage approval."
     : `Close as ${parsed.data.requestedLifecycleState} saved. Submit the edit for brokerage approval when ready.`;
-  redirect(`/workspace/listings/${parsed.data.listingId}?notice=${encodeURIComponent(notice)}`);
+  redirect(`/workspace/listings?status=edits&notice=${encodeURIComponent(notice)}`);
 }
 
 export async function saveListingDraftAction(formData: FormData): Promise<SaveListingDraftResult> {
@@ -478,7 +478,7 @@ export async function submitListingForReviewAction(
   revalidatePath("/workspace");
   revalidatePath("/workspace/listings");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
-  redirect(`/workspace/listings/${parsed.data.listingId}?notice=Submitted+to+your+brokerage+for+review.`);
+  redirect("/workspace/listings?status=pending&notice=Submitted+to+your+brokerage+for+approval.");
 }
 
 const reviewDecisionSchema = z.object({
@@ -582,7 +582,14 @@ export async function decideListingReviewAction(
     : parsed.data.decision === "changes_requested"
       ? "Changes requested. A new editable draft is ready for the agent."
       : "Submission rejected and retained in its review history.";
-  redirect(`/workspace/listings?status=pending&notice=${encodeURIComponent(notice)}`);
+  const destinationStatus = approvedOutcome
+    ? "closed"
+    : parsed.data.decision === "approved"
+      ? published ? "published" : "all"
+      : parsed.data.decision === "changes_requested"
+        ? "edits"
+        : "closed";
+  redirect(`/workspace/listings?status=${destinationStatus}&notice=${encodeURIComponent(notice)}`);
 }
 
 const activatePublicListingSchema = z.object({
@@ -635,5 +642,5 @@ export async function activatePublicListingAction(formData: FormData) {
   revalidatePath("/workspace");
   revalidatePath("/workspace/listings");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
-  redirect(`/workspace/listings/${parsed.data.listingId}?notice=Listing+is+now+active+in+the+public+marketplace.`);
+  redirect("/workspace/listings?status=published&notice=Listing+is+now+active+in+the+public+marketplace.");
 }
