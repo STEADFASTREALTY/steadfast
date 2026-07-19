@@ -688,6 +688,13 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .approval-image-previews figcaption { align-items: center; display: flex; font-size: 15px; gap: 6px; justify-content: space-between; padding: 7px 8px; white-space: nowrap; }
 .approval-image-previews figcaption span, .approval-image-previews figcaption small { font-size: 15px; overflow: hidden; text-overflow: ellipsis; }
 .approval-image-previews figcaption small { color: #788682; }
+.listing-cover-help { color: #5a6a66; font-size: 15px; line-height: 1.5; margin: 20px 0 0; }
+.approval-image-previews figure:has(.cover-photo-button.active) { border: 2px solid var(--gold); }
+.approval-image-previews figure form { padding: 0 7px 8px; }
+.cover-photo-button { background: #fff; border: 1px solid var(--evergreen); color: var(--evergreen); cursor: pointer; font-size: 15px; font-weight: 700; min-height: 36px; padding: 7px 8px; width: 100%; }
+.cover-photo-button:hover:not(:disabled), .cover-photo-button:focus-visible { background: var(--evergreen); color: #fff; outline: none; }
+.cover-photo-button.active { background: var(--gold); border-color: var(--gold); color: var(--evergreen); cursor: default; }
+.cover-photo-button:disabled:not(.active) { cursor: wait; opacity: .65; }
 .submission-panel { align-items: center; background: #fff3cf; border: 2px solid #c78400; border-left: 10px solid #c78400; color: var(--ink); display: grid; gap: 42px; grid-template-columns: minmax(0, 1fr) 380px; padding: 38px 42px; }
 .submission-panel > div > span { color: #935600; font-size: 15px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .submitted-listing-heading > span, .submitted-media > div:first-child > span, .review-decision-card > div > span, .listing-review-history > div > span { color: var(--lime-dark); font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }

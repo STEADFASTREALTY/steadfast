@@ -286,6 +286,40 @@ export async function finalizeListingMediaUploadAction(mediaIdInput: unknown): P
   }
 }
 
+const selectCoverMediaSchema = z.object({
+  listingId: z.string().uuid(),
+  mediaId: z.string().uuid(),
+});
+
+export type SelectListingCoverMediaState = {
+  error?: string;
+  coverMediaId?: string;
+};
+
+export async function selectListingCoverMediaAction(
+  _previousState: SelectListingCoverMediaState,
+  formData: FormData,
+): Promise<SelectListingCoverMediaState> {
+  const parsed = selectCoverMediaSchema.safeParse({
+    listingId: readText(formData, "listingId"),
+    mediaId: readText(formData, "mediaId"),
+  });
+  if (!parsed.success) return { error: "The selected cover image is invalid." };
+
+  const context = await getActiveMembershipContext(`/workspace/listings/${parsed.data.listingId}`);
+  if (!context.membership) return { error: "You no longer have listing access." };
+
+  const { error } = await context.supabase.from("select_listing_cover_media_commands").insert({
+    request_id: randomUUID(),
+    listing_id: parsed.data.listingId,
+    media_id: parsed.data.mediaId,
+  });
+  if (error) return { error: "The cover photo could not be changed. Make sure this listing is still an editable draft." };
+
+  revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
+  return { coverMediaId: parsed.data.mediaId };
+}
+
 type AdminClient = ReturnType<typeof createAdminClient>;
 
 async function rejectMedia(

@@ -157,6 +157,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
       originalFilename: media.original_filename,
     } : null;
   }))).filter((media): media is NonNullable<typeof media> => Boolean(media));
+  const coverMediaId = mediaLinks?.find((link) => link.position === 1)?.media_id;
   const listingAudience = listing.lifecycle_state === "active" || listing.lifecycle_state === "under_offer"
     ? "Public listing"
     : version?.visibility === "professional_network"
@@ -171,7 +172,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
     <div className="listing-wizard-shell">
       <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>{initial ? "Autosave on · private draft" : "Read only"}</span></div>
       <StatusMessage notice={query.notice} error={query.error} />
-      {initial ? <><EditListingForm key={`${listing.id}:${listing.lock_version}`} initial={initial} parishes={parishes ?? []} /><ListingMediaUploader listingId={listing.id} images={readyImages} reservedCount={reservedCount} /><ListingSubmissionPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} /></> : <>
+      {initial ? <><EditListingForm key={`${listing.id}:${listing.lock_version}`} initial={initial} parishes={parishes ?? []} /><ListingMediaUploader listingId={listing.id} images={readyImages} reservedCount={reservedCount} coverMediaId={coverMediaId} /><ListingSubmissionPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} /></> : <>
         <section className="submitted-listing-summary">
           <div className="submitted-listing-heading"><span>Version {version?.version_number}</span><h2>{version?.revision_state === "submitted" ? "Submitted snapshot" : "Retained listing snapshot"}</h2><p>This content is immutable and shown exactly as it was submitted or decided.</p></div>
           <dl>

@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   authorizeListingMediaUploadAction,
   finalizeListingMediaUploadAction,
+  selectListingCoverMediaAction,
+  type SelectListingCoverMediaState,
 } from "@/app/actions/listings";
 import { MAX_IMAGE_BYTES, MAX_LISTING_IMAGES, MAX_UPLOAD_BATCH } from "@/lib/media/constants";
 import { createClient } from "@/lib/supabase/client";
@@ -26,15 +28,25 @@ export function ListingMediaUploader({
   listingId,
   images,
   reservedCount,
+  coverMediaId,
 }: {
   listingId: string;
   images: ReadyMedia[];
   reservedCount: number;
+  coverMediaId?: string;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<UploadState>({ kind: "idle", message: "No files are being uploaded." });
+  const [coverState, coverAction, coverPending] = useActionState<SelectListingCoverMediaState, FormData>(selectListingCoverMediaAction, {});
   const uploading = state.kind === "uploading";
+  const selectedCoverId = coverState.coverMediaId ?? coverMediaId ?? images[0]?.id;
+
+  useEffect(() => {
+    if (coverState.coverMediaId) {
+      router.refresh();
+    }
+  }, [coverState.coverMediaId, router]);
 
   async function uploadSelected(files: FileList | null) {
     if (!files?.length) return;
@@ -111,14 +123,19 @@ export function ListingMediaUploader({
         <strong>{images.length} / {MAX_LISTING_IMAGES}</strong>
       </div>
 
-      {images.length ? <div className="approval-image-previews">{images.map((image, index) => (
+      {images.length ? <><p className="listing-cover-help">Choose the photo visitors see first on property cards. You can change it any time before submitting this draft.</p>{coverState.error ? <p className="inline-form-error" role="alert">{coverState.error}</p> : null}<div className="approval-image-previews">{images.map((image, index) => (
         <figure key={image.id}>
           {/* Signed, short-lived private URL generated only after listing authorization. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image.url} alt={`Property image ${index + 1}`} width={image.width} height={image.height} />
-          <figcaption><span>{index === 0 ? "Cover candidate" : `Image ${index + 1}`}</span><small title={image.originalFilename}>{image.width} × {image.height}</small></figcaption>
+          <figcaption><span>{image.id === selectedCoverId ? "Cover photo" : `Image ${index + 1}`}</span><small title={image.originalFilename}>{image.width} × {image.height}</small></figcaption>
+          <form action={coverAction} data-prompt-title="Make this the cover photo?" data-prompt-message="This image will appear first on property cards and public listings after brokerage approval." data-prompt-confirm="Set cover photo">
+            <input type="hidden" name="listingId" value={listingId} />
+            <input type="hidden" name="mediaId" value={image.id} />
+            <button className={image.id === selectedCoverId ? "cover-photo-button active" : "cover-photo-button"} type="submit" disabled={coverPending || image.id === selectedCoverId}>{coverPending && image.id !== selectedCoverId ? "Saving…" : image.id === selectedCoverId ? "Main card photo" : "Set as main card photo"}</button>
+          </form>
         </figure>
-      ))}</div> : <div className="listing-media-empty"><strong>No property images yet</strong><p>Add bright, accurate photographs. Avoid people, identity documents, vehicle plates, or other unnecessary personal information.</p></div>}
+      ))}</div></> : <div className="listing-media-empty"><strong>No property images yet</strong><p>Add bright, accurate photographs. Avoid people, identity documents, vehicle plates, or other unnecessary personal information.</p></div>}
 
       <div className={`listing-media-upload upload-${state.kind}`}>
         <label className="solid-button" aria-disabled={uploading || reservedCount >= MAX_LISTING_IMAGES}>
