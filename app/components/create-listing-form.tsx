@@ -21,9 +21,12 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
   const router = useRouter();
   const uploadStartedFor = useRef<string | null>(null);
   const selectedImageFilesRef = useRef<File[]>([]);
+  const uploadedImageIndexesRef = useRef<Set<number>>(new Set());
   const [purpose, setPurpose] = useState("sale");
   const [propertyType, setPropertyType] = useState("residential");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [retryUpload, setRetryUpload] = useState(0);
   const [uploadState, setUploadState] = useState<UploadState>({ kind: "idle", message: "No images selected yet." });
   const [state, formAction, pending] = useActionState<CreateListingDraftState, FormData>(createListingDraftAction, {});
   const showRooms = propertyType === "residential" || propertyType === "development";
@@ -34,23 +37,33 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
     if (!images.length) return;
     if (images.length > MAX_LISTING_IMAGES) {
       selectedImageFilesRef.current = [];
+      uploadedImageIndexesRef.current = new Set();
       setSelectedImages([]);
       setUploadState({ kind: "error", message: `Choose up to ${MAX_LISTING_IMAGES} images for one listing.` });
       return;
     }
     if (images.some((file) => !ACCEPTED_TYPES.has(file.type) || file.size < 1 || file.size > MAX_IMAGE_BYTES)) {
       selectedImageFilesRef.current = [];
+      uploadedImageIndexesRef.current = new Set();
       setSelectedImages([]);
       setUploadState({ kind: "error", message: "Choose JPEG, PNG, or WebP images no larger than 15 MB each." });
       return;
     }
     selectedImageFilesRef.current = images;
+    uploadedImageIndexesRef.current = new Set();
     setSelectedImages(images);
     setUploadState({ kind: "idle", message: `${images.length} image${images.length === 1 ? "" : "s"} ready. They will be compressed to full-HD before upload.` });
   }
 
   useEffect(() => {
-    if (!state.listingId || uploadStartedFor.current === state.listingId) return;
+    const urls = selectedImages.map((image) => URL.createObjectURL(image));
+    setPreviewUrls(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [selectedImages]);
+
+  useEffect(() => {
+    if (!state.listingId) return;
+    if (uploadStartedFor.current === state.listingId && retryUpload === 0) return;
     uploadStartedFor.current = state.listingId;
 
     const destination = `/workspace/listings/${state.listingId}`;
@@ -62,38 +75,44 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
 
     void (async () => {
       const supabase = createClient();
-      let completed = 0;
-      for (const sourceFile of filesToUpload) {
+      const remaining = filesToUpload
+        .map((sourceFile, index) => ({ sourceFile, index }))
+        .filter(({ index }) => !uploadedImageIndexesRef.current.has(index));
+      for (let position = 0; position < remaining.length; position += 1) {
+        const { sourceFile, index } = remaining[position];
+        const completed = uploadedImageIndexesRef.current.size;
         setUploadState({ kind: "uploading", message: `Compressing image ${completed + 1} of ${filesToUpload.length} to full-HD…` });
         let image: File;
         try {
           image = await compressListingImage(sourceFile);
         } catch {
-          router.push(`/workspace/listings/${state.listingId}?error=An+image+could+not+be+compressed.+Choose+a+different+file.`);
+          setUploadState({ kind: "error", message: "One image could not be compressed. It has not been lost; choose a different image or retry the upload." });
           return;
         }
         setUploadState({ kind: "uploading", message: `Securely uploading image ${completed + 1} of ${filesToUpload.length}…` });
         const authorization = await authorizeListingMediaUploadAction({ listingId: state.listingId, filename: image.name, mimeType: image.type, byteSize: image.size });
         if (authorization.status !== "authorized") {
-          router.push(`/workspace/listings/${state.listingId}?error=${encodeURIComponent(authorization.error)}`);
+          setUploadState({ kind: "error", message: `${authorization.error} Your other selected images remain queued.` });
           return;
         }
         const { error } = await supabase.storage.from("listing-originals").uploadToSignedUrl(authorization.path, authorization.token, image, { contentType: image.type, cacheControl: "0" });
         if (error) {
-          router.push(`/workspace/listings/${state.listingId}?error=An+image+did+not+finish+uploading.+Please+choose+it+again.`);
+          setUploadState({ kind: "error", message: "One image did not finish uploading. Your other selected images remain queued; retry to continue." });
           return;
         }
         const finalized = await finalizeListingMediaUploadAction(authorization.mediaId);
         if (finalized.status !== "ready") {
-          router.push(`/workspace/listings/${state.listingId}?error=${encodeURIComponent(finalized.error)}`);
+          setUploadState({ kind: "error", message: `${finalized.error} Your other selected images remain queued.` });
           return;
         }
-        completed += 1;
+        uploadedImageIndexesRef.current.add(index);
       }
       selectedImageFilesRef.current = [];
+      uploadedImageIndexesRef.current = new Set();
+      const completed = filesToUpload.length;
       router.push(`${destination}?notice=${encodeURIComponent(`Private draft created with ${completed} validated image${completed === 1 ? "" : "s"}.`)}`);
     })();
-  }, [router, state.listingId, state.returnTo]);
+  }, [retryUpload, router, state.listingId, state.returnTo]);
 
   return (
     <form action={formAction} className="listing-wizard" data-prompt-title="Create this private draft?" data-prompt-message="SteadFast will save the draft, compress selected property photos to full-HD, strip metadata, and securely upload them for brokerage review." data-prompt-confirm="Create draft">
@@ -144,6 +163,7 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
             <div><strong>Up to 30 images</strong><p>Landscape photos are capped at 1920 × 1080. Portrait photos use the equivalent rotated limit.</p></div>
             <p className="listing-media-status" role={uploadState.kind === "error" ? "alert" : "status"}>{uploadState.message}</p>
           </div>
+          {previewUrls.length ? <div className="create-listing-image-previews" aria-label="Selected property image previews">{previewUrls.map((url, index) => <figure key={url}><img src={url} alt={`Selected property image ${index + 1}`} /><figcaption>Image {index + 1}</figcaption></figure>)}</div> : null}
         </div>
       </section>
 
@@ -156,7 +176,7 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
         </fieldset>
       </section>
 
-      <div className="wizard-submit"><div><strong>Saved as a private draft</strong><p>{selectedImages.length ? "Selected images will be compressed and securely attached before the draft opens." : "You will review and submit it to your broker in a later step."}</p>{state.error ? <p className="inline-form-error" role="alert">{state.error}</p> : null}</div><button className="solid-button" type="submit" disabled={pending || uploading || uploadState.kind === "error"}>{pending ? "Creating draft…" : uploading ? "Uploading images…" : selectedImages.length ? "Create draft and upload images" : "Create private draft"}</button></div>
+      <div className="wizard-submit"><div><strong>{state.listingId ? "Private draft created" : "Saved as a private draft"}</strong><p>{state.listingId && uploadState.kind === "error" ? "The draft and every completed image are saved. Retry to continue the remaining image uploads." : selectedImages.length ? "Selected images will be compressed and securely attached before the draft opens." : "You will review and submit it to your broker in a later step."}</p>{state.error ? <p className="inline-form-error" role="alert">{state.error}</p> : null}</div>{state.listingId && uploadState.kind === "error" ? <button className="solid-button" type="button" onClick={() => setRetryUpload((value) => value + 1)}>Retry image upload</button> : <button className="solid-button" type="submit" disabled={pending || uploading || Boolean(state.listingId)}>{pending ? "Creating draft…" : uploading ? "Uploading images…" : selectedImages.length ? "Create draft and upload images" : "Create private draft"}</button>}</div>
     </form>
   );
 }
