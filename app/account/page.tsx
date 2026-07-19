@@ -129,7 +129,6 @@ export default async function AccountPage({
             <p>{context.membership ? "Your brokerage controls your professional roles and listing authority." : "Browse properties freely or apply to the brokerage that referred you."}</p>
           </section>
           {context.membership ? <section><span>Brokerage</span><strong>{(context.membership.brokerages as unknown as { display_name?: string } | null)?.display_name ?? "Your brokerage"}</strong><p>Roles: {context.roles.join(", ").replaceAll("_", " ") || "member"}</p></section> : null}
-          {access.hasWorkspace ? <Link className="solid-button" href="/workspace">Open your workspace</Link> : null}
         </aside>
       </div>
     </main>

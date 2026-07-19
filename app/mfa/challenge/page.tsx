@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Verify authenticator", description: 
 export const dynamic = "force-dynamic";
 
 export default async function MfaChallengePage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const next = safeInternalPath((await searchParams).next ?? null, "/workspace");
+  const next = safeInternalPath((await searchParams).next ?? null, "/account");
   const account = await requireAccount(`/mfa/challenge?next=${encodeURIComponent(next)}`);
   const { data } = await account.supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (data?.currentLevel === "aal2") redirect(next);

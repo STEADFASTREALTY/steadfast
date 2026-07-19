@@ -77,7 +77,7 @@ export async function getActiveMembershipContext(nextPath = "/account") {
 
 export async function requireInternalMfa(
   context: Awaited<ReturnType<typeof getActiveMembershipContext>>,
-  nextPath = "/workspace",
+  nextPath = "/account",
 ) {
   const requiresMfa = context.platformRoles.some((role) =>
     role === "steadfast_operations" || role === "steadfast_admin",
