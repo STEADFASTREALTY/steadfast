@@ -4,7 +4,7 @@ import { PublicCurrencySelector } from "@/app/components/public-currency-selecto
 import { signOutAction } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 
-const links = [["Home", "/"], ["Search", "/properties"], ["About ProperAP", "/about"], ["Careers", "/careers"], ["Feedback", "/feedback"], ["Advertise", "/advertise"], ["Support", "/support"]] as const;
+const links = [["Home", "/"], ["Search", "/properties"], ["About", "/about"], ["Careers", "/careers"], ["Feedback", "/feedback"], ["Advertise", "/advertise"], ["Support", "/support"]] as const;
 
 export async function PublicHeader() {
   const supabase = await createClient();
