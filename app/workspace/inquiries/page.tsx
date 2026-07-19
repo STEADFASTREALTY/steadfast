@@ -53,7 +53,6 @@ export default async function InquiryInboxPage({ searchParams }: PageProps) {
       <section className="account-hero compact">
         <span className="eyebrow"><i /> Private client service</span>
         <h1>Property inquiries.</h1>
-        <p>{access.canReviewListings ? "Brokerage inquiries are shown according to your current permissions." : "Only inquiries assigned to you are shown here."}</p>
       </section>
       <section className="inquiry-shell">
         <StatusMessage error={query.error} notice={query.notice} />
