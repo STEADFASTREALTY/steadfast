@@ -675,7 +675,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .listing-index-bar { background: var(--paper); border: 1px solid var(--line); color: var(--ink); min-height: 88px; }
 .listing-index-bar > div span { color: #71807c; display: block; font-size: 15px; font-weight: 700; letter-spacing: .12em; margin-bottom: 7px; text-transform: uppercase; }
 .listing-index-bar > div strong { font-family: Georgia, serif; font-size: 20px; font-weight: 400; }
-.listing-index { max-width: 1320px; }
+.listing-index { margin-top: 24px; max-width: 1320px; }
 .listing-library-layout { align-items: start; display: grid; gap: 24px; grid-template-columns: 220px minmax(0, 1fr); margin-top: 22px; }
 .listing-status-nav { background: var(--evergreen); border: 1px solid var(--evergreen); padding: 14px 10px; position: sticky; top: 18px; }
 .listing-status-nav > strong { color: var(--gold); display: block; font-size: 15px; letter-spacing: .1em; padding: 10px 12px 14px; text-transform: uppercase; }
