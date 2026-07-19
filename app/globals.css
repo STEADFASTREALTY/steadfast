@@ -654,6 +654,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .mini-list > div { border-top: 1px solid var(--line); padding: 15px 0; }
 
 .listing-wizard-shell, .listing-index { margin: -38px auto 0; max-width: 1120px; padding: 0 28px 90px; position: relative; }
+.listing-detail-shell { margin-top: 24px; }
 .wizard-topline, .listing-index-bar { align-items: center; background: var(--ink); color: #fff; display: flex; justify-content: space-between; min-height: 64px; padding: 0 25px; }
 .wizard-topline a { color: rgba(255,255,255,.72); font-size: 15px; font-weight: 700; }
 .wizard-topline span { color: var(--lime); font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }

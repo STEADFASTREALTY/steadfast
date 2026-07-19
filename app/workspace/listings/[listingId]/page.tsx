@@ -17,6 +17,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = { title: "Listing", description: "Edit, review, and publish a brokerage listing record.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
+const ACTIVITY_PAGE_SIZE = 5;
 
 type DraftVersion = {
   id: string;
@@ -52,7 +53,7 @@ function activityLabel(activity: ListingActivity) {
   return activity.action.replace("listing.", "Listing ").replaceAll("_", " ");
 }
 
-export default async function ListingDraftPage({ params, searchParams }: { params: Promise<{ listingId: string }>; searchParams: Promise<{ notice?: string; error?: string }> }) {
+export default async function ListingDraftPage({ params, searchParams }: { params: Promise<{ listingId: string }>; searchParams: Promise<{ notice?: string; error?: string; activityPage?: string }> }) {
   const route = await params;
   const query = await searchParams;
   if (!z.string().uuid().safeParse(route.listingId).success) redirect("/access-denied?reason=listing-record");
@@ -123,10 +124,18 @@ export default async function ListingDraftPage({ params, searchParams }: { param
     .eq("target_type", "listing")
     .eq("target_id", listing.id)
     .order("occurred_at", { ascending: false });
-  const activities = (activityRows ?? []) as ListingActivity[];
+  const allActivities = (activityRows ?? []) as ListingActivity[];
+  const requestedActivityPage = Number.parseInt(query.activityPage ?? "1", 10);
+  const activityPageCount = Math.max(1, Math.ceil(allActivities.length / ACTIVITY_PAGE_SIZE));
+  const currentActivityPage = Math.min(
+    Math.max(Number.isFinite(requestedActivityPage) ? requestedActivityPage : 1, 1),
+    activityPageCount,
+  );
+  const activityStart = (currentActivityPage - 1) * ACTIVITY_PAGE_SIZE;
+  const activities = allActivities.slice(activityStart, activityStart + ACTIVITY_PAGE_SIZE);
   const relatedPersonIds = [...new Set([
     ...reviews.map((review) => review.reviewer_person_id),
-    ...activities.flatMap((activity) => activity.actor_person_id ? [activity.actor_person_id] : []),
+    ...allActivities.flatMap((activity) => activity.actor_person_id ? [activity.actor_person_id] : []),
   ])];
   const { data: relatedPeople } = relatedPersonIds.length
     ? await admin.from("people").select("id,display_name").in("id", relatedPersonIds)
@@ -174,7 +183,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   return <main className="account-page">
     <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
     <section className="account-hero compact"><span className="eyebrow"><i /> {listingAudience}</span><h1>{version?.title ?? "Listing record"}</h1><p>{brokerage?.display_name ?? "Your brokerage"} · {listing.lifecycle_state.replaceAll("_", " ")}</p></section>
-    <div className="listing-wizard-shell">
+    <div className="listing-wizard-shell listing-detail-shell">
       <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>{initial ? "Autosave on · private listing" : canEditActiveListing ? "Active listing · editing available" : "Read only"}</span></div>
       <StatusMessage notice={query.notice} error={query.error} />
       {canEditActiveListing ? <section className="activation-panel listing-edit-panel">
@@ -207,7 +216,11 @@ export default async function ListingDraftPage({ params, searchParams }: { param
         {listing.lifecycle_state === "pending_initial_approval" && access.canReviewListings ? <ReviewDecisionForm listingId={listing.id} listingVersionId={version.id} /> : <section className="locked-listing-card"><span>{listing.lifecycle_state === "pending_initial_approval" ? "Brokerage review pending" : version?.revision_state.replaceAll("_", " ")}</span><h2>{listing.lifecycle_state === "pending_initial_approval" ? "This version is awaiting a brokerage decision." : "This listing version is retained as reviewed."}</h2><p>{listing.lifecycle_state === "pending_initial_approval" ? "The assigned agent cannot change the submitted snapshot. An authorized reviewer can approve it, request corrections, or reject it." : "Approved, returned, and rejected submissions remain immutable for a complete brokerage history."}</p></section>}
       </>}
       {reviews.length ? <section className="listing-review-history"><div><span>Decision history</span><h2>Brokerage reviews</h2></div>{reviews.map((review) => <article key={`${review.listing_version_id}:${review.decided_at}`}><strong>{review.decision.replaceAll("_", " ")}</strong><small>{new Date(review.decided_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {namesByPersonId.get(review.reviewer_person_id) ?? "Brokerage reviewer"}{review.is_self_approval ? " · authorized self-approval" : ""}</small>{review.comment ? <p>{review.comment}</p> : null}</article>)}</section> : null}
-      {activities.length ? <section className="listing-review-history activity-log"><div><span>Activity log</span><h2>Listing record</h2></div>{activities.map((activity) => <article key={`${activity.action}:${activity.occurred_at}`}><strong>{activityLabel(activity)}</strong><small>{new Date(activity.occurred_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {activity.actor_person_id ? namesByPersonId.get(activity.actor_person_id) ?? "Brokerage member" : "SteadFast"}</small>{activity.reason ? <p>{activity.reason}</p> : null}</article>)}</section> : null}
+      {allActivities.length ? <section id="activity-log" className="listing-review-history activity-log"><div><span>Activity log · {allActivities.length} event{allActivities.length === 1 ? "" : "s"}</span><h2>Listing record</h2></div>{activities.map((activity) => <article key={`${activity.action}:${activity.occurred_at}`}><strong>{activityLabel(activity)}</strong><small>{new Date(activity.occurred_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {activity.actor_person_id ? namesByPersonId.get(activity.actor_person_id) ?? "Brokerage member" : "ProperAP"}</small>{activity.reason ? <p>{activity.reason}</p> : null}</article>)}{activityPageCount > 1 ? <nav className="listing-pagination activity-pagination" aria-label="Activity log pages">
+        {currentActivityPage > 1 ? <Link href={`/workspace/listings/${listing.id}?activityPage=${currentActivityPage - 1}#activity-log`}>← Previous</Link> : <span aria-disabled="true">← Previous</span>}
+        <strong>Page {currentActivityPage} of {activityPageCount}</strong>
+        {currentActivityPage < activityPageCount ? <Link href={`/workspace/listings/${listing.id}?activityPage=${currentActivityPage + 1}#activity-log`}>Next →</Link> : <span aria-disabled="true">Next →</span>}
+      </nav> : null}</section> : null}
       {listing.lifecycle_state === "approved_inactive" && listing.current_approved_version_id && access.canReviewListings ? <section className="activation-panel">
         <div><span>Final publication check</span><h2>Activate in the public marketplace</h2><p>This separately verifies the approved public visibility, active brokerage, active agent representative, cleared property record, validated media, and current listing version.</p></div>
         <form action={activatePublicListingAction} data-prompt-title="Activate this listing publicly?" data-prompt-message="The approved listing and its privacy-safe photographs will become searchable on the SteadFast marketplace." data-prompt-confirm="Activate listing">
