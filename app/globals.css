@@ -500,17 +500,20 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .invite-result input { font-size: 15px; }
 
 .account-page { background: var(--cream); min-height: 100vh; }
-.account-header { align-items: center; background: var(--ink); border-bottom: 2px solid #fff; color: #fff; display: flex; min-height: 78px; padding: 0 clamp(24px, 5vw, 76px); }
+.account-header { align-items: center; background: #eef2f5; border-bottom: 1px solid #d7dfe4; color: var(--charcoal); display: flex; min-height: 78px; padding: 0 clamp(24px, 5vw, 76px); }
+.account-header .brand-logo { height: 70px; width: 82px; }
+.account-header .brand-logo img { filter: drop-shadow(0 2px 4px rgba(7,52,120,.14)); }
 .account-header nav { display: flex; gap: 28px; margin-left: auto; }
-.account-header nav a { color: rgba(255,255,255,.68); font-size: 15px; }
-.account-header nav .notification-nav-link { align-items: center; color: rgba(255,255,255,.82); display: inline-flex; gap: 0; position: relative; }
+.account-header nav a { color: var(--evergreen); font-size: 15px; }
+.account-header nav a:hover { color: #075aa8; }
+.account-header nav .notification-nav-link { align-items: center; color: var(--evergreen); display: inline-flex; gap: 0; position: relative; }
 .notification-nav-link svg, .account-exit-button svg { fill: none; height: 23px; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 23px; }
-.notification-nav-link:hover, .account-exit-button:hover { color: #fff; }
+.notification-nav-link:hover, .account-exit-button:hover { color: #075aa8; }
 .notification-nav-link strong { align-items: center; background: var(--coral); border: 1px solid #fff; border-radius: 999px; color: #fff; display: inline-flex; font-size: 12px; font-weight: 800; justify-content: center; line-height: 1; min-height: 19px; min-width: 19px; padding: 2px 4px; position: absolute; right: -11px; top: -9px; }
-.account-session-actions { align-items: center; border-left: 1px solid rgba(255,255,255,.18); display: flex; gap: 12px; margin-left: 30px; padding-left: 30px; }
-.account-session-actions > span { color: rgba(255,255,255,.68); font-size: 15px; }
+.account-session-actions { align-items: center; border-left: 1px solid #c8d2d8; display: flex; gap: 12px; margin-left: 30px; padding-left: 30px; }
+.account-session-actions > span { color: var(--evergreen); font-size: 15px; }
 .account-session-actions form { display: flex; }
-.account-exit-button { align-items: center; background: transparent; border: 0; color: var(--gold); cursor: pointer; display: inline-flex; justify-content: center; min-height: 42px; min-width: 42px; padding: 7px; }
+.account-exit-button { align-items: center; background: transparent; border: 0; color: var(--evergreen); cursor: pointer; display: inline-flex; justify-content: center; min-height: 42px; min-width: 42px; padding: 7px; }
 .stack-form label.remember-device { align-items: center; color: #52635f; display: flex !important; flex-direction: row; font-size: 15px; gap: 9px; justify-content: flex-start; }
 .stack-form .remember-device > span { font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; }
 .remember-device input { accent-color: var(--ink); }
