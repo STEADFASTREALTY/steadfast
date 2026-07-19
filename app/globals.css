@@ -688,13 +688,16 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .approval-image-previews figcaption { align-items: center; display: flex; font-size: 15px; gap: 6px; justify-content: space-between; padding: 7px 8px; white-space: nowrap; }
 .approval-image-previews figcaption span, .approval-image-previews figcaption small { font-size: 15px; overflow: hidden; text-overflow: ellipsis; }
 .approval-image-previews figcaption small { color: #788682; }
-.submission-panel { align-items: center; background: var(--ink); color: #fff; display: grid; gap: 42px; grid-template-columns: minmax(0, 1fr) 380px; padding: 38px 42px; }
-.submission-panel > div > span, .submitted-listing-heading > span, .submitted-media > div:first-child > span, .review-decision-card > div > span, .listing-review-history > div > span { color: var(--lime-dark); font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.submission-panel { align-items: center; background: #fff3cf; border: 2px solid #c78400; border-left: 10px solid #c78400; color: var(--ink); display: grid; gap: 42px; grid-template-columns: minmax(0, 1fr) 380px; padding: 38px 42px; }
+.submission-panel > div > span { color: #935600; font-size: 15px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.submitted-listing-heading > span, .submitted-media > div:first-child > span, .review-decision-card > div > span, .listing-review-history > div > span { color: var(--lime-dark); font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .submission-panel h2, .submitted-listing-summary h2, .submitted-media h2, .review-decision-card h2, .listing-review-history h2 { font-family: Georgia, serif; font-size: 29px; font-weight: 400; margin: 8px 0; }
-.submission-panel p { color: rgba(255,255,255,.68); font-size: 15px; line-height: 1.65; margin: 0; }
+.submission-panel p { color: #4f4431; font-size: 15px; line-height: 1.65; margin: 0; }
 .submission-panel form { align-items: flex-start; display: flex; flex-direction: column; gap: 16px; }
-.submission-panel form label { align-items: flex-start; color: rgba(255,255,255,.78); display: flex; font-size: 15px; gap: 9px; line-height: 1.5; }
-.submission-panel form input { accent-color: var(--lime); margin-top: 2px; }
+.submission-panel form label { align-items: flex-start; color: var(--ink); display: flex; font-size: 15px; font-weight: 700; gap: 9px; line-height: 1.5; }
+.submission-panel form input { accent-color: #b86b00; margin-top: 2px; }
+.submission-panel .solid-button { background: #b86b00; border-color: #b86b00; color: #fff; min-height: 50px; padding: 0 26px; }
+.submission-panel .solid-button:hover { background: #8d4f00; border-color: #8d4f00; }
 .submission-panel .inline-form-error, .review-decision-card .inline-form-error { color: #f0a08d; font-size: 15px; font-weight: 700; }
 .submitted-listing-summary, .submitted-media, .review-decision-card, .listing-review-history { background: var(--paper); border: 1px solid var(--line); border-top: 0; padding: 42px; }
 .submitted-listing-heading p, .submitted-media > div:first-child p, .review-decision-card > div > p { color: #687774; font-size: 15px; line-height: 1.6; margin: 0; }
