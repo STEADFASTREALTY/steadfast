@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AccountHeader } from "@/app/components/account-header";
+import { AccountSectionNav } from "@/app/components/account-section-nav";
 import { StatusMessage } from "@/app/components/status-message";
 import {
   submitAgentApplicationAction,
@@ -71,11 +72,7 @@ export default async function AccountPage({
         <p>Keep your profile current and manage how you participate in the professional network.</p>
       </section>
       <div className="account-settings-layout">
-        <nav aria-label="My account sections" className="account-section-nav">
-          <span>My account</span>
-          <Link className={activeSection === "profile" ? "active" : ""} href="/account?section=profile">Profile</Link>
-          <Link className={activeSection === "photo" ? "active" : ""} href="/account?section=photo">My photo</Link>
-        </nav>
+        <AccountSectionNav active={activeSection} />
         <div className="account-main">
           <StatusMessage error={params.error} notice={params.notice} />
           {activeSection === "profile" ? <>

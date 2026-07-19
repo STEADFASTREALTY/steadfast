@@ -41,7 +41,6 @@ export async function AccountHeader({
         {canManageInquiries ? <Link href="/workspace/inquiries">Inquiries</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}
         <Link href="/account">My account</Link>
-        <Link href="/account/security">Security</Link>
         <NotificationNavLink initialCount={unreadNotificationCount ?? 0} />
       </nav>
       <div className="account-session-actions">

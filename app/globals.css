@@ -524,6 +524,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .account-section-nav > span { color: var(--gold); font-size: 15px; font-weight: 700; letter-spacing: .09em; padding: 8px 10px 12px; text-transform: uppercase; }
 .account-section-nav a { align-items: center; color: rgba(255,255,255,.78); display: flex; font-size: 15px; font-weight: 700; min-height: 44px; padding: 0 12px; }
 .account-section-nav a:hover, .account-section-nav a.active { background: rgba(255,255,255,.13); color: #fff; }
+.account-security-settings-layout .security-note { grid-column: 3; }
 .management-layout { grid-template-columns: minmax(0, 1fr) 380px; }
 .account-main, .management-layout > div, .management-aside { display: flex; flex-direction: column; gap: 26px; }
 .settings-main { margin: -38px auto 0; max-width: 900px; padding: 0 28px 90px; position: relative; }
