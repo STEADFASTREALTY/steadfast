@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ListingCover, PropertySearchParams, PublicListing } from "@/lib/public-property-search";
 import { JamaicaListingMap } from "./jamaica-listing-map";
 import { CurrencyPriceRangeFields } from "@/app/components/currency-price-range-fields";
-import type { ExchangeRateSnapshot } from "@/lib/currency-conversions";
+import { convertJmdToCurrency, formatCurrencyAmount, type DisplayCurrency, type ExchangeRateSnapshot } from "@/lib/currency-conversions";
 
 const PRICE_OPTIONS = [0, 1_000_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000, 250_000_000, 500_000_000];
 const SIZE_OPTIONS = [500, 1_000, 1_500, 2_000, 3_000, 5_000];
@@ -20,9 +20,9 @@ type Props = {
   rates: ExchangeRateSnapshot | null;
 };
 
-function formatPrice(listing: PublicListing) {
+function formatPrice(listing: PublicListing, currency: DisplayCurrency, rates: ExchangeRateSnapshot | null) {
   const amount = listing.currency === "JMD"
-    ? `J$${new Intl.NumberFormat("en-JM", { maximumFractionDigits: 0 }).format(listing.price)}`
+    ? formatCurrencyAmount(convertJmdToCurrency(Number(listing.price), currency, rates), currency)
     : new Intl.NumberFormat("en-JM", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price);
   return listing.price_period ? `${amount} / ${listing.price_period}` : amount;
 }
@@ -40,11 +40,11 @@ function queryFromForm(form: HTMLFormElement, cardsPerRow: 4 | 6) {
   return query;
 }
 
-function PropertyCard({ listing, cover }: { listing: PublicListing; cover?: ListingCover }) {
+function PropertyCard({ listing, cover, currency, rates }: { listing: PublicListing; cover?: ListingCover; currency: DisplayCurrency; rates: ExchangeRateSnapshot | null }) {
   const facts = [listing.bedrooms === null ? null : `${listing.bedrooms} bd`, listing.bathrooms === null ? null : `${listing.bathrooms} ba`, listing.building_area === null ? null : `${new Intl.NumberFormat("en-JM").format(listing.building_area)} sq ft`].filter(Boolean).join(" · ");
   return <article className="property-result-card" key={listing.listing_id}>
     <Link className="property-card-visual" href={`/properties/${listing.listing_id}`} aria-label={`View ${listing.title}`}>{cover ? <Image src={`/media/listings/${cover.id}/card.webp`} alt={`${listing.title} property view`} width={cover.width} height={cover.height} sizes="(max-width: 680px) 100vw, (max-width: 1050px) 33vw, 17vw" unoptimized /> : <span className="property-card-placeholder">Photo preparing</span>}<span className="property-card-badge">{listing.purpose === "sale" ? "For sale" : "For rent"}</span></Link>
-    <div className="property-card-copy"><strong className="property-card-price">{formatPrice(listing)}</strong><h2><Link href={`/properties/${listing.listing_id}`}>{listing.title}</Link></h2>{facts ? <p className="property-card-facts">{facts}</p> : null}<p className="property-card-location">{listing.public_location_label ?? listing.administrative_area_name}</p></div>
+    <div className="property-card-copy"><strong className="property-card-price">{formatPrice(listing, currency, rates)}</strong><h2><Link href={`/properties/${listing.listing_id}`}>{listing.title}</Link></h2>{facts ? <p className="property-card-facts">{facts}</p> : null}<p className="property-card-location">{listing.public_location_label ?? listing.administrative_area_name}</p></div>
   </article>;
 }
 
@@ -56,6 +56,17 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
   const [error, setError] = useState("");
   const [selectedMapListingIds, setSelectedMapListingIds] = useState<string[] | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>(initialFilters.displayCurrency);
+  useEffect(() => {
+    const loadCurrency = () => {
+      const saved = window.localStorage.getItem("canadasap-display-currency");
+      if (saved === "JMD" || saved === "USD" || saved === "CAD" || saved === "GBP") setDisplayCurrency(saved);
+    };
+    const handleChange = (event: Event) => setDisplayCurrency((event as CustomEvent<DisplayCurrency>).detail);
+    loadCurrency();
+    window.addEventListener("canadasap:currency-change", handleChange);
+    return () => window.removeEventListener("canadasap:currency-change", handleChange);
+  }, []);
   const coverByListing = useMemo(() => new Map(covers.map((cover) => [cover.listing_id, cover])), [covers]);
   const mapListings = selectedMapListingIds ? listings.filter((listing) => selectedMapListingIds.includes(listing.listing_id)) : [];
   const pageSize = cardsPerRow * 3;
@@ -116,7 +127,7 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
     <section className="property-search-card-section" aria-label="Property results" aria-busy={isLoading}>
       <div className="property-results-toolbar"><p><strong>{listings.length}</strong> properties</p><div aria-label="Cards per row" className="property-grid-switch"><span>View</span><button type="button" onClick={() => changeView(4)} aria-pressed={cardsPerRow === 4}>4</button><button type="button" onClick={() => changeView(6)} aria-pressed={cardsPerRow === 6}>6</button></div></div>
       {error ? <p className="search-results-error" role="alert">{error}</p> : null}
-      {listings.length ? <><div className={`property-card-grid cards-${cardsPerRow}`}>{pageListings.map((listing) => <PropertyCard key={listing.listing_id} listing={listing} cover={coverByListing.get(listing.listing_id)} />)}</div>{totalPages > 1 ? <nav className="property-pagination" aria-label="Property result pages"><button type="button" disabled={visiblePage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}>Previous</button><span>Page {visiblePage} of {totalPages}</span><button type="button" disabled={visiblePage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}>Next</button></nav> : null}</> : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active listings appear here. Change the location or property type to see other available properties.</p><button className="solid-button" type="button" onClick={() => { const form = document.querySelector<HTMLFormElement>(".marketplace-filters"); form?.reset(); if (form) void updateResults(queryFromForm(form, cardsPerRow)); }}>Clear filters</button></div>}
+      {listings.length ? <><div className={`property-card-grid cards-${cardsPerRow}`}>{pageListings.map((listing) => <PropertyCard key={listing.listing_id} listing={listing} cover={coverByListing.get(listing.listing_id)} currency={displayCurrency} rates={rates} />)}</div>{totalPages > 1 ? <nav className="property-pagination" aria-label="Property result pages"><button type="button" disabled={visiblePage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}>Previous</button><span>Page {visiblePage} of {totalPages}</span><button type="button" disabled={visiblePage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}>Next</button></nav> : null}</> : <div className="listing-empty"><span>No matching inventory</span><h2>Try a broader search.</h2><p>Only active listings appear here. Change the location or property type to see other available properties.</p><button className="solid-button" type="button" onClick={() => { const form = document.querySelector<HTMLFormElement>(".marketplace-filters"); form?.reset(); if (form) void updateResults(queryFromForm(form, cardsPerRow)); }}>Clear filters</button></div>}
     </section>
 
     <div className="property-map-separator" aria-hidden="true"><span>Explore listings on the map</span></div>
@@ -124,7 +135,7 @@ export function PropertySearchResults({ initialListings, initialCovers, initialF
       <JamaicaListingMap listings={listings} selectedIds={selectedMapListingIds} onSelect={setSelectedMapListingIds} />
       <section className="marketplace-results" aria-label="Property results" aria-busy={isLoading}>
         <div className="property-results-toolbar"><p>{selectedMapListingIds ? <><strong>{mapListings.length}</strong> homes in this map area</> : "Choose a number on the map"}</p></div>
-        {mapListings.length ? <div className="property-card-grid cards-6">{mapListings.map((listing) => <PropertyCard key={listing.listing_id} listing={listing} cover={coverByListing.get(listing.listing_id)} />)}</div> : <div className="map-results-placeholder">Select a numbered location to see its listings here.</div>}
+        {mapListings.length ? <div className="property-card-grid cards-6">{mapListings.map((listing) => <PropertyCard key={listing.listing_id} listing={listing} cover={coverByListing.get(listing.listing_id)} currency={displayCurrency} rates={rates} />)}</div> : <div className="map-results-placeholder">Select a numbered location to see its listings here.</div>}
       </section>
     </div>
   </>;
