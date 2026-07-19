@@ -117,8 +117,8 @@ export function NotificationInbox({ notifications }: { notifications: InboxNotif
                 {notification.targetType === "listing" ? <Link className="solid-button" href={`/workspace/listings/${notification.targetId}`}>Open listing</Link> : null}
                 {notification.targetType === "share" ? <Link className="solid-button" href="/workspace/sharing">Open sharing</Link> : null}
                 {notification.targetType === "inquiry" ? <Link className="solid-button" href="/workspace/inquiries">Open inquiry</Link> : null}
-                {!notification.readAt ? <form action={markNotificationReadAction}><input name="notificationId" type="hidden" value={notification.id} /><button className="text-button" type="submit">Mark read</button></form> : <span className="notification-read-state">Read</span>}
                 <div className="notification-message-controls">
+                  {!notification.readAt ? <form action={markNotificationReadAction}><input name="notificationId" type="hidden" value={notification.id} /><button className="notification-read-button" type="submit">Mark read</button></form> : <span className="notification-read-state">Read</span>}
                   <form action={notification.starredAt ? unstarNotificationAction : starNotificationAction}>
                     <input name="notificationId" type="hidden" value={notification.id} />
                     <button aria-label={notification.starredAt ? "Remove star" : "Star notification"} className={notification.starredAt ? "notification-icon-button starred" : "notification-icon-button"} title={notification.starredAt ? "Remove star" : "Star notification"} type="submit">★</button>
