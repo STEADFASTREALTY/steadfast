@@ -7,7 +7,7 @@ import { BrandLogo } from "@/app/components/brand-logo";
 import { safeInternalPath } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Sign in", description: "Securely sign in to your SteadFast account.", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Sign in", description: "Securely sign in to your ProperAP account.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SignInPage({
@@ -33,7 +33,7 @@ export default async function SignInPage({
         <div>
           <span className="eyebrow dark"><i /> Secure account</span>
           <h2>Sign in</h2>
-          <p>Use the email address connected to your SteadFast account.</p>
+          <p>Use the email address connected to your ProperAP account.</p>
         </div>
         <StatusMessage error={params.error} notice={params.notice} />
         <form action={signInAction} className="stack-form" noValidate>
@@ -44,7 +44,7 @@ export default async function SignInPage({
           <p className="form-assist"><Link href="/forgot-password">Forgot your password?</Link></p>
           <button className="solid-button" type="submit">Sign in</button>
         </form>
-        <p className="auth-switch">New to SteadFast? <Link href={`/register?next=${encodeURIComponent(next)}`}>Create a free account</Link></p>
+        <p className="auth-switch">New to ProperAP? <Link href={`/register?next=${encodeURIComponent(next)}`}>Create a free account</Link></p>
       </section>
     </main>
   );

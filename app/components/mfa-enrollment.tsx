@@ -46,7 +46,7 @@ export function MfaEnrollment({ nextPath, allowAdditional = false }: { nextPath:
 
     const result = await supabase.auth.mfa.enroll({
       factorType: "totp",
-      friendlyName: allowAdditional ? "SteadFast backup authenticator" : "SteadFast authenticator",
+      friendlyName: allowAdditional ? "ProperAP backup authenticator" : "ProperAP authenticator",
     });
     if (result.error) {
       setMessage("Authenticator setup could not be started. Please try again.");
@@ -87,7 +87,7 @@ export function MfaEnrollment({ nextPath, allowAdditional = false }: { nextPath:
   }
 
   return <form className="mfa-enrollment" onSubmit={verifyEnrollment}>
-    <div className="mfa-qr"><Image src={enrollment.qrCode} alt="QR code for SteadFast authenticator setup" width={220} height={220} unoptimized /></div>
+    <div className="mfa-qr"><Image src={enrollment.qrCode} alt="QR code for ProperAP authenticator setup" width={220} height={220} unoptimized /></div>
     <div><h3>1. Scan this code</h3><p>Open your authenticator app and scan the QR code. If scanning is unavailable, enter this setup key:</p><code>{enrollment.secret}</code></div>
     <label><span>2. Enter the six-digit code</span><input value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" required /></label>
     {message ? <p className="status-message error" role="status">{message}</p> : null}

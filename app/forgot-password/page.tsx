@@ -4,7 +4,7 @@ import { forgotPasswordAction } from "@/app/actions/auth";
 import { StatusMessage } from "@/app/components/status-message";
 import { BrandLogo } from "@/app/components/brand-logo";
 
-export const metadata: Metadata = { title: "Forgot password", description: "Request a secure SteadFast password reset link.", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Forgot password", description: "Request a secure ProperAP password reset link.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ForgotPasswordPage({
@@ -21,7 +21,7 @@ export default async function ForgotPasswordPage({
         <BrandLogo />
         <span className="eyebrow"><i /> Account recovery</span>
         <h1>Return to<br />your work.</h1>
-        <p>Enter your account email. If it matches a SteadFast account, we will send a private recovery link.</p>
+        <p>Enter your account email. If it matches a ProperAP account, we will send a private recovery link.</p>
       </section>
       <section className="auth-card">
         <div>

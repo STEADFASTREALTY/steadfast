@@ -44,6 +44,6 @@ export function MfaChallenge({ nextPath }: { nextPath: string }) {
     <label><span>Authenticator code</span><input value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" required autoFocus /></label>
     {message ? <p className="status-message error" role="status">{message}</p> : null}
     <button className="solid-button" type="submit" disabled={busy}>{busy ? "Verifying…" : "Verify and continue"}</button>
-    <p className="form-assist">Lost access to your authenticator? Contact your SteadFast administrator. <Link href="/account">Return to your account</Link></p>
+    <p className="form-assist">Lost access to your authenticator? Contact your ProperAP administrator. <Link href="/account">Return to your account</Link></p>
   </form>;
 }

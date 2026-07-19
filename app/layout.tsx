@@ -10,17 +10,17 @@ const siteUrl = STEADFAST_SITE_URL;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "SteadFast Realty | Property, connected",
-    template: "%s | SteadFast Realty",
+    default: "ProperAP | Property, connected",
+    template: "%s | ProperAP",
   },
   description:
     "A modern real estate platform built for Jamaica's agents, brokerages, and property seekers.",
-  applicationName: "SteadFast Realty",
+  applicationName: "ProperAP",
   openGraph: {
-    title: "SteadFast Realty",
+    title: "ProperAP",
     description: "Property, connected. Built for Jamaica.",
     url: siteUrl,
-    siteName: "SteadFast Realty",
+    siteName: "ProperAP",
     locale: "en_JM",
     type: "website",
   },
@@ -40,8 +40,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <SteadFastPromptProvider>{children}</SteadFastPromptProvider>
         <CookieNotice />
         <StructuredData value={[
-          { "@context": "https://schema.org", "@type": "Organization", name: "SteadFast Realty", url: siteUrl, areaServed: { "@type": "Country", name: "Jamaica" } },
-          { "@context": "https://schema.org", "@type": "WebSite", name: "SteadFast Realty", url: siteUrl, inLanguage: "en-JM" },
+          { "@context": "https://schema.org", "@type": "Organization", name: "ProperAP", url: siteUrl, areaServed: { "@type": "Country", name: "Jamaica" } },
+          { "@context": "https://schema.org", "@type": "WebSite", name: "ProperAP", url: siteUrl, inLanguage: "en-JM" },
         ]} />
       </body>
     </html>

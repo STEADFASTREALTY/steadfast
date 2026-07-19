@@ -19,7 +19,7 @@ export function publicPageMetadata(input: {
       title: input.title,
       description: input.description,
       url,
-      siteName: "SteadFast Realty",
+      siteName: "ProperAP",
       locale: "en_JM",
       type: "website",
     },

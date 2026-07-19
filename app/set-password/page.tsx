@@ -5,7 +5,7 @@ import { StatusMessage } from "@/app/components/status-message";
 import { BrandLogo } from "@/app/components/brand-logo";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Set password", description: "Set a secure password for your SteadFast account.", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Set password", description: "Set a secure password for your ProperAP account.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SetPasswordPage({
@@ -27,7 +27,7 @@ export default async function SetPasswordPage({
         <BrandLogo />
         <span className="eyebrow"><i /> Secure account</span>
         <h1>Protect your<br />account.</h1>
-        <p>Create the private password you will use to access SteadFast. Recovery links expire and can only be used through your email.</p>
+        <p>Create the private password you will use to access ProperAP. Recovery links expire and can only be used through your email.</p>
       </section>
       <section className="auth-card">
         <div><span className="eyebrow dark"><i /> Account recovery</span><h2>Set your password</h2></div>

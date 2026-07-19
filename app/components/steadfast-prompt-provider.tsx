@@ -111,7 +111,7 @@ export function SteadFastPromptProvider({ children }: { children: ReactNode }) {
     {children}
     {request ? <div className="prompt-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) cancel(); }}>
       <section className={`steadfast-prompt ${request.variant === "danger" ? "danger" : ""}`} role="alertdialog" aria-modal="true" aria-labelledby="steadfast-prompt-title" aria-describedby="steadfast-prompt-message">
-        <span>{request.variant === "danger" ? "Please confirm" : "SteadFast confirmation"}</span>
+        <span>{request.variant === "danger" ? "Please confirm" : "ProperAP confirmation"}</span>
         <h2 id="steadfast-prompt-title">{request.title}</h2>
         <p id="steadfast-prompt-message">{request.message}</p>
         <div>

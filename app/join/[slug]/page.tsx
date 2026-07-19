@@ -8,7 +8,7 @@ import { getProfessionalSite } from "@/app/components/public-professional-site";
 import { getActiveMembershipContext, requireAccount } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Join a brokerage", description: "Apply to join a SteadFast brokerage as an agent.", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Join a brokerage", description: "Apply to join a ProperAP brokerage as an agent.", robots: { index: false, follow: false } };
 
 export default async function JoinBrokeragePage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ error?: string; notice?: string }> }) {
   const { slug } = await params;

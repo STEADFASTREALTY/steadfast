@@ -9,7 +9,7 @@ import { PropertySearchResults } from "./property-search-results";
 
 export const metadata: Metadata = publicPageMetadata({
   title: "Property Search",
-  description: "Search brokerage-approved property listings across Jamaica with SteadFast Realty.",
+  description: "Search brokerage-approved property listings across Jamaica with ProperAP.",
   path: "/properties",
   keywords: ["homes for sale Jamaica", "property for rent Jamaica", "Jamaica property search"],
 });

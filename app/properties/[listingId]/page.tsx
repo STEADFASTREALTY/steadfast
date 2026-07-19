@@ -28,7 +28,7 @@ async function getPublicListing(listingId: string) {
 
 export async function generateMetadata({ params }: RouteProps): Promise<Metadata> {
   const listing = await getPublicListing((await params).listingId);
-  if (!listing) return { title: "Property not available", description: "This SteadFast property listing is not publicly available.", robots: { index: false, follow: false, noarchive: true } };
+  if (!listing) return { title: "Property not available", description: "This ProperAP property listing is not publicly available.", robots: { index: false, follow: false, noarchive: true } };
   return publicPageMetadata({
     title: listing.title,
     description: listing.description.slice(0, 155),
