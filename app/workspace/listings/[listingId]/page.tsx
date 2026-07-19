@@ -37,7 +37,18 @@ type DraftVersion = {
   public_location_precision: EditableListingDraft["publicLocationPrecision"];
 };
 type Address = { administrative_area_id: string; address_line_1: string; address_line_2: string | null; postal_code: string | null };
-type ReviewRecord = { listing_version_id: string; decision: string; comment: string | null; is_self_approval: boolean; decided_at: string };
+type ReviewRecord = { listing_version_id: string; reviewer_person_id: string; decision: string; comment: string | null; is_self_approval: boolean; decided_at: string };
+type ListingActivity = { action: string; actor_person_id: string | null; reason: string | null; after_summary: Record<string, unknown> | null; occurred_at: string };
+
+function activityLabel(activity: ListingActivity) {
+  if (activity.action === "listing.draft_created") return "Listing draft created";
+  if (activity.action === "listing.submitted") return "Submitted for brokerage approval";
+  if (activity.action === "listing.reviewed") {
+    const decision = typeof activity.after_summary?.decision === "string" ? activity.after_summary.decision : "reviewed";
+    return decision === "approved" ? "Listing approved" : decision === "rejected" ? "Listing denied" : "Changes requested";
+  }
+  return activity.action.replace("listing.", "Listing ").replaceAll("_", " ");
+}
 
 export default async function ListingDraftPage({ params, searchParams }: { params: Promise<{ listingId: string }>; searchParams: Promise<{ notice?: string; error?: string }> }) {
   const route = await params;
@@ -98,10 +109,24 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   } : null;
 
   const { data: reviewRows } = await admin.from("listing_reviews")
-    .select("listing_version_id,decision,comment,is_self_approval,decided_at")
+    .select("listing_version_id,reviewer_person_id,decision,comment,is_self_approval,decided_at")
     .in("listing_version_id", versions.map((item) => item.id))
     .order("decided_at", { ascending: false });
   const reviews = (reviewRows ?? []) as ReviewRecord[];
+  const { data: activityRows } = await admin.from("audit_events")
+    .select("action,actor_person_id,reason,after_summary,occurred_at")
+    .eq("target_type", "listing")
+    .eq("target_id", listing.id)
+    .order("occurred_at", { ascending: false });
+  const activities = (activityRows ?? []) as ListingActivity[];
+  const relatedPersonIds = [...new Set([
+    ...reviews.map((review) => review.reviewer_person_id),
+    ...activities.flatMap((activity) => activity.actor_person_id ? [activity.actor_person_id] : []),
+  ])];
+  const { data: relatedPeople } = relatedPersonIds.length
+    ? await admin.from("people").select("id,display_name").in("id", relatedPersonIds)
+    : { data: [] as Array<{ id: string; display_name: string }> };
+  const namesByPersonId = new Map((relatedPeople ?? []).map((person) => [person.id, person.display_name]));
 
   const { data: mediaLinks } = version ? await admin
     .from("listing_version_media")
@@ -160,7 +185,8 @@ export default async function ListingDraftPage({ params, searchParams }: { param
         </figure>)}</div></section> : null}
         {listing.lifecycle_state === "pending_initial_approval" && access.canReviewListings ? <ReviewDecisionForm listingId={listing.id} listingVersionId={version.id} /> : <section className="locked-listing-card"><span>{listing.lifecycle_state === "pending_initial_approval" ? "Brokerage review pending" : version?.revision_state.replaceAll("_", " ")}</span><h2>{listing.lifecycle_state === "pending_initial_approval" ? "This version is awaiting a brokerage decision." : "This listing version is retained as reviewed."}</h2><p>{listing.lifecycle_state === "pending_initial_approval" ? "The assigned agent cannot change the submitted snapshot. An authorized reviewer can approve it, request corrections, or reject it." : "Approved, returned, and rejected submissions remain immutable for a complete brokerage history."}</p></section>}
       </>}
-      {reviews.length ? <section className="listing-review-history"><div><span>Decision history</span><h2>Brokerage reviews</h2></div>{reviews.map((review) => <article key={`${review.listing_version_id}:${review.decided_at}`}><strong>{review.decision.replaceAll("_", " ")}</strong><small>{new Date(review.decided_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })}{review.is_self_approval ? " · authorized self-approval" : ""}</small>{review.comment ? <p>{review.comment}</p> : null}</article>)}</section> : null}
+      {reviews.length ? <section className="listing-review-history"><div><span>Decision history</span><h2>Brokerage reviews</h2></div>{reviews.map((review) => <article key={`${review.listing_version_id}:${review.decided_at}`}><strong>{review.decision.replaceAll("_", " ")}</strong><small>{new Date(review.decided_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {namesByPersonId.get(review.reviewer_person_id) ?? "Brokerage reviewer"}{review.is_self_approval ? " · authorized self-approval" : ""}</small>{review.comment ? <p>{review.comment}</p> : null}</article>)}</section> : null}
+      {activities.length ? <section className="listing-review-history activity-log"><div><span>Activity log</span><h2>Listing record</h2></div>{activities.map((activity) => <article key={`${activity.action}:${activity.occurred_at}`}><strong>{activityLabel(activity)}</strong><small>{new Date(activity.occurred_at).toLocaleString("en-JM", { dateStyle: "medium", timeStyle: "short" })} · by {activity.actor_person_id ? namesByPersonId.get(activity.actor_person_id) ?? "Brokerage member" : "SteadFast"}</small>{activity.reason ? <p>{activity.reason}</p> : null}</article>)}</section> : null}
       {listing.lifecycle_state === "approved_inactive" && listing.current_approved_version_id && access.canReviewListings ? <section className="activation-panel">
         <div><span>Final publication check</span><h2>Activate in the public marketplace</h2><p>This separately verifies the approved public visibility, active brokerage, active agent representative, cleared property record, validated media, and current listing version.</p></div>
         <form action={activatePublicListingAction} data-prompt-title="Activate this listing publicly?" data-prompt-message="The approved listing and its privacy-safe photographs will become searchable on the SteadFast marketplace." data-prompt-confirm="Activate listing">

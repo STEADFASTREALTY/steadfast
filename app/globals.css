@@ -718,6 +718,8 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .review-decision-card fieldset small { color: #71807c; font-size: 15px; line-height: 1.5; margin-top: 4px; }
 .review-comment { display: flex; flex-direction: column; }
 .review-comment textarea { border: 1px solid var(--line); line-height: 1.6; min-height: 130px; padding: 14px; resize: vertical; }
+.denial-confirmation { align-items: flex-start; background: #f9e5e0; border: 1px solid #d69b91; color: #6b291e; display: flex; font-size: 15px; font-weight: 700; gap: 10px; line-height: 1.5; padding: 14px; }
+.denial-confirmation input { accent-color: var(--error); margin-top: 3px; }
 .review-decision-card > .solid-button { justify-self: start; }
 .listing-review-history { display: grid; gap: 14px; }
 .listing-review-history article { background: var(--cream); border-left: 3px solid var(--lime-dark); padding: 17px 19px; }

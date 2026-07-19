@@ -358,9 +358,13 @@ const reviewDecisionSchema = z.object({
   listingVersionId: z.string().uuid(),
   decision: z.enum(["approved", "changes_requested", "rejected"]),
   comment: z.string().trim().max(4000),
+  confirmDenial: z.string(),
 }).superRefine((value, context) => {
   if (value.decision !== "approved" && !value.comment) {
     context.addIssue({ code: "custom", path: ["comment"], message: "Explain the required correction or rejection reason." });
+  }
+  if (value.decision === "rejected" && value.confirmDenial !== "yes") {
+    context.addIssue({ code: "custom", path: ["confirmDenial"], message: "Confirm that you want to deny this listing." });
   }
 });
 
@@ -375,6 +379,7 @@ export async function decideListingReviewAction(
     listingVersionId: readText(formData, "listingVersionId"),
     decision: readText(formData, "decision"),
     comment: readText(formData, "comment"),
+    confirmDenial: readText(formData, "confirmDenial"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check the review decision." };
 
