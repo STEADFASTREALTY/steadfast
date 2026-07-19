@@ -197,7 +197,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .currency-price { align-items: stretch; display: flex; flex-direction: column; gap: 11px; min-width: 270px; }
 .currency-price-value { align-items: baseline; display: grid; gap: 6px 10px; grid-template-columns: 42px minmax(0, 1fr) auto; justify-content: stretch; }
 .currency-price-value > span { color: rgba(255,255,255,.78); font-size: 15px; font-weight: 700; letter-spacing: .05em; }
-.currency-price-value > strong { color: var(--lime); font-family: Georgia, serif; font-size: 34px; font-weight: 400; white-space: nowrap; }
+.currency-price-value > strong { color: var(--lime); font-family: Georgia, serif; font-size: 28px; font-weight: 400; white-space: nowrap; }
 .currency-price-value > strong small { font-family: inherit; font-size: 15px; }
 .currency-price-value > small { color: rgba(255,255,255,.55); font-size: 15px; white-space: nowrap; }
 .currency-price-conversions { align-items: stretch; display: grid; gap: 8px; justify-content: stretch; }
