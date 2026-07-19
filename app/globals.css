@@ -639,13 +639,13 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .listing-media-grid figcaption small { color: #788682; font-size: 15px; }
 .listing-media-empty { border: 1px dashed #aeb9b5; margin-top: 28px; padding: 28px; }
 .listing-media-empty strong { display: block; font-family: Georgia, serif; font-size: 18px; font-weight: 400; margin-bottom: 7px; }
-.listing-media-upload { align-items: center; background: var(--cream); border: 1px solid var(--line); display: grid; gap: 18px; grid-template-columns: auto minmax(190px, 1fr) minmax(220px, 1fr); margin-top: 18px; padding: 18px; }
+.listing-media-upload { align-items: center; background: var(--cream); border: 1px solid var(--line); display: grid; gap: 18px; grid-template-columns: auto minmax(0, 1fr); margin-top: 18px; padding: 18px; }
 .listing-media-upload .solid-button { align-items: center; cursor: pointer; display: inline-flex; justify-content: center; min-height: 45px; min-width: 184px; padding: 0 18px; white-space: nowrap; }
 .listing-media-upload .solid-button[aria-disabled="true"] { cursor: wait; opacity: .6; }
 .listing-media-upload input { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
 .listing-media-upload strong { display: block; font-size: 15px; }
 .listing-media-upload div p, .listing-media-status { color: #71807c; font-size: 15px; line-height: 1.5; margin: 4px 0 0; }
-.listing-media-status { justify-self: end; margin: 0; text-align: right; }
+.listing-media-status { grid-column: 1 / -1; justify-self: start; margin: 0; text-align: left; }
 .listing-media-upload.upload-error { border-color: var(--error); }
 .listing-media-upload.upload-error .listing-media-status { color: var(--error); font-weight: 700; }
 .listing-media-upload.upload-success { border-color: var(--teal-strong); }
