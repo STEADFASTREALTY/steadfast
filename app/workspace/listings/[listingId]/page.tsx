@@ -172,7 +172,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
         : "Private listing";
 
   return <main className="account-page">
-    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
+    <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
     <section className="account-hero compact"><span className="eyebrow"><i /> {listingAudience}</span><h1>{version?.title ?? "Listing record"}</h1><p>{brokerage?.display_name ?? "Your brokerage"} · {listing.lifecycle_state.replaceAll("_", " ")}</p></section>
     <div className="listing-wizard-shell">
       <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>{initial ? "Autosave on · private listing" : canEditActiveListing ? "Active listing · editing available" : "Read only"}</span></div>

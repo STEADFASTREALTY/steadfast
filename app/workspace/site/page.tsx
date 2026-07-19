@@ -125,7 +125,6 @@ export default async function SiteBuilderPage({
         hasWorkspace={access.hasWorkspace}
         canManageAgents={access.canManageAgents}
         canManageListings={access.isAgent}
-        canReviewListings={access.canReviewListings}
         canManageInquiries={access.canManageInquiries}
         canShareListings={access.canShareListings}
       />

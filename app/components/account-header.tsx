@@ -9,7 +9,6 @@ export async function AccountHeader({
   hasWorkspace = false,
   canManageAgents = false,
   canManageListings = false,
-  canReviewListings = false,
   canManageInquiries = false,
   canShareListings = false,
 }: {
@@ -17,7 +16,6 @@ export async function AccountHeader({
   hasWorkspace?: boolean;
   canManageAgents?: boolean;
   canManageListings?: boolean;
-  canReviewListings?: boolean;
   canManageInquiries?: boolean;
   canShareListings?: boolean;
 }) {
@@ -35,7 +33,6 @@ export async function AccountHeader({
         <Link href="/properties">Properties</Link>
         {hasWorkspace ? <Link href="/workspace/site">Website</Link> : null}
         {canManageListings ? <Link href="/workspace/listings">Listings</Link> : null}
-        {canReviewListings ? <Link href="/workspace/reviews">Reviews</Link> : null}
         {canShareListings ? <Link href="/workspace/sharing">Sharing</Link> : null}
         {canManageInquiries ? <Link href="/workspace/inquiries">Inquiries</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}

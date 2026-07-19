@@ -477,7 +477,6 @@ export async function submitListingForReviewAction(
 
   revalidatePath("/workspace");
   revalidatePath("/workspace/listings");
-  revalidatePath("/workspace/reviews");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
   redirect(`/workspace/listings/${parsed.data.listingId}?notice=Submitted+to+your+brokerage+for+review.`);
 }
@@ -569,7 +568,6 @@ export async function decideListingReviewAction(
 
   revalidatePath("/workspace");
   revalidatePath("/workspace/listings");
-  revalidatePath("/workspace/reviews");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
   const notice = parsed.data.decision === "approved"
     ? approvedOutcome === "sold"
@@ -584,7 +582,7 @@ export async function decideListingReviewAction(
     : parsed.data.decision === "changes_requested"
       ? "Changes requested. A new editable draft is ready for the agent."
       : "Submission rejected and retained in its review history.";
-  redirect(`/workspace/reviews?notice=${encodeURIComponent(notice)}`);
+  redirect(`/workspace/listings?status=pending&notice=${encodeURIComponent(notice)}`);
 }
 
 const activatePublicListingSchema = z.object({

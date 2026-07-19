@@ -17,7 +17,7 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
   const required = access.isAdmin || access.isOperations;
 
   return <main className="account-page">
-    <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
+    <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
     <section className="account-hero compact"><span className="eyebrow"><i /> Account protection</span><h1>Security.</h1><p>Protect your account and control signed-in machines.</p></section>
     <div className="account-settings-layout account-security-settings-layout">
       <AccountSectionNav active="security" />

@@ -47,7 +47,6 @@ export default async function InquiryInboxPage({ searchParams }: PageProps) {
         hasWorkspace={access.hasWorkspace}
         canManageAgents={access.canManageAgents}
         canManageListings={access.isAgent || access.canReviewListings}
-        canReviewListings={access.canReviewListings}
         canManageInquiries={access.canManageInquiries}
         canShareListings={access.canShareListings}
       />

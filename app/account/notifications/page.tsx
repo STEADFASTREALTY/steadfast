@@ -78,7 +78,6 @@ export default async function NotificationsPage() {
         hasWorkspace={access.hasWorkspace}
         canManageAgents={access.canManageAgents}
         canManageListings={access.isAgent || access.canReviewListings}
-        canReviewListings={access.canReviewListings}
         canManageInquiries={access.canManageInquiries}
         canShareListings={access.canShareListings}
       />

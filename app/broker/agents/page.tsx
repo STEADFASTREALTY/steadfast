@@ -81,7 +81,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
+      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
       <section className="account-hero compact"><span className="eyebrow"><i /> Brokerage control</span><h1>Team.</h1><p>{brokerage?.display_name ?? "Your brokerage"}</p></section>
       <div className="team-management-layout">
         <aside className="account-section-nav" aria-label="Team management sections">
