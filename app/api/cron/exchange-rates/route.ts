@@ -6,12 +6,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
 export const maxDuration = 20;
 
-const exchangeRatesResponse = z.array(z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  base: z.literal("USD"),
-  quote: z.enum(["JMD", "CAD", "GBP"]),
-  rate: z.number().positive(),
-}));
+const exchangeRatesResponse = z.object({
+  result: z.literal("success"),
+  time_last_update_unix: z.number().int().positive(),
+  base_code: z.literal("USD"),
+  rates: z.object({
+    JMD: z.number().positive(),
+    CAD: z.number().positive(),
+    GBP: z.number().positive(),
+  }),
+});
 
 function hasValidCronSecret(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -29,26 +33,21 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch("https://api.frankfurter.dev/v2/rates?base=USD&quotes=JMD,CAD,GBP", {
+    const response = await fetch("https://open.er-api.com/v6/latest/USD", {
       cache: "no-store",
       headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) throw new Error(`Provider returned ${response.status}.`);
     const payload = exchangeRatesResponse.parse(await response.json());
-    const rates = new Map(payload.map((item) => [item.quote, item]));
-    const jmd = rates.get("JMD");
-    const cad = rates.get("CAD");
-    const gbp = rates.get("GBP");
-    if (!jmd || !cad || !gbp || jmd.date !== cad.date || jmd.date !== gbp.date) throw new Error("Provider returned an incomplete rate set.");
-    const providerUpdatedAt = new Date(`${jmd.date}T00:00:00.000Z`);
+    const providerUpdatedAt = new Date(payload.time_last_update_unix * 1000);
     const supabase = createAdminClient();
     const { error } = await supabase.from("exchange_rate_snapshots").insert({
-      provider: "Frankfurter",
+      provider: "ExchangeRate-API",
       base_currency: "USD",
-      jmd_per_usd: jmd.rate,
-      cad_per_usd: cad.rate,
-      gbp_per_usd: gbp.rate,
+      jmd_per_usd: payload.rates.JMD,
+      cad_per_usd: payload.rates.CAD,
+      gbp_per_usd: payload.rates.GBP,
       provider_updated_at: providerUpdatedAt.toISOString(),
       fetched_at: new Date().toISOString(),
     });
