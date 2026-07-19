@@ -353,6 +353,20 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .activation-panel form label { align-items: flex-start; display: flex; font-size: 15px; gap: 9px; line-height: 1.5; }
 .activation-panel form input { accent-color: var(--ink); margin-top: 2px; }
 .activation-panel .solid-button { justify-self: start; }
+.listing-closure-panel { align-items: start; background: #fff8e8; border: 2px solid var(--gold); display: grid; gap: 34px; grid-template-columns: minmax(0, 1fr) minmax(360px, .9fr); margin-top: 24px; padding: 30px 34px; }
+.listing-closure-copy > span { color: #8d6510; font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.listing-closure-copy h2 { font-family: Georgia, serif; font-size: 28px; font-weight: 400; margin: 8px 0 10px; }
+.listing-closure-copy p { color: #55624c; font-size: 15px; line-height: 1.65; margin: 0; }
+.listing-closure-panel form { display: grid; gap: 16px; }
+.listing-closure-panel fieldset { border: 0; display: grid; gap: 9px; margin: 0; padding: 0; }
+.listing-closure-panel legend { color: #667572; font-size: 15px; font-weight: 700; letter-spacing: .1em; margin-bottom: 9px; text-transform: uppercase; }
+.listing-closure-panel label { align-items: flex-start; background: #fff; border: 1px solid #cdbb91; cursor: pointer; display: flex; gap: 12px; padding: 13px 14px; }
+.listing-closure-panel label:has(input:checked) { border-color: var(--gold); box-shadow: inset 4px 0 0 var(--gold); }
+.listing-closure-panel input { accent-color: var(--ink); margin-top: 4px; }
+.listing-closure-panel label span, .listing-closure-panel label strong, .listing-closure-panel label small { display: block; }
+.listing-closure-panel label strong { font-size: 15px; }
+.listing-closure-panel label small { color: #667572; font-size: 15px; line-height: 1.45; margin-top: 3px; }
+.listing-closure-panel .solid-button { justify-self: start; }
 .active-publication { background: var(--ink); border-color: var(--ink); color: #fff; }
 .active-publication > div > span { color: var(--lime); }
 .active-publication p { color: rgba(255,255,255,.68); }
@@ -955,6 +969,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
   .public-media-gallery { grid-template-columns: 1fr; }
   .public-media-gallery img, .public-media-gallery img:first-child { grid-column: auto; height: 64vw; min-height: 240px; }
   .activation-panel { grid-template-columns: 1fr; padding: 28px 22px; }
+  .listing-closure-panel { grid-template-columns: 1fr; padding: 24px 20px; }
   .active-publication .solid-button { justify-self: start; }
   .public-listing-hero { align-items: flex-start; flex-direction: column; padding: 58px 24px; }
   .public-listing-facts { grid-template-columns: 1fr 1fr; }

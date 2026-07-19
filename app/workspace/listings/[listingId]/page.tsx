@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AccountHeader } from "@/app/components/account-header";
 import { EditListingForm, type EditableListingDraft } from "@/app/components/edit-listing-form";
 import { ListingMediaUploader } from "@/app/components/listing-media-uploader";
+import { ListingClosurePanel } from "@/app/components/listing-closure-panel";
 import { ListingSubmissionPanel } from "@/app/components/listing-submission-panel";
 import { ReviewDecisionForm } from "@/app/components/review-decision-form";
 import { StatusMessage } from "@/app/components/status-message";
@@ -24,6 +25,7 @@ type DraftVersion = {
   purpose: EditableListingDraft["purpose"];
   property_type: EditableListingDraft["propertyType"];
   property_subtype: string | null;
+  requested_lifecycle_state: "active" | "sold" | "rented" | "approved_inactive" | null;
   price: number;
   price_period: EditableListingDraft["pricePeriod"] | null;
   title: string;
@@ -72,7 +74,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   if (!isAuthorized || !listing) redirect("/access-denied?reason=listing-record");
 
   const [{ data: versionRows }, { data: property }, { data: parishes }] = await Promise.all([
-    admin.from("listing_versions").select("id,version_number,revision_state,purpose,property_type,property_subtype,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,visibility,public_location_precision").eq("listing_id", listing.id),
+    admin.from("listing_versions").select("id,version_number,revision_state,purpose,property_type,property_subtype,requested_lifecycle_state,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,visibility,public_location_precision").eq("listing_id", listing.id),
     admin.from("properties").select("address_id").eq("id", listing.property_id).maybeSingle(),
     context.supabase.from("administrative_areas").select("id,name").eq("area_type", "parish").order("name"),
   ]);
@@ -182,7 +184,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
           <button className="solid-button" type="submit">Edit listing</button>
         </form>
       </section> : null}
-      {initial ? <><EditListingForm key={`${listing.id}:${listing.lock_version}`} initial={initial} parishes={parishes ?? []} /><ListingMediaUploader listingId={listing.id} images={readyImages} reservedCount={reservedCount} coverMediaId={coverMediaId} /><ListingSubmissionPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} /></> : <>
+      {initial ? <><EditListingForm key={`${listing.id}:${listing.lock_version}`} initial={initial} parishes={parishes ?? []} />{version.requested_lifecycle_state && ["active", "sold", "rented"].includes(version.requested_lifecycle_state) ? <ListingClosurePanel listingId={listing.id} lockVersion={listing.lock_version} requestedState={version.requested_lifecycle_state as "active" | "sold" | "rented"} /> : null}<ListingMediaUploader listingId={listing.id} images={readyImages} reservedCount={reservedCount} coverMediaId={coverMediaId} /><ListingSubmissionPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} /></> : <>
         <section className="submitted-listing-summary">
           <div className="submitted-listing-heading"><span>Listing details</span><h2>{version?.revision_state === "submitted" ? "Submitted for review" : "Current listing"}</h2><p>{version?.revision_state === "submitted" ? "These are the exact details awaiting the brokerage decision." : "Review the current details or choose Edit listing to make changes."}</p></div>
           <dl>
@@ -190,6 +192,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
             <div><dt>Price</dt><dd>{version ? new Intl.NumberFormat("en-JM", { style: "currency", currency: "JMD", maximumFractionDigits: 0 }).format(version.price) : "—"}</dd></div>
             <div><dt>Property type</dt><dd>{version?.property_type.replaceAll("_", " ")}</dd></div>
             <div><dt>Visibility request</dt><dd>{version?.visibility.replaceAll("_", " ")}</dd></div>
+            {version?.requested_lifecycle_state === "sold" || version?.requested_lifecycle_state === "rented" ? <div><dt>Closing request</dt><dd>{version.requested_lifecycle_state}</dd></div> : null}
             <div><dt>Bedrooms</dt><dd>{version?.bedrooms ?? "—"}</dd></div>
             <div><dt>Bathrooms</dt><dd>{version?.bathrooms ?? "—"}</dd></div>
           </dl>

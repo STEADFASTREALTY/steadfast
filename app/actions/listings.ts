@@ -136,6 +136,49 @@ export async function startActiveListingEditAction(formData: FormData) {
   redirect(`/workspace/listings/${listingId.data}?notice=${encodeURIComponent("Editing is open. The listing is now private until the brokerage approves it again.")}`);
 }
 
+const listingClosureRequestSchema = z.object({
+  listingId: z.string().uuid(),
+  expectedLockVersion: z.coerce.number().int().positive(),
+  requestedLifecycleState: z.enum(["active", "sold", "rented"]),
+});
+
+export async function requestListingClosureAction(formData: FormData) {
+  const parsed = listingClosureRequestSchema.safeParse({
+    listingId: readText(formData, "listingId"),
+    expectedLockVersion: readText(formData, "expectedLockVersion"),
+    requestedLifecycleState: readText(formData, "requestedLifecycleState"),
+  });
+  if (!parsed.success) redirect("/workspace/listings?error=Choose+a+valid+listing+outcome.");
+
+  const context = await getActiveMembershipContext(`/workspace/listings/${parsed.data.listingId}`);
+  const canEdit = Boolean(context.membership) && (
+    context.roles.includes("agent")
+    || context.roles.includes("broker")
+    || context.permissions.some((permission) => permission.permission_key === "listing.manage" && permission.effect === "allow")
+  );
+  if (!canEdit) redirect(`/workspace/listings/${parsed.data.listingId}?error=You+do+not+have+permission+to+change+this+listing.`);
+
+  const { error } = await context.supabase.from("request_listing_closure_commands").insert({
+    request_id: randomUUID(),
+    listing_id: parsed.data.listingId,
+    expected_lock_version: parsed.data.expectedLockVersion,
+    requested_lifecycle_state: parsed.data.requestedLifecycleState,
+  });
+  if (error?.code === "40001") {
+    redirect(`/workspace/listings/${parsed.data.listingId}?error=${encodeURIComponent("This draft changed after the page opened. Reload it before changing the outcome.")}`);
+  }
+  if (error) {
+    redirect(`/workspace/listings/${parsed.data.listingId}?error=${encodeURIComponent("The listing outcome could not be saved. Confirm that this is an active listing opened for editing.")}`);
+  }
+
+  revalidatePath("/workspace/listings");
+  revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
+  const notice = parsed.data.requestedLifecycleState === "active"
+    ? "This edit will keep the listing active after brokerage approval."
+    : `Close as ${parsed.data.requestedLifecycleState} saved. Submit the edit for brokerage approval when ready.`;
+  redirect(`/workspace/listings/${parsed.data.listingId}?notice=${encodeURIComponent(notice)}`);
+}
+
 export async function saveListingDraftAction(formData: FormData): Promise<SaveListingDraftResult> {
   const context = await getActiveMembershipContext("/workspace/listings");
   const canWorkWithListings = Boolean(context.membership) && (
@@ -491,6 +534,7 @@ export async function decideListingReviewAction(
   // submissions intentionally remain off the public marketplace.
   let published = false;
   let activationNeedsAttention = false;
+  let approvedOutcome: "sold" | "rented" | null = null;
   if (parsed.data.decision === "approved") {
     const admin = createAdminClient();
     const { data: approvedListing } = await admin
@@ -499,8 +543,11 @@ export async function decideListingReviewAction(
       .eq("id", parsed.data.listingId)
       .maybeSingle();
     const { data: approvedVersion } = approvedListing?.current_approved_version_id
-      ? await admin.from("listing_versions").select("id,visibility").eq("id", approvedListing.current_approved_version_id).maybeSingle()
+      ? await admin.from("listing_versions").select("id,visibility,requested_lifecycle_state").eq("id", approvedListing.current_approved_version_id).maybeSingle()
       : { data: null };
+    approvedOutcome = approvedVersion?.requested_lifecycle_state === "sold" || approvedVersion?.requested_lifecycle_state === "rented"
+      ? approvedVersion.requested_lifecycle_state
+      : null;
 
     if (approvedListing?.lifecycle_state === "approved_inactive" && approvedVersion?.visibility === "public") {
       try {
@@ -525,7 +572,11 @@ export async function decideListingReviewAction(
   revalidatePath("/workspace/reviews");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
   const notice = parsed.data.decision === "approved"
-    ? published
+    ? approvedOutcome === "sold"
+      ? "Listing approved and closed as sold."
+      : approvedOutcome === "rented"
+        ? "Listing approved and closed as rented."
+        : published
       ? "Listing approved and published to the public marketplace."
       : activationNeedsAttention
         ? "Listing approved, but public publication needs attention. Open the listing to complete the safety checks."
