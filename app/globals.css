@@ -1001,21 +1001,24 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .demo-listing-notice p { margin: .35rem 0; color: var(--charcoal); }
 .demo-listing-notice a { color: var(--evergreen); font-weight: 700; text-decoration: underline; }
 
-.public-header { align-items: center; background: var(--evergreen); color: #fff; display: flex; gap: 22px; min-height: 60px; padding: 0 clamp(20px, 4vw, 64px); }
+.public-header { align-items: center; background: #eef2f5; border-bottom: 1px solid #d7dfe4; color: var(--charcoal); display: flex; gap: 22px; min-height: 60px; padding: 0 clamp(20px, 4vw, 64px); }
 .public-header .brand-logo { height: 70px; width: 82px; }
+.public-header .brand-logo img { filter: drop-shadow(0 2px 4px rgba(7,52,120,.14)); }
 .public-header nav { align-items: center; display: flex; flex: 1; gap: clamp(12px, 1.7vw, 25px); justify-content: center; }
-.public-header nav a { color: rgba(255,255,255,.84); font-size: 15px; white-space: nowrap; }
-.public-header nav a:hover { color: var(--gold); }
-.public-header .outline-button { min-height: 36px; padding: 0 15px; }
-.public-account-session { align-items: center; border-left: 1px solid rgba(255,255,255,.2); display: flex; gap: 7px; padding-left: 18px; }
-.public-account-session > a { color: #fff; font-size: 15px; font-weight: 700; white-space: nowrap; }
-.public-account-session > a:hover { color: var(--gold); }
+.public-header nav a { color: var(--evergreen); font-size: 15px; white-space: nowrap; }
+.public-header nav a:hover { color: #075aa8; }
+.public-header .outline-button { border-color: rgba(16,44,42,.42); color: var(--evergreen); min-height: 36px; padding: 0 15px; }
+.public-account-session { align-items: center; border-left: 1px solid #c8d2d8; display: flex; gap: 7px; padding-left: 18px; }
+.public-account-session > a { color: var(--evergreen); font-size: 15px; font-weight: 700; white-space: nowrap; }
+.public-account-session > a:hover { color: #075aa8; }
 .public-account-session form { display: flex; margin: 0; }
 .public-account-session .account-exit-button { min-height: 38px; min-width: 38px; }
 .public-currency-selector { align-items: center; display: flex; gap: 7px; }
-.public-currency-selector span { color: rgba(255,255,255,.7); font-size: 15px; font-weight: 700; }
-.public-currency-selector select { background: transparent; border: 1px solid rgba(255,255,255,.42); border-radius: 6px; color: #fff; font-size: 15px; min-height: 36px; padding: 0 8px; }
-.public-currency-selector option { background: var(--evergreen); color: #fff; }
+.public-currency-selector span { color: #4f6068; font-size: 15px; font-weight: 700; }
+.public-currency-selector select { background: #fff; border: 1px solid #b9c6ce; border-radius: 6px; color: var(--evergreen); font-size: 15px; min-height: 36px; padding: 0 8px; }
+.public-currency-selector option { background: #fff; color: var(--evergreen); }
+.public-header .account-exit-button { color: #075aa8; }
+.public-header .account-exit-button:hover { color: var(--evergreen); }
 .home-search-hero { background: linear-gradient(135deg, var(--evergreen), #164641); color: #fff; padding: clamp(64px, 9vw, 108px) clamp(20px, 6vw, 96px); text-align: center; }
 .home-search-hero > span, .home-section-heading > span, .public-information-hero > span { color: var(--gold); font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .home-search-hero h1 { font-family: Georgia, serif; font-size: clamp(45px, 7vw, 78px); font-weight: 400; letter-spacing: -.05em; margin: 14px 0; }
