@@ -30,6 +30,7 @@ export async function getActiveMembershipContext(nextPath = "/account") {
     account.supabase
       .from("brokerage_memberships")
       .select("id, brokerage_id, status, starts_at, brokerages(id, display_name, slug, status)")
+      .eq("person_id", account.person.id)
       .eq("status", "active")
       .limit(1),
     admin
