@@ -70,6 +70,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
   const assetBySite = new Map((assets ?? []).map((asset) => [asset.site_id, asset.id]));
   const listingCountByPerson = new Map<string, number>();
   for (const listing of listings ?? []) listingCountByPerson.set(listing.created_by_person_id, (listingCountByPerson.get(listing.created_by_person_id) ?? 0) + 1);
+  const hasPendingApplications = applications?.some((application) => application.status === "submitted") ?? false;
 
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
   return (
@@ -80,7 +81,10 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
         <aside className="account-section-nav" aria-label="Team management sections">
           <span>Team</span>
           <Link className={section === "members" ? "active" : ""} href="/broker/agents?section=members">Team members</Link>
-          <Link className={section === "applications" ? "active" : ""} href="/broker/agents?section=applications">Applications</Link>
+          <Link className={section === "applications" ? "active" : ""} href="/broker/agents?section=applications">
+            <span>Applications</span>
+            {hasPendingApplications ? <span aria-label="Applications awaiting review" className="nav-alert-badge" title="Applications awaiting review">!</span> : null}
+          </Link>
         </aside>
         <div className="team-management-main">
           <StatusMessage error={params.error} notice={params.notice} />
