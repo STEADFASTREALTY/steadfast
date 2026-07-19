@@ -5,6 +5,7 @@ import { AccountHeader } from "@/app/components/account-header";
 import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = { title: "Listings", description: "Manage private and approved brokerage property listings.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -18,9 +19,19 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
   const access = deriveWorkspaceAccess({ hasMembership: true, roles: context.roles, permissions: context.permissions, platformRoles: context.platformRoles });
   if (!access.isAgent && !access.canReviewListings) redirect("/access-denied?reason=listing-workspace");
 
-  const { data: listings } = await context.supabase.from("listings")
+  // Listing drafts are intentionally protected from public/RLS projections. The
+  // authenticated membership is verified above; this scoped server query then
+  // returns only the current brokerage inventory (or the agent's own work).
+  const admin = createAdminClient();
+  let listingsQuery = admin.from("listings")
     .select("id, lifecycle_state, updated_at, listing_versions(version_number,title,purpose,price,currency,revision_state)")
     .order("updated_at", { ascending: false });
+  if (access.canReviewListings && context.membership.brokerage_id) {
+    listingsQuery = listingsQuery.eq("brokerage_id", context.membership.brokerage_id);
+  } else {
+    listingsQuery = listingsQuery.eq("created_by_person_id", context.person.id);
+  }
+  const { data: listings } = await listingsQuery;
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
 
   return <main className="account-page">
