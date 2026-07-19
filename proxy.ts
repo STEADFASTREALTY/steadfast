@@ -61,8 +61,9 @@ export async function proxy(request: NextRequest) {
     ? ".properap.com"
     : undefined;
   const subdomainMatch = hostname.match(/^([a-z0-9]+(?:-[a-z0-9]+)*)\.properap\.com$/);
-  const rewriteUrl = subdomainMatch && request.nextUrl.pathname === "/"
-    ? new URL(`/sites/${subdomainMatch[1]}`, request.url)
+  const professionalSlug = subdomainMatch?.[1] === "www" ? null : subdomainMatch?.[1];
+  const rewriteUrl = professionalSlug && request.nextUrl.pathname === "/"
+    ? new URL(`/sites/${professionalSlug}`, request.url)
     : null;
   let response = rewriteUrl
     ? NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } })
