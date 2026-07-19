@@ -37,7 +37,6 @@ type DraftVersion = {
   public_location_precision: EditableListingDraft["publicLocationPrecision"];
 };
 type Address = { administrative_area_id: string; address_line_1: string; address_line_2: string | null; postal_code: string | null };
-type Property = { property_addresses: Address | null };
 type ReviewRecord = { listing_version_id: string; decision: string; comment: string | null; is_self_approval: boolean; decided_at: string };
 
 export default async function ListingDraftPage({ params, searchParams }: { params: Promise<{ listingId: string }>; searchParams: Promise<{ notice?: string; error?: string }> }) {
@@ -49,16 +48,29 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   const access = deriveWorkspaceAccess({ hasMembership: true, roles: context.roles, permissions: context.permissions, platformRoles: context.platformRoles });
   if (!access.isAgent && !access.canReviewListings) redirect("/access-denied?reason=listing-workspace");
 
-  const [{ data: listing }, { data: parishes }] = await Promise.all([
-    context.supabase.from("listings").select("id,lifecycle_state,lock_version,current_approved_version_id,updated_at,properties(property_addresses(administrative_area_id,address_line_1,address_line_2,postal_code)),listing_versions(id,version_number,revision_state,purpose,property_type,property_subtype,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,visibility,public_location_precision)").eq("id", route.listingId).single(),
+  const admin = createAdminClient();
+  const { data: listing } = await admin
+    .from("listings")
+    .select("id,brokerage_id,created_by_person_id,property_id,lifecycle_state,lock_version,current_approved_version_id,updated_at")
+    .eq("id", route.listingId)
+    .maybeSingle();
+  const isAuthorized = listing && (
+    (access.canReviewListings && listing.brokerage_id === context.membership.brokerage_id) ||
+    (!access.canReviewListings && listing.created_by_person_id === context.person.id)
+  );
+  if (!isAuthorized || !listing) redirect("/access-denied?reason=listing-record");
+
+  const [{ data: versionRows }, { data: property }, { data: parishes }] = await Promise.all([
+    admin.from("listing_versions").select("id,version_number,revision_state,purpose,property_type,property_subtype,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,visibility,public_location_precision").eq("listing_id", listing.id),
+    admin.from("properties").select("address_id").eq("id", listing.property_id).maybeSingle(),
     context.supabase.from("administrative_areas").select("id,name").eq("area_type", "parish").order("name"),
   ]);
-  if (!listing) redirect("/access-denied?reason=listing-record");
 
-  const versions = (listing.listing_versions as unknown as DraftVersion[]).sort((a, b) => b.version_number - a.version_number);
+  const versions = ((versionRows ?? []) as DraftVersion[]).sort((a, b) => b.version_number - a.version_number);
   const version = versions.find((item) => item.revision_state === "working_draft") ?? versions[0];
-  const property = listing.properties as unknown as Property | null;
-  const address = property?.property_addresses;
+  const { data: address } = property?.address_id
+    ? await admin.from("property_addresses").select("administrative_area_id,address_line_1,address_line_2,postal_code").eq("id", property.address_id).maybeSingle()
+    : { data: null as Address | null };
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
   const editable = listing.lifecycle_state === "draft" && version?.revision_state === "working_draft" && address;
 
@@ -85,27 +97,31 @@ export default async function ListingDraftPage({ params, searchParams }: { param
     publicLocationPrecision: version.public_location_precision,
   } : null;
 
-  const { data: reviewRows } = await context.supabase.from("listing_reviews")
+  const { data: reviewRows } = await admin.from("listing_reviews")
     .select("listing_version_id,decision,comment,is_self_approval,decided_at")
     .in("listing_version_id", versions.map((item) => item.id))
     .order("decided_at", { ascending: false });
   const reviews = (reviewRows ?? []) as ReviewRecord[];
 
-  const { data: mediaLinks } = version ? await context.supabase
+  const { data: mediaLinks } = version ? await admin
     .from("listing_version_media")
-    .select("position,listing_media(id,original_filename,object_path,status,width,height)")
+    .select("position,media_id")
     .eq("listing_version_id", version.id)
     .order("position") : { data: [] };
-  const linkedMedia = (mediaLinks ?? []).map((link) => link.listing_media as unknown as {
+  const mediaIds = (mediaLinks ?? []).map((link) => link.media_id);
+  const { data: mediaRows } = mediaIds.length
+    ? await admin.from("listing_media").select("id,original_filename,object_path,status,width,height").in("id", mediaIds)
+    : { data: [] };
+  const mediaById = new Map((mediaRows ?? []).map((media) => [media.id, media]));
+  const linkedMedia = (mediaLinks ?? []).map((link) => mediaById.get(link.media_id) as {
     id: string;
     original_filename: string;
     object_path: string;
     status: string;
     width: number | null;
     height: number | null;
-  } | null).filter((media): media is NonNullable<typeof media> => Boolean(media));
+  } | undefined).filter((media): media is NonNullable<typeof media> => Boolean(media));
   const reservedCount = linkedMedia.filter((media) => !["rejected", "removed"].includes(media.status)).length;
-  const admin = createAdminClient();
   const readyImages = (await Promise.all(linkedMedia.filter((media) => media.status === "ready" && media.width && media.height).map(async (media) => {
     const { data } = await admin.storage.from(LISTING_MEDIA_BUCKET).createSignedUrl(media.object_path, 15 * 60);
     return data?.signedUrl ? {
