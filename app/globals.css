@@ -463,7 +463,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 
 .auth-page { background: var(--cream); display: grid; grid-template-columns: minmax(340px, .9fr) minmax(480px, 1.1fr); min-height: 100vh; }
 .auth-intro { background: #eef2f5; border-right: 1px solid #d7dfe4; color: var(--charcoal); display: flex; flex-direction: column; justify-content: center; padding: clamp(48px, 8vw, 110px); }
-.auth-intro .brand-logo { height: 188px; margin-bottom: 42px; width: 220px; }
+.auth-intro .brand-logo { align-self: center; height: 282px; margin-bottom: 42px; width: 330px; }
 .auth-intro .brand-logo img { filter: drop-shadow(0 2px 4px rgba(7,52,120,.14)); }
 .auth-intro .eyebrow { color: var(--gold); }
 .auth-intro .brand { left: clamp(36px, 6vw, 90px); position: absolute; top: 34px; }
@@ -885,7 +885,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 
 @media (max-width: 680px) {
   .auth-intro { min-height: 430px; padding: 100px 28px 55px; }
-  .auth-intro .brand-logo { height: 128px; margin-bottom: 28px; width: 150px; }
+  .auth-intro .brand-logo { height: 192px; margin-bottom: 28px; width: 225px; }
   .auth-intro .brand { left: 28px; }
   .auth-intro h1 { font-size: 58px; }
   .stack-form.two-column { grid-template-columns: 1fr; }
