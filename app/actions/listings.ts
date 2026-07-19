@@ -400,12 +400,50 @@ export async function decideListingReviewAction(
   });
   if (error) return { error: "This submission could not be decided. It may already have been reviewed or its eligibility changed." };
 
+  // A public submission is already broker-reviewed at this point. Complete the
+  // same protected activation path automatically; private and agent-network
+  // submissions intentionally remain off the public marketplace.
+  let published = false;
+  let activationNeedsAttention = false;
+  if (parsed.data.decision === "approved") {
+    const admin = createAdminClient();
+    const { data: approvedListing } = await admin
+      .from("listings")
+      .select("id,lifecycle_state,current_approved_version_id,lock_version")
+      .eq("id", parsed.data.listingId)
+      .maybeSingle();
+    const { data: approvedVersion } = approvedListing?.current_approved_version_id
+      ? await admin.from("listing_versions").select("id,visibility").eq("id", approvedListing.current_approved_version_id).maybeSingle()
+      : { data: null };
+
+    if (approvedListing?.lifecycle_state === "approved_inactive" && approvedVersion?.visibility === "public") {
+      try {
+        await ensureApprovedVersionDerivatives(admin, approvedListing.id, approvedVersion.id);
+        const { error: activationError } = await context.supabase.from("activate_public_listing_commands").insert({
+          request_id: randomUUID(),
+          listing_id: approvedListing.id,
+          approved_version_id: approvedVersion.id,
+          expected_lock_version: approvedListing.lock_version,
+          confirm_publication: true,
+        });
+        published = !activationError;
+        activationNeedsAttention = Boolean(activationError);
+      } catch {
+        activationNeedsAttention = true;
+      }
+    }
+  }
+
   revalidatePath("/workspace");
   revalidatePath("/workspace/listings");
   revalidatePath("/workspace/reviews");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
   const notice = parsed.data.decision === "approved"
-    ? "Listing approved. An authorized reviewer can now complete the separate public activation check."
+    ? published
+      ? "Listing approved and published to the public marketplace."
+      : activationNeedsAttention
+        ? "Listing approved, but public publication needs attention. Open the listing to complete the safety checks."
+        : "Listing approved. Its requested private or agents-only visibility has been retained."
     : parsed.data.decision === "changes_requested"
       ? "Changes requested. A new editable draft is ready for the agent."
       : "Submission rejected and retained in its review history.";

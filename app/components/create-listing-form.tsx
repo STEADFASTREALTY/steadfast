@@ -170,7 +170,7 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
       <section className="wizard-section">
         <div className="wizard-step"><span>05</span><div><strong>Choose the intended audience.</strong><p>This is only a request. The draft cannot appear publicly before brokerage approval.</p></div></div>
         <fieldset className="visibility-options"><legend>Requested visibility</legend>
-          <label><input type="radio" name="visibility" value="public" defaultChecked /><span><strong>Public</strong><small>Eligible for public search and websites after approval.</small></span></label>
+          <label><input type="radio" name="visibility" value="public" defaultChecked /><span><strong>Public</strong><small>Publishes to public search and websites immediately after broker approval.</small></span></label>
           <label><input type="radio" name="visibility" value="professional_network" /><span><strong>Agents only</strong><small>Visible to all approved agents on CanadaSAP after approval. It will not appear in public search or public websites.</small></span></label>
           <label><input type="radio" name="visibility" value="private" /><span><strong>Private</strong><small>Keep it inside your brokerage workspace.</small></span></label>
         </fieldset>

@@ -7,13 +7,13 @@ export function ReviewDecisionForm({ listingId, listingVersionId }: { listingId:
   const [decision, setDecision] = useState<"approved" | "changes_requested" | "rejected">("approved");
   const [state, action, pending] = useActionState<ReviewListingState, FormData>(decideListingReviewAction, {});
   const promptTitle = decision === "approved" ? "Approve this listing?" : decision === "changes_requested" ? "Return this listing for changes?" : "Reject this listing?";
-  const promptMessage = decision === "approved" ? "This version will become the brokerage-approved record. Public activation will still require a separate confirmation." : decision === "changes_requested" ? "The submission will be retained and a new working draft will be opened for the agent." : "This proposal will be closed and retained in the brokerage history.";
+  const promptMessage = decision === "approved" ? "This version will become the brokerage-approved record. If it is marked Public, it will be published to the marketplace immediately after approval." : decision === "changes_requested" ? "The submission will be retained and a new working draft will be opened for the agent." : "This proposal will be closed and retained in the brokerage history.";
   return <form action={action} className="review-decision-card" data-prompt-title={promptTitle} data-prompt-message={promptMessage} data-prompt-confirm={decision === "approved" ? "Approve listing" : decision === "changes_requested" ? "Request changes" : "Reject listing"} data-prompt-variant={decision === "rejected" ? "danger" : "standard"}>
     <input type="hidden" name="listingId" value={listingId} />
     <input type="hidden" name="listingVersionId" value={listingVersionId} />
     <div><span>Brokerage decision</span><h2>Review this submission</h2><p>The submitted snapshot cannot be edited. Return it to the agent when corrections are needed.</p></div>
     <fieldset><legend>Decision</legend>
-      <label><input type="radio" name="decision" value="approved" checked={decision === "approved"} onChange={() => setDecision("approved")} /><span><strong>Approve</strong><small>Establish this as the canonical version. Public activation remains separate and requires a final eligibility check.</small></span></label>
+      <label><input type="radio" name="decision" value="approved" checked={decision === "approved"} onChange={() => setDecision("approved")} /><span><strong>Approve</strong><small>Establish this as the canonical version. Public listings publish immediately after their protected eligibility checks pass.</small></span></label>
       <label><input type="radio" name="decision" value="changes_requested" checked={decision === "changes_requested"} onChange={() => setDecision("changes_requested")} /><span><strong>Request changes</strong><small>Retain this submission and create a new editable version for correction.</small></span></label>
       <label><input type="radio" name="decision" value="rejected" checked={decision === "rejected"} onChange={() => setDecision("rejected")} /><span><strong>Reject</strong><small>Close this proposal while retaining its complete history.</small></span></label>
     </fieldset>

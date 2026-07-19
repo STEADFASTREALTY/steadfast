@@ -137,7 +137,7 @@ export function EditListingForm({ initial, parishes }: { initial: EditableListin
       <section className="wizard-section">
         <div className="wizard-step"><span>04</span><div><strong>Intended audience</strong><p>The listing remains private until the brokerage approves it.</p></div></div>
         <fieldset className="visibility-options"><legend>Requested visibility</legend>
-          <label><input type="radio" name="visibility" value="public" defaultChecked={initial.visibility === "public"} /><span><strong>Public</strong><small>Eligible for public search and websites after approval.</small></span></label>
+          <label><input type="radio" name="visibility" value="public" defaultChecked={initial.visibility === "public"} /><span><strong>Public</strong><small>Publishes to public search and websites immediately after broker approval.</small></span></label>
           <label><input type="radio" name="visibility" value="professional_network" defaultChecked={initial.visibility === "professional_network"} /><span><strong>Agents only</strong><small>Visible to all approved agents on CanadaSAP after approval. It will not appear in public search or public websites.</small></span></label>
           <label><input type="radio" name="visibility" value="private" defaultChecked={initial.visibility === "private"} /><span><strong>Private</strong><small>Keep it inside the brokerage workspace.</small></span></label>
         </fieldset>
