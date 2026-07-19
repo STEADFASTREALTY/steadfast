@@ -36,7 +36,9 @@ export async function generateAndStoreMediaDerivatives(
     const contentHash = createHash("sha256").update(derivative.bytes).digest("hex");
     const { error: uploadError } = await admin.storage
       .from(PUBLIC_DERIVATIVE_BUCKET)
-      .upload(objectPath, derivative.bytes, {
+      // Supabase Storage treats a plain Uint8Array inconsistently in the
+      // Node runtime. A Buffer keeps the WebP bytes binary end-to-end.
+      .upload(objectPath, Buffer.from(derivative.bytes), {
         cacheControl: "31536000",
         contentType: "image/webp",
         upsert: true,

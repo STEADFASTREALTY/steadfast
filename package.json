@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/maybe-regenerate-public-derivatives.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
     "check:metadata": "node scripts/check-page-metadata.mjs",
