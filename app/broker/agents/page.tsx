@@ -99,7 +99,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
               <div className="card-heading"><span>Current team</span><h2>Team members</h2><p>Suspended members keep their CanadaSAP account but cannot use brokerage tools.</p></div>
               <div className="team-table-scroll">
                 <table className="team-members-table">
-                  <thead><tr><th>Professional photo</th><th>First name</th><th>Last name</th><th>Date joined</th><th>Agent listings</th><th>Webpage</th><th>Action</th></tr></thead>
+                  <thead><tr><th>Photo</th><th>First</th><th>Last</th><th>Joined</th><th>Listings</th><th>Webpage</th><th>Action</th></tr></thead>
                   <tbody>{(members ?? []).map((member) => {
                     const person = member.people as unknown as Person;
                     const { firstName, lastName } = splitName(person?.display_name);
@@ -139,7 +139,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
               if (!activeRoles.includes("broker_staff") || activeRoles.includes("broker")) return null;
               const person = member.people as unknown as Person;
               const activePermissionKeys = permissions.filter((permission) => !permission.ends_at && permission.effect === "allow").map((permission) => permission.permission_key);
-              return <div key={member.id}><strong>{person?.display_name ?? "Staff member"}</strong><StaffCapabilityPanel membershipId={member.id} activePermissionKeys={activePermissionKeys} /></div>;
+              return <StaffCapabilityPanel key={member.id} membershipId={member.id} activePermissionKeys={activePermissionKeys} staffName={person?.display_name ?? "Staff member"} />;
             })}</div></section> : null}
           </> : <>
             <section className="account-card">

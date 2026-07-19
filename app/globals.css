@@ -548,8 +548,6 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .team-action-icons form { margin: 0; }
 .team-protected-member, .team-no-site { color: #7b8884; font-size: 15px; }
 .team-capability-list { display: grid; gap: 18px; margin-top: 22px; }
-.team-capability-list > div { border-top: 1px solid var(--line); padding-top: 18px; }
-.team-capability-list > div > strong { display: block; font-family: Georgia, serif; font-size: 18px; margin-bottom: 10px; }
 .account-main, .management-layout > div, .management-aside { display: flex; flex-direction: column; gap: 26px; }
 .settings-main { margin: -38px auto 0; max-width: 900px; padding: 0 28px 90px; position: relative; }
 .account-card { background: var(--paper); border: 1px solid var(--line); padding: 34px; }
@@ -576,7 +574,12 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .decision-form label { display: flex; flex-direction: column; gap: 7px; }
 .decision-form .solid-button, .outline-dark-button { border-radius: 999px; min-height: 42px; padding: 0 18px; }
 .capability-panel { border: 1px solid var(--line); grid-column: 1 / -1; padding: 16px; }
-.capability-panel summary { cursor: pointer; font-size: 15px; font-weight: 700; letter-spacing: .06em; }
+.capability-panel summary { align-items: center; cursor: pointer; display: flex; font-size: 15px; font-weight: 700; gap: 12px; list-style: none; }
+.capability-panel summary::-webkit-details-marker { display: none; }
+.capability-panel summary strong { align-items: center; display: inline-flex; font-family: Georgia, serif; font-size: 18px; font-weight: 700; letter-spacing: 0; }
+.capability-panel summary strong::after { color: var(--evergreen); content: "▼"; font-family: Arial, sans-serif; font-size: 15px; margin-left: 8px; transition: transform .18s ease; }
+.capability-panel[open] summary strong::after { transform: rotate(180deg); }
+.capability-panel summary > span { color: #657572; font-size: 15px; letter-spacing: .06em; }
 .capability-panel > p { color: #657572; font-size: 15px; line-height: 1.55; margin: 12px 0; }
 .capability-list { border-top: 1px solid var(--line); }
 .capability-row { align-items: center; border-bottom: 1px solid var(--line); display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) auto; padding: 14px 0; }

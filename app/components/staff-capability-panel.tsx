@@ -17,12 +17,13 @@ const capabilities = [
 type StaffCapabilityPanelProps = {
   membershipId: string;
   activePermissionKeys: string[];
+  staffName: string;
 };
 
-export function StaffCapabilityPanel({ membershipId, activePermissionKeys }: StaffCapabilityPanelProps) {
+export function StaffCapabilityPanel({ membershipId, activePermissionKeys, staffName }: StaffCapabilityPanelProps) {
   return (
     <details className="capability-panel">
-      <summary>Manage staff access</summary>
+      <summary><strong>{staffName}</strong><span>Permissions</span></summary>
       <p>Turn on only the work this person is responsible for. Every change is recorded.</p>
       <div className="capability-list">
         {capabilities.map((capability) => {
