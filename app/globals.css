@@ -195,17 +195,16 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .property-card-copy { padding: 14px; }
 .property-card-price { color: var(--ink); display: block; font-size: clamp(13px, 1.15vw, 17px); }
 .currency-price { align-items: stretch; display: flex; flex-direction: column; gap: 11px; min-width: 270px; }
-.currency-price-value { align-items: baseline; display: grid; gap: 6px 10px; grid-template-columns: 42px minmax(0, 1fr) auto; justify-content: stretch; }
+.currency-price-value { align-items: baseline; display: grid; gap: 6px 10px; grid-template-columns: 42px minmax(0, 1fr) auto 24px; justify-content: stretch; }
 .currency-price-value > span { color: rgba(255,255,255,.78); font-size: 15px; font-weight: 700; letter-spacing: .05em; }
 .currency-price-value > strong { color: var(--lime); font-family: Georgia, serif; font-size: 28px; font-weight: 400; white-space: nowrap; }
 .currency-price-value > strong small { font-family: inherit; font-size: 15px; }
 .currency-price-value > small { color: rgba(255,255,255,.55); font-size: 15px; white-space: nowrap; }
-.currency-price-conversions { align-items: stretch; display: grid; gap: 8px; justify-content: stretch; }
-.currency-price-conversions > div { align-items: baseline; display: grid; gap: 10px; grid-template-columns: 42px minmax(0, 1fr) auto 24px; }
-.currency-price-conversions > div > span { color: rgba(255,255,255,.68); font-size: 15px; font-weight: 700; letter-spacing: .05em; }
-.currency-price-conversions > div > strong { color: #fff; font-size: 20px; font-weight: 700; text-align: left; white-space: nowrap; }
-.currency-price-conversions > div > strong small { font-size: 15px; font-weight: 700; }
-.currency-price-conversions > div > small { color: rgba(255,255,255,.55); font-size: 15px; }
+.currency-price-row { align-items: baseline; display: grid; gap: 10px; grid-template-columns: 42px minmax(0, 1fr) auto 24px; }
+.currency-price-row > span { color: rgba(255,255,255,.68); font-size: 15px; font-weight: 700; letter-spacing: .05em; }
+.currency-price-row > strong { color: #fff; font-size: 20px; font-weight: 700; text-align: left; white-space: nowrap; }
+.currency-price-row > strong small { font-size: 15px; font-weight: 700; }
+.currency-price-row > small { color: rgba(255,255,255,.55); font-size: 15px; }
 .currency-info { align-items: center; border: 1px solid rgba(255,255,255,.8); border-radius: 50%; color: #fff; cursor: help; display: inline-flex; font-family: Georgia, serif; font-size: 15px; font-style: italic; font-weight: 700; height: 24px; justify-content: center; justify-self: end; position: relative; width: 24px; }
 .currency-info:focus { outline: 3px solid rgba(216,167,46,.55); outline-offset: 2px; }
 .currency-disclaimer { background: var(--ink); border: 1px solid var(--gold); bottom: calc(100% + 10px); color: #fff; display: block; font-family: Arial, sans-serif; font-size: 15px; font-style: normal; font-weight: 400; line-height: 1.5; opacity: 0; padding: 14px; pointer-events: none; position: absolute; right: 0; text-align: left; transform: translateY(5px); transition: opacity .16s ease, transform .16s ease; visibility: hidden; width: min(360px, 80vw); z-index: 5; }
@@ -887,6 +886,10 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .public-header nav a { color: rgba(255,255,255,.84); font-size: 15px; white-space: nowrap; }
 .public-header nav a:hover { color: var(--gold); }
 .public-header .outline-button { min-height: 36px; padding: 0 15px; }
+.public-currency-selector { align-items: center; display: flex; gap: 7px; }
+.public-currency-selector span { color: rgba(255,255,255,.7); font-size: 15px; font-weight: 700; }
+.public-currency-selector select { background: transparent; border: 1px solid rgba(255,255,255,.42); border-radius: 6px; color: #fff; font-size: 15px; min-height: 36px; padding: 0 8px; }
+.public-currency-selector option { background: var(--evergreen); color: #fff; }
 .home-search-hero { background: linear-gradient(135deg, var(--evergreen), #164641); color: #fff; padding: clamp(64px, 9vw, 108px) clamp(20px, 6vw, 96px); text-align: center; }
 .home-search-hero > span, .home-section-heading > span, .public-information-hero > span { color: var(--gold); font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .home-search-hero h1 { font-family: Georgia, serif; font-size: clamp(45px, 7vw, 78px); font-weight: 400; letter-spacing: -.05em; margin: 14px 0; }

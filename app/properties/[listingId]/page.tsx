@@ -5,7 +5,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { BrandLogo } from "@/app/components/brand-logo";
+import { PublicHeader } from "@/app/components/public-chrome";
 import { StructuredData } from "@/app/components/structured-data";
 import { StatusMessage } from "@/app/components/status-message";
 import { createInquiryAction } from "@/app/actions/inquiries";
@@ -89,7 +89,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
       ...(hasPublicMapPoint ? { geo: { "@type": "GeoCoordinates", latitude, longitude } } : {}),
       seller: { "@type": "RealEstateAgent", name: listing.brokerage_name },
     }} />
-    <header className="site-header search-header"><BrandLogo /><Link className="outline-button" href="/properties">Back to search</Link></header>
+    <PublicHeader />
     <section className="public-listing-hero">
       <div><span>{listing.purpose === "sale" ? "For sale" : "Long-term rental"} · {listing.lifecycle_state.replaceAll("_", " ")}</span><h1>{listing.title}</h1><p>{location}</p></div>
       {listing.currency === "JMD" ? <CurrencyPrice priceJmd={Number(listing.price)} pricePeriod={listing.price_period} rates={exchangeRates} /> : <strong>{new Intl.NumberFormat("en-JM", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price)}{listing.price_period ? <small> / {listing.price_period}</small> : null}</strong>}
