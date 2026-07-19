@@ -10,7 +10,7 @@ export function BrandLogo({ compact = false }: { compact?: boolean }) {
         width={1187}
         height={1015}
         priority
-        sizes={compact ? "54px" : "86px"}
+        sizes={compact ? "72px" : "170px"}
       />
     </Link>
   );
