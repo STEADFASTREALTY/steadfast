@@ -1,6 +1,6 @@
 import "server-only";
 
-const DEFAULT_APP_URL = "https://www.properap.com";
+const DEFAULT_APP_URL = "https://properap.com";
 
 export function getAppUrl() {
   const configured = process.env.NEXT_PUBLIC_APP_URL ?? DEFAULT_APP_URL;

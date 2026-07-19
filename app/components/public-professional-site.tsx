@@ -113,7 +113,7 @@ function SiteShell({ site, listings, media, assets, testimonials, team }: { site
     <PublicSiteLiveRefresh slug={site.slug} updatedAt={site.updated_at} />
     <style>{`.professional-site-page { background: ${palette.background} !important; color: ${palette.text} !important; }.professional-site-page .brokerage-site-hero { background: ${palette.primary} !important; }.professional-site-page .professional-site-hero h1 { color: ${heroTextColor} !important; -webkit-text-fill-color: ${heroTextColor} !important; }.professional-site-page .professional-site-hero p { color: ${heroSecondaryTextColor} !important; -webkit-text-fill-color: ${heroSecondaryTextColor} !important; }.professional-site-page .professional-site-hero .site-join-button { color: ${heroTextColor} !important; -webkit-text-fill-color: ${heroTextColor} !important; }`}</style>
     {order.map((name: string) => section[name])}
-    <footer className="professional-site-footer"><nav aria-label="Professional website navigation"><Link href="/properties">All properties</Link><Link href="/sign-in">Professional sign in</Link></nav><span>SteadFast Realty</span><a href="https://www.properap.com">properap.com</a><span>© {new Date().getFullYear()} SteadFast Realty. All rights reserved.</span></footer>
+    <footer className="professional-site-footer"><nav aria-label="Professional website navigation"><Link href="/properties">All properties</Link><Link href="/sign-in">Professional sign in</Link></nav><span>SteadFast Realty</span><a href="https://properap.com">properap.com</a><span>© {new Date().getFullYear()} SteadFast Realty. All rights reserved.</span></footer>
   </main>;
 }
 
