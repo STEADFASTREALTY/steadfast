@@ -8,13 +8,13 @@ import { ListingMediaUploader } from "@/app/components/listing-media-uploader";
 import { ListingSubmissionPanel } from "@/app/components/listing-submission-panel";
 import { ReviewDecisionForm } from "@/app/components/review-decision-form";
 import { StatusMessage } from "@/app/components/status-message";
-import { activatePublicListingAction } from "@/app/actions/listings";
+import { activatePublicListingAction, startActiveListingEditAction } from "@/app/actions/listings";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
 import { LISTING_MEDIA_BUCKET } from "@/lib/media/constants";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const metadata: Metadata = { title: "Listing draft", description: "Edit, review, and publish a private brokerage listing record.", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Listing", description: "Edit, review, and publish a brokerage listing record.", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 type DraftVersion = {
@@ -84,6 +84,9 @@ export default async function ListingDraftPage({ params, searchParams }: { param
     : { data: null as Address | null };
   const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
   const editable = listing.lifecycle_state === "draft" && version?.revision_state === "working_draft" && address;
+  const canEditActiveListing = ["active", "under_offer"].includes(listing.lifecycle_state) && (
+    listing.created_by_person_id === context.person.id || access.canReviewListings
+  );
 
   const initial: EditableListingDraft | null = editable ? {
     listingId: listing.id,
@@ -170,11 +173,18 @@ export default async function ListingDraftPage({ params, searchParams }: { param
     <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canReviewListings={access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
     <section className="account-hero compact"><span className="eyebrow"><i /> {listingAudience}</span><h1>{version?.title ?? "Listing record"}</h1><p>{brokerage?.display_name ?? "Your brokerage"} · {listing.lifecycle_state.replaceAll("_", " ")}</p></section>
     <div className="listing-wizard-shell">
-      <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>{initial ? "Autosave on · private draft" : "Read only"}</span></div>
+      <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>{initial ? "Autosave on · private listing" : canEditActiveListing ? "Active listing · editing available" : "Read only"}</span></div>
       <StatusMessage notice={query.notice} error={query.error} />
+      {canEditActiveListing ? <section className="activation-panel listing-edit-panel">
+        <div><span>Active listing</span><h2>Edit this listing</h2><p>Edit the existing property record, its details, and its photographs. Once editing begins, the listing is removed from public display until your brokerage approves it again.</p></div>
+        <form action={startActiveListingEditAction} data-prompt-title="Edit this active listing?" data-prompt-message="The listing will become private while you edit it. After your changes are submitted, it must be approved by the brokerage before it appears publicly again." data-prompt-confirm="Edit listing">
+          <input type="hidden" name="listingId" value={listing.id} />
+          <button className="solid-button" type="submit">Edit listing</button>
+        </form>
+      </section> : null}
       {initial ? <><EditListingForm key={`${listing.id}:${listing.lock_version}`} initial={initial} parishes={parishes ?? []} /><ListingMediaUploader listingId={listing.id} images={readyImages} reservedCount={reservedCount} coverMediaId={coverMediaId} /><ListingSubmissionPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} /></> : <>
         <section className="submitted-listing-summary">
-          <div className="submitted-listing-heading"><span>Version {version?.version_number}</span><h2>{version?.revision_state === "submitted" ? "Submitted snapshot" : "Retained listing snapshot"}</h2><p>This content is immutable and shown exactly as it was submitted or decided.</p></div>
+          <div className="submitted-listing-heading"><span>Listing details</span><h2>{version?.revision_state === "submitted" ? "Submitted for review" : "Current listing"}</h2><p>{version?.revision_state === "submitted" ? "These are the exact details awaiting the brokerage decision." : "Review the current details or choose Edit listing to make changes."}</p></div>
           <dl>
             <div><dt>Purpose</dt><dd>{version?.purpose === "sale" ? "For sale" : "Long-term rental"}</dd></div>
             <div><dt>Price</dt><dd>{version ? new Intl.NumberFormat("en-JM", { style: "currency", currency: "JMD", maximumFractionDigits: 0 }).format(version.price) : "—"}</dd></div>
@@ -205,7 +215,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
           <button className="solid-button" type="submit">Activate public listing</button>
         </form>
       </section> : null}
-      {listing.lifecycle_state === "active" ? <section className="activation-panel active-publication"><div><span>Public marketplace</span><h2>This listing is active.</h2><p>The public page is generated only from the approved safe projection. Private addresses, drafts, review comments, audit records, and source media paths remain excluded.</p></div><Link className="solid-button" href={`/properties/${listing.id}`}>View public listing</Link></section> : null}
+      {listing.lifecycle_state === "active" ? <section className="activation-panel active-publication"><div><span>Public marketplace</span><h2>This listing is active.</h2><p>The public page contains the brokerage-approved listing details and protected display photographs.</p></div><Link className="solid-button" href={`/properties/${listing.id}`}>View public listing</Link></section> : null}
     </div>
   </main>;
 }

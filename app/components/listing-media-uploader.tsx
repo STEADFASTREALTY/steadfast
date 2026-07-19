@@ -126,7 +126,7 @@ export function ListingMediaUploader({
         <strong>{images.length} / {MAX_LISTING_IMAGES}</strong>
       </div>
 
-      {visibleImages.length ? <><p className="listing-cover-help">Choose the photo visitors see first on property cards. Use × to remove a photo from this draft. Removed photos remain in prior approved versions and the audit history.</p>{coverState.error || removeState.error ? <p className="inline-form-error" role="alert">{coverState.error ?? removeState.error}</p> : null}<div className="approval-image-previews">{visibleImages.map((image, index) => (
+      {visibleImages.length ? <><p className="listing-cover-help">Choose the photo visitors see first on property cards. Use × to remove a photo from this listing.</p>{coverState.error || removeState.error ? <p className="inline-form-error" role="alert">{coverState.error ?? removeState.error}</p> : null}<div className="approval-image-previews">{visibleImages.map((image, index) => (
         <figure key={image.id}>
           {/* Signed, short-lived private URL generated only after listing authorization. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -137,7 +137,7 @@ export function ListingMediaUploader({
             <input type="hidden" name="mediaId" value={image.id} />
             <button className={image.id === selectedCoverId ? "cover-photo-button active" : "cover-photo-button"} type="submit" disabled={coverPending || image.id === selectedCoverId}>{coverPending && image.id !== selectedCoverId ? "Saving…" : image.id === selectedCoverId ? "Main card photo" : "Set as main card photo"}</button>
           </form>
-          <form action={removeAction} data-prompt-title="Remove this property photo?" data-prompt-message="This removes the photo from the editable draft. It does not erase retained approved versions or their audit history." data-prompt-confirm="Remove photo" data-prompt-variant="danger">
+          <form action={removeAction} data-prompt-title="Remove this property photo?" data-prompt-message="This photo will be removed from the listing you are editing." data-prompt-confirm="Remove photo" data-prompt-variant="danger">
             <input type="hidden" name="listingId" value={listingId} />
             <input type="hidden" name="mediaId" value={image.id} />
             <button className="listing-media-remove" type="submit" aria-label={`Remove property image ${index + 1}`} disabled={removePending}>×</button>

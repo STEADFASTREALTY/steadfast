@@ -110,6 +110,32 @@ export type SaveListingDraftResult =
   | { status: "conflict"; error: string }
   | { status: "error"; error: string };
 
+export async function startActiveListingEditAction(formData: FormData) {
+  const listingId = z.string().uuid().safeParse(readText(formData, "listingId"));
+  if (!listingId.success) redirect("/workspace/listings?error=The+listing+reference+is+invalid.");
+
+  const context = await getActiveMembershipContext(`/workspace/listings/${listingId.data}`);
+  const canEdit = Boolean(context.membership) && (
+    context.roles.includes("agent")
+    || context.roles.includes("broker")
+    || context.permissions.some((permission) => permission.permission_key === "listing.manage" && permission.effect === "allow")
+  );
+  if (!canEdit) redirect("/access-denied?reason=listing-edit");
+
+  const { error } = await context.supabase.from("start_listing_edit_commands").insert({
+    request_id: randomUUID(),
+    listing_id: listingId.data,
+  });
+  if (error) {
+    redirect(`/workspace/listings/${listingId.data}?error=${encodeURIComponent("This active listing could not be opened for editing.")}`);
+  }
+
+  revalidatePath("/properties");
+  revalidatePath("/workspace/listings");
+  revalidatePath(`/workspace/listings/${listingId.data}`);
+  redirect(`/workspace/listings/${listingId.data}?notice=${encodeURIComponent("Editing is open. The listing is now private until the brokerage approves it again.")}`);
+}
+
 export async function saveListingDraftAction(formData: FormData): Promise<SaveListingDraftResult> {
   const context = await getActiveMembershipContext("/workspace/listings");
   const canWorkWithListings = Boolean(context.membership) && (
