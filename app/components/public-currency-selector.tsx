@@ -7,6 +7,10 @@ import type { DisplayCurrency } from "@/lib/currency-conversions";
 const storageKey = "canadasap-display-currency";
 
 function savedCurrency() {
+  // This component is rendered during the server pass as well as in the
+  // browser. Keep the initial render safe, then read the visitor preference
+  // once the browser is available in the effect below.
+  if (typeof window === "undefined") return "JMD";
   const local = window.localStorage.getItem(storageKey);
   if (local === "JMD" || local === "USD" || local === "CAD" || local === "GBP") return local;
   const cookie = document.cookie.split("; ").find((item) => item.startsWith("canadasap_display_currency="))?.split("=")[1];
