@@ -152,7 +152,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
           </dl>
           <article><h3>{version?.title}</h3><p>{version?.description}</p></article>
         </section>
-        {readyImages.length ? <section className="submitted-media"><div><span>Validated media</span><h2>{readyImages.length} property image{readyImages.length === 1 ? "" : "s"}</h2></div><div className="listing-media-grid">{readyImages.map((image, index) => <figure key={image.id}>
+        {readyImages.length ? <section className="submitted-media"><div><span>Validated media</span><h2>{readyImages.length} property image{readyImages.length === 1 ? "" : "s"}</h2></div><div className="approval-image-previews">{readyImages.map((image, index) => <figure key={image.id}>
           {/* Signed, short-lived private URL; optimization proxies must not persist the original. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image.url} alt={`Submitted property image ${index + 1}`} width={image.width} height={image.height} />
