@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { SteadFastPromptProvider } from "@/app/components/steadfast-prompt-provider";
 import { StructuredData } from "@/app/components/structured-data";
+import { CookieNotice } from "@/app/components/cookie-notice";
 import { STEADFAST_SITE_URL } from "@/lib/seo/metadata";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en-JM">
       <body>
         <SteadFastPromptProvider>{children}</SteadFastPromptProvider>
+        <CookieNotice />
         <StructuredData value={[
           { "@context": "https://schema.org", "@type": "Organization", name: "SteadFast Realty", url: siteUrl, areaServed: { "@type": "Country", name: "Jamaica" } },
           { "@context": "https://schema.org", "@type": "WebSite", name: "SteadFast Realty", url: siteUrl, inLanguage: "en-JM" },

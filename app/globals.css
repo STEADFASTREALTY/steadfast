@@ -54,6 +54,13 @@ button, a.outline-button, a.solid-button, a.danger-button, a.outline-dark-button
 .launch-note { color: var(--lime); font-size: 15px; letter-spacing: .15em; text-transform: uppercase; }
 .outline-button, .solid-button { align-items: center; border: 1px solid rgba(255,255,255,.36); border-radius: 999px; display: inline-flex; font-size: 15px; font-weight: 700; justify-content: center; min-height: 42px; padding: 0 21px; }
 .outline-button:hover { border-color: var(--lime); }
+.cookie-notice { align-items: center; background: var(--evergreen); border: 1px solid rgba(255,255,255,.35); bottom: 20px; box-shadow: 0 18px 42px rgba(9,28,26,.3); color: #fff; display: flex; gap: 28px; justify-content: space-between; left: 50%; max-width: min(720px, calc(100vw - 32px)); padding: 20px 22px; position: fixed; transform: translateX(-50%); width: 100%; z-index: 200; }
+.cookie-notice strong { display: block; font-family: Georgia, serif; font-size: 20px; font-weight: 400; margin-bottom: 5px; }
+.cookie-notice p { color: rgba(255,255,255,.8); font-size: 15px; line-height: 1.45; margin: 0; }
+.cookie-notice-actions { align-items: center; display: flex; flex: 0 0 auto; gap: 14px; }
+.cookie-notice-actions a { color: #fff; font-size: 15px; text-decoration: underline; }
+.cookie-notice-actions button { background: var(--gold); border: 1px solid var(--gold); color: var(--ink); font-weight: 700; min-height: 40px; padding: 0 16px; }
+.cookie-notice-actions button:hover { background: #e5ba4d; border-color: #e5ba4d; }
 .prompt-backdrop { align-items: center; background: rgba(9,28,26,.7); display: flex; inset: 0; justify-content: center; padding: 24px; position: fixed; z-index: 1000; }
 .steadfast-prompt { background: var(--ivory); border: 1px solid var(--sand); box-shadow: 0 30px 100px rgba(0,0,0,.32); max-width: 520px; padding: clamp(32px, 5vw, 52px); width: 100%; }
 .steadfast-prompt > span { color: var(--teal-strong); display: block; font-size: 15px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
@@ -928,6 +935,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 @media (max-width: 760px) { .site-builder-workspace { grid-template-columns: 1fr; }.site-builder-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); position: static; }.site-builder-nav > span { grid-column: 1 / -1; }.site-builder-preview iframe { height: 520px; } }
 @media (max-width: 1050px) { .public-header nav { gap: 13px; }.public-header nav a { font-size: 15px; } }
 @media (max-width: 800px) { .public-header { flex-wrap: wrap; gap: 10px; padding-bottom: 12px; padding-top: 10px; }.public-header nav { flex-basis: 100%; justify-content: flex-start; order: 3; overflow-x: auto; padding-bottom: 4px; }.public-header .outline-button { margin-left: auto; }.home-search { grid-template-columns: 1fr; }.home-search-intents { min-height: auto; }.home-recommendation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.public-footer { grid-template-columns: 1fr; }.public-footer nav { justify-content: flex-start; } }
+@media (max-width: 620px) { .cookie-notice { align-items: stretch; bottom: 12px; flex-direction: column; gap: 14px; }.cookie-notice-actions { justify-content: space-between; } }
 @media (max-width: 620px) { .recommendation-admin-row { align-items: stretch; grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .site-builder-hero { padding-left: 28px !important; } }
 @media (max-width: 480px) { .home-recommendations { padding-left: 18px; padding-right: 18px; }.home-recommendation-grid { gap: 10px; }.home-recommendation-card { padding: 9px; }.home-recommendation-card strong { font-size: 15px; }.public-social { justify-content: flex-start; } }

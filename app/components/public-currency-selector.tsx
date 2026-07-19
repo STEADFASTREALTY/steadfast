@@ -24,7 +24,8 @@ export function PublicCurrencySelector() {
   function changeCurrency(nextCurrency: DisplayCurrency) {
     setCurrency(nextCurrency);
     window.localStorage.setItem(storageKey, nextCurrency);
-    document.cookie = `canadasap_display_currency=${nextCurrency}; path=/; max-age=31536000; samesite=lax`;
+    const domain = window.location.hostname === "canadasap.com" || window.location.hostname.endsWith(".canadasap.com") ? "; domain=.canadasap.com" : "";
+    document.cookie = `canadasap_display_currency=${nextCurrency}; path=/; max-age=31536000; samesite=lax${domain}`;
     window.dispatchEvent(new CustomEvent("canadasap:currency-change", { detail: nextCurrency }));
     router.refresh();
   }
