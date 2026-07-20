@@ -63,11 +63,12 @@ export default async function AccountPage({
   const openApplication = applications?.some((application) =>
     ["draft", "submitted", "broker_approved"].includes(application.status),
   );
-  const isConsumer = !context.membership;
+  const isPlatformAccount = access.isOperations || access.isAdmin;
+  const isConsumer = !context.membership && !isPlatformAccount;
 
   return (
     <main className="account-page">
-      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} isConsumer={!context.membership} />
+      <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} isConsumer={isConsumer} isOperations={access.isOperations} isAdmin={access.isAdmin} />
       <section className="account-hero compact">
         <span className="eyebrow"><i /> Your ProperAP account</span>
         <h1>Hello, {context.person.display_name}</h1>
@@ -128,9 +129,9 @@ export default async function AccountPage({
 
         <aside className="account-sidebar">
           <section>
-            <span>{isConsumer ? "Your account" : "Professional status"}</span>
-            <strong>{context.membership ? "Active brokerage member" : "Registered user"}</strong>
-            <p>{context.membership ? "Your brokerage controls your professional roles and listing authority." : "Browse freely, keep liked listings, and receive updates about the properties that matter to you."}</p>
+            <span>{isPlatformAccount ? "Platform role" : isConsumer ? "Your account" : "Professional status"}</span>
+            <strong>{isPlatformAccount ? access.isAdmin ? "ProperAP administrator" : "ProperAP Operations Staff" : context.membership ? "Active brokerage member" : "Registered user"}</strong>
+            <p>{isPlatformAccount ? "Manage customer, professional, brokerage, and platform operations through the Operations workspace." : context.membership ? "Your brokerage controls your professional roles and listing authority." : "Browse freely, keep liked listings, and receive updates about the properties that matter to you."}</p>
           </section>
           {context.membership ? <section><span>Brokerage</span><strong>{(context.membership.brokerages as unknown as { display_name?: string } | null)?.display_name ?? "Your brokerage"}</strong><p>Roles: {context.roles.join(", ").replaceAll("_", " ") || "member"}</p></section> : null}
         </aside>
