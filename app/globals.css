@@ -529,7 +529,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .registration-role-option input { accent-color: var(--evergreen); flex: 0 0 auto; margin: 3px 0 0; }
 .registration-role-option span { display: grid; gap: 5px; }
 .registration-role-option strong { color: var(--ink); font-size: 16px; }
-.registration-role-option small { color: #52635f; font-size: 16px; line-height: 1.35; }
+.registration-role-option small { color: #52635f; font-size: 16px !important; font-weight: 400; letter-spacing: 0; line-height: 1.45; text-transform: none; }
 .registration-notice { background: #fff7df; border-left: 4px solid var(--gold); color: #3f4036; font-size: 15px; line-height: 1.5; margin: 0; padding: 13px 15px; }
 .auth-switch { color: #657572; font-size: 15px; margin: 26px 0 0; text-align: center; }
 .auth-switch a { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
