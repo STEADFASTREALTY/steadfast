@@ -47,7 +47,7 @@ export function RegistrationForm({ brokerages, next }: { brokerages: Brokerage[]
         <label><span>Contact number</span><input name="contactPhone" type="tel" autoComplete="tel" minLength={7} maxLength={30} required /></label>
         <label><span>Business address</span><input name="contactAddress" autoComplete="street-address" minLength={8} maxLength={500} required /></label>
         {role === "agent" ? <label className="full"><span>Brokerage that referred you</span><select name="brokerageId" required defaultValue=""><option value="" disabled>Select your brokerage</option>{brokerages.map((brokerage) => <option value={brokerage.id} key={brokerage.id}>{brokerage.display_name}</option>)}</select></label> : <label className="full"><span>Brokerage name</span><input name="brokerageName" minLength={2} maxLength={160} required placeholder="Your brokerage company name" /></label>}
-        <p className="registration-notice full"><strong>Professional accounts start inactive.</strong> ProperAP must approve the registration and confirm activation or payment before professional workspace access is enabled.</p>
+        <p className="registration-notice full"><strong>Professional testing accounts are free.</strong> ProperAP approval is still required before professional workspace access is enabled. No payment is required during testing.</p>
       </>}
       <label className="check-row full"><input name="privacyAccepted" type="checkbox" required /> I agree to the privacy notice and account terms for this pilot.</label>
       <button className="solid-button full" type="submit">{role === "consumer" ? "Create free account" : "Submit professional registration"}</button>

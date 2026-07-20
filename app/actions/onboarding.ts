@@ -86,7 +86,7 @@ export async function requestProfessionalUpgradeAction(formData: FormData) {
     .from("professional_registration_requests")
     .select("id")
     .eq("person_id", account.person.id)
-    .in("status", ["submitted", "brokerage_approved", "properap_approved", "payment_pending"])
+    .in("status", ["submitted", "brokerage_approved", "properap_approved"])
     .limit(1)
     .maybeSingle();
   if (existing) redirect("/account/subscription?notice=Your+professional+upgrade+request+is+already+being+reviewed.");
