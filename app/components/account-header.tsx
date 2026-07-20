@@ -12,6 +12,8 @@ export async function AccountHeader({
   canManageInquiries = false,
   canShareListings = false,
   isConsumer = false,
+  isOperations = false,
+  isAdmin = false,
 }: {
   displayName: string;
   hasWorkspace?: boolean;
@@ -20,6 +22,8 @@ export async function AccountHeader({
   canManageInquiries?: boolean;
   canShareListings?: boolean;
   isConsumer?: boolean;
+  isOperations?: boolean;
+  isAdmin?: boolean;
 }) {
   const supabase = await createClient();
   const { count: unreadNotificationCount } = await supabase
@@ -41,6 +45,7 @@ export async function AccountHeader({
         {canManageInquiries ? <Link href="/workspace/inquiries">Inquiries</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}
         {(canManageListings || canManageAgents || canManageInquiries || canShareListings) ? <Link href="/workspace/analytics">Analytics</Link> : null}
+        {(isOperations || isAdmin) ? <Link href="/staff">Operations</Link> : null}
         <Link href="/account">My account</Link>
         <NotificationNavLink initialCount={unreadNotificationCount ?? 0} />
       </nav>
