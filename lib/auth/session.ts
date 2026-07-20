@@ -26,7 +26,7 @@ export async function requireAccount(nextPath = "/account") {
 export async function getActiveMembershipContext(nextPath = "/account") {
   const account = await requireAccount(nextPath);
   const admin = createAdminClient();
-  const [{ data: memberships }, { data: internalRoles }] = await Promise.all([
+  const [{ data: memberships }, { data: internalRoles }, { data: independentProfile }] = await Promise.all([
     account.supabase
       .from("brokerage_memberships")
       .select("id, brokerage_id, status, starts_at, brokerages(id, display_name, slug, status)")
@@ -38,6 +38,12 @@ export async function getActiveMembershipContext(nextPath = "/account") {
       .select("role_key")
       .eq("person_id", account.person.id)
       .is("ends_at", null),
+    admin
+      .from("independent_agent_profiles")
+      .select("person_id,status")
+      .eq("person_id", account.person.id)
+      .eq("status", "active")
+      .maybeSingle(),
   ]);
 
   const platformRoles = internalRoles?.map((role) => role.role_key) ?? [];
@@ -50,6 +56,7 @@ export async function getActiveMembershipContext(nextPath = "/account") {
       roles: [] as string[],
       permissions: [] as Array<{ permission_key: string; effect: string }>,
       platformRoles,
+      independentAgent: Boolean(independentProfile),
     };
   }
 
@@ -72,6 +79,7 @@ export async function getActiveMembershipContext(nextPath = "/account") {
     roles: roles?.map((role) => role.role_key) ?? [],
     permissions: permissions ?? [],
     platformRoles,
+    independentAgent: Boolean(independentProfile),
   };
 }
 

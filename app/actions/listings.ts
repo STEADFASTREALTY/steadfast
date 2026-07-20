@@ -1,6 +1,6 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -244,7 +244,7 @@ export async function saveListingDraftAction(formData: FormData): Promise<SaveLi
     || context.roles.includes("broker")
     || context.permissions.some((permission) => permission.permission_key === "listing.manage" && permission.effect === "allow")
   );
-  if (!canWorkWithListings) return { status: "error", error: "You no longer have listing access." };
+  if (!canWorkWithListings && !context.independentAgent) return { status: "error", error: "You no longer have listing access." };
 
   const parsed = updateListingDraftSchema.safeParse({
     ...readDraftInput(formData),
@@ -254,6 +254,44 @@ export async function saveListingDraftAction(formData: FormData): Promise<SaveLi
   });
   if (!parsed.success) {
     return { status: "error", error: parsed.error.issues[0]?.message ?? "Check the draft details." };
+  }
+
+  if (context.independentAgent && !context.membership) {
+    const admin = createAdminClient();
+    const { data: listing } = await admin.from("listings")
+      .select("id,lock_version,property_id,lifecycle_state,independent_owner_person_id")
+      .eq("id", parsed.data.listingId).maybeSingle();
+    if (!listing || listing.independent_owner_person_id !== context.person.id || listing.lifecycle_state !== "draft") {
+      return { status: "error", error: "This independent listing is no longer editable." };
+    }
+    if (listing.lock_version !== parsed.data.expectedLockVersion) {
+      return { status: "conflict", error: "A newer save exists. Reload the latest draft before continuing." };
+    }
+    const [{ data: version }, { data: property }] = await Promise.all([
+      admin.from("listing_versions").select("id").eq("listing_id", listing.id).eq("revision_state", "working_draft").order("version_number", { ascending: false }).limit(1).maybeSingle(),
+      admin.from("properties").select("address_id").eq("id", listing.property_id).maybeSingle(),
+    ]);
+    const { data: address } = property?.address_id
+      ? await admin.from("property_addresses").select("administrative_area_id,address_line_1,address_line_2,postal_code").eq("id", property.address_id).maybeSingle()
+      : { data: null };
+    if (!version || !address || address.administrative_area_id !== parsed.data.administrativeAreaId || address.address_line_1 !== parsed.data.addressLine1 || (address.address_line_2 ?? "") !== parsed.data.addressLine2 || (address.postal_code ?? "") !== parsed.data.postalCode) {
+      return { status: "error", error: "Transferred independent listings keep their verified address. You can edit the marketing details, price, audience, and photographs." };
+    }
+    const payload = toCommandPayload(parsed.data);
+    const contentHash = createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+    const { error: versionError } = await admin.from("listing_versions").update({
+      purpose: payload.purpose, property_type: payload.property_type, property_subtype: payload.property_subtype,
+      price: payload.price, price_period: payload.price_period, title: payload.title, description: payload.description,
+      bedrooms: payload.bedrooms, bathrooms: payload.bathrooms, building_area: payload.building_area,
+      land_area: payload.land_area, area_unit: payload.area_unit, visibility: payload.visibility,
+      public_location_precision: payload.public_location_precision, content_hash: contentHash,
+    }).eq("id", version.id);
+    if (versionError) return { status: "error", error: "This draft could not be saved. Your entered details are still on this page." };
+    const savedAt = new Date().toISOString();
+    await admin.from("listings").update({ lock_version: listing.lock_version + 1, updated_at: savedAt }).eq("id", listing.id).eq("lock_version", listing.lock_version);
+    revalidatePath("/workspace/listings");
+    revalidatePath(`/workspace/listings/${listing.id}`);
+    return { status: "saved", lockVersion: listing.lock_version + 1, savedAt };
   }
 
   const { error } = await context.supabase.from("update_listing_draft_commands").insert({
@@ -297,11 +335,27 @@ export async function authorizeListingMediaUploadAction(
   if (!parsed.success) return { status: "error", error: "Choose a JPEG, PNG, or WebP image no larger than 15 MB." };
 
   const context = await getActiveMembershipContext(`/workspace/listings/${parsed.data.listingId}`);
-  if (!context.membership) return { status: "error", error: "You no longer have listing access." };
+  if (!context.membership && !context.independentAgent) return { status: "error", error: "You no longer have listing access." };
 
   const mediaId = randomUUID();
   const mimeType = parsed.data.mimeType as SupportedImageMime;
-  const path = `${context.membership.brokerage_id}/${parsed.data.listingId}/${mediaId}/original.${extensionForMime(mimeType)}`;
+  const path = context.independentAgent && !context.membership
+    ? `independent/${context.person.id}/${parsed.data.listingId}/${mediaId}/original.${extensionForMime(mimeType)}`
+    : `${context.membership!.brokerage_id}/${parsed.data.listingId}/${mediaId}/original.${extensionForMime(mimeType)}`;
+  if (context.independentAgent && !context.membership) {
+    const admin = createAdminClient();
+    const { data: listing } = await admin.from("listings").select("id,lifecycle_state,independent_owner_person_id").eq("id", parsed.data.listingId).maybeSingle();
+    const { data: version } = listing ? await admin.from("listing_versions").select("id").eq("listing_id", listing.id).eq("revision_state", "working_draft").order("version_number", { ascending: false }).limit(1).maybeSingle() : { data: null };
+    if (!listing || !version || listing.lifecycle_state !== "draft" || listing.independent_owner_person_id !== context.person.id) return { status: "error", error: "This independent listing is no longer editable." };
+    const { count } = await admin.from("listing_media").select("id", { count: "exact", head: true }).eq("listing_id", listing.id).not("status", "in", "(rejected,removed)");
+    if ((count ?? 0) >= 30) return { status: "error", error: "A listing can have no more than 30 images." };
+    const { data: existing } = await admin.from("listing_version_media").select("position").eq("listing_version_id", version.id).order("position", { ascending: false }).limit(1);
+    const nextPosition = (existing?.[0]?.position ?? 0) + 1;
+    const { error: mediaError } = await admin.from("listing_media").insert({ id: mediaId, listing_id: listing.id, brokerage_id: null, object_path: path, original_filename: parsed.data.filename, declared_mime_type: mimeType, declared_byte_size: parsed.data.byteSize, uploaded_by_person_id: context.person.id });
+    if (mediaError) return { status: "error", error: "This image could not be added to the private draft." };
+    const { error: linkError } = await admin.from("listing_version_media").insert({ listing_version_id: version.id, listing_id: listing.id, media_id: mediaId, position: nextPosition });
+    if (linkError) return { status: "error", error: "This image could not be attached to the draft." };
+  } else {
   const { error: commandError } = await context.supabase
     .from("authorize_listing_media_upload_commands")
     .insert({
@@ -313,6 +367,7 @@ export async function authorizeListingMediaUploadAction(
       object_path: path,
     });
   if (commandError) return { status: "error", error: "This image could not be added to the private draft." };
+  }
 
   try {
     const admin = createAdminClient();
@@ -537,6 +592,71 @@ export async function submitListingForReviewAction(
   revalidatePath("/workspace/listings");
   revalidatePath(`/workspace/listings/${parsed.data.listingId}`);
   redirect("/workspace/listings?status=pending&notice=Submitted+to+your+brokerage+for+approval.");
+}
+
+/** Publishes a transferred independent-agent draft without brokerage review.
+ * The server verifies independent status, ownership, public visibility and
+ * validated media before exposing a sanitized marketplace snapshot. */
+export async function publishIndependentListingAction(
+  _previousState: SubmitListingState,
+  formData: FormData,
+): Promise<SubmitListingState> {
+  const parsed = submissionSchema.safeParse({
+    listingId: readText(formData, "listingId"),
+    listingVersionId: readText(formData, "listingVersionId"),
+    expectedLockVersion: readText(formData, "expectedLockVersion"),
+  });
+  if (!parsed.success) return { error: "The listing reference is invalid. Reload the draft and try again." };
+  const context = await getActiveMembershipContext(`/workspace/listings/${parsed.data.listingId}`);
+  if (!context.independentAgent || context.membership) return { error: "Independent publishing is not available for this account." };
+  const admin = createAdminClient();
+  const { data: listing } = await admin.from("listings")
+    .select("id,property_id,brokerage_id,independent_owner_person_id,lifecycle_state,lock_version")
+    .eq("id", parsed.data.listingId).maybeSingle();
+  if (!listing || listing.brokerage_id || listing.independent_owner_person_id !== context.person.id || listing.lifecycle_state !== "draft" || listing.lock_version !== parsed.data.expectedLockVersion) {
+    return { error: "This independent draft changed or is no longer available. Reload it before publishing." };
+  }
+  const { data: version } = await admin.from("listing_versions")
+    .select("id,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,visibility,public_location_precision,public_location_label,content_hash")
+    .eq("id", parsed.data.listingVersionId).eq("listing_id", listing.id).eq("revision_state", "working_draft").maybeSingle();
+  if (!version || version.visibility !== "public" || !version.content_hash) return { error: "Choose Public visibility and save the complete draft before publishing." };
+  const { data: mediaLinks } = await admin.from("listing_version_media").select("media_id").eq("listing_version_id", version.id);
+  const mediaIds = (mediaLinks ?? []).map((link) => link.media_id);
+  const { count: readyMediaCount } = mediaIds.length ? await admin.from("listing_media").select("id", { count: "exact", head: true }).in("id", mediaIds).eq("status", "ready") : { count: 0 };
+  if (!readyMediaCount) return { error: "Add at least one validated property image before publishing." };
+  const [{ data: property }, { data: agentSite }] = await Promise.all([
+    admin.from("properties").select("address_id").eq("id", listing.property_id).maybeSingle(),
+    admin.from("professional_sites").select("slug").eq("owner_person_id", context.person.id).eq("site_type", "agent").maybeSingle(),
+  ]);
+  const { data: address } = property?.address_id ? await admin.from("property_addresses").select("administrative_area_id").eq("id", property.address_id).maybeSingle() : { data: null };
+  const { data: area } = address ? await admin.from("administrative_areas").select("id,code,name").eq("id", address.administrative_area_id).maybeSingle() : { data: null };
+  if (!area) return { error: "The property location is incomplete and cannot be published." };
+  const now = new Date().toISOString();
+  try {
+    await ensureApprovedVersionDerivatives(admin, listing.id, version.id);
+    const { error: approveError } = await admin.from("listing_versions").update({ revision_state: "approved", approved_at: now, approved_by_person_id: context.person.id }).eq("id", version.id);
+    if (approveError) throw approveError;
+    const { error: listingError } = await admin.from("listings").update({ lifecycle_state: "active", current_approved_version_id: version.id, published_at: now, unpublished_at: null, lock_version: listing.lock_version + 1, updated_at: now }).eq("id", listing.id).eq("lock_version", listing.lock_version);
+    if (listingError) throw listingError;
+    const { error: snapshotError } = await admin.from("public_listing_snapshots").upsert({
+      listing_id: listing.id, approved_version_id: version.id, brokerage_id: null, brokerage_name: null, brokerage_slug: null,
+      assigned_agent_person_id: context.person.id, assigned_agent_name: context.person.display_name, assigned_agent_slug: agentSite?.slug ?? null,
+      lifecycle_state: "active", purpose: version.purpose, property_type: version.property_type, property_subtype: version.property_subtype,
+      currency: version.currency, price: version.price, price_period: version.price_period, title: version.title, description: version.description,
+      bedrooms: version.bedrooms, bathrooms: version.bathrooms, building_area: version.building_area, land_area: version.land_area, area_unit: version.area_unit,
+      administrative_area_id: area.id, administrative_area_code: area.code, administrative_area_name: area.name,
+      public_location_precision: version.public_location_precision, public_location_label: version.public_location_label,
+      public_latitude: null, public_longitude: null, ready_media_count: readyMediaCount, published_at: now, updated_at: now,
+    }, { onConflict: "listing_id" });
+    if (snapshotError) throw snapshotError;
+    await admin.from("publication_records").upsert({ listing_id: listing.id, surface: "marketplace", status: "active", approved_version_id: version.id, published_at: now, removed_at: null, removal_reason: null, updated_at: now }, { onConflict: "listing_id,surface" });
+  } catch {
+    return { error: "The listing could not be published. Its private draft is still available; please try again." };
+  }
+  revalidatePath("/properties");
+  revalidatePath("/workspace/listings");
+  revalidatePath(`/workspace/listings/${listing.id}`);
+  redirect(`/workspace/listings?status=published&notice=${encodeURIComponent("Your independent listing is now published.")}`);
 }
 
 const reviewDecisionSchema = z.object({

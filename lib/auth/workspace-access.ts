@@ -17,11 +17,13 @@ export function deriveWorkspaceAccess({
   roles,
   permissions,
   platformRoles,
+  isIndependentAgent = false,
 }: {
   hasMembership: boolean;
   roles: string[];
   permissions: Permission[];
   platformRoles: string[];
+  isIndependentAgent?: boolean;
 }): WorkspaceAccess {
   const isBroker = roles.includes("broker");
   const allows = (key: string) => permissions.some(
@@ -31,8 +33,8 @@ export function deriveWorkspaceAccess({
   const isAdmin = platformRoles.includes("steadfast_admin");
 
   return {
-    hasWorkspace: hasMembership || isOperations || isAdmin,
-    isAgent: roles.includes("agent") || isBroker,
+    hasWorkspace: hasMembership || isIndependentAgent || isOperations || isAdmin,
+    isAgent: roles.includes("agent") || isBroker || isIndependentAgent,
     canManageAgents: isBroker || allows("agent.manage"),
     canReviewListings: isBroker || allows("listing.review"),
     canManageInquiries: roles.includes("agent"),

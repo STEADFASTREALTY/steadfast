@@ -31,11 +31,13 @@ export function ListingMediaUploader({
   images,
   reservedCount,
   coverMediaId,
+  allowCoverSelection = true,
 }: {
   listingId: string;
   images: ReadyMedia[];
   reservedCount: number;
   coverMediaId?: string;
+  allowCoverSelection?: boolean;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -126,22 +128,22 @@ export function ListingMediaUploader({
         <strong>{images.length} / {MAX_LISTING_IMAGES}</strong>
       </div>
 
-      {visibleImages.length ? <><p className="listing-cover-help">Choose the photo visitors see first on property cards. Use × to remove a photo from this listing.</p>{coverState.error || removeState.error ? <p className="inline-form-error" role="alert">{coverState.error ?? removeState.error}</p> : null}<div className="approval-image-previews">{visibleImages.map((image, index) => (
+      {visibleImages.length ? <><p className="listing-cover-help">{allowCoverSelection ? "Choose the photo visitors see first on property cards. Use × to remove a photo from this listing." : "Your transferred listing photos remain private until you publish."}</p>{coverState.error || removeState.error ? <p className="inline-form-error" role="alert">{coverState.error ?? removeState.error}</p> : null}<div className="approval-image-previews">{visibleImages.map((image, index) => (
         <figure key={image.id}>
           {/* Signed, short-lived private URL generated only after listing authorization. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image.url} alt={`Property image ${index + 1}`} width={image.width} height={image.height} />
           <figcaption><span>{image.id === selectedCoverId ? "Cover photo" : `Image ${index + 1}`}</span><small title={image.originalFilename}>{image.width} × {image.height}</small></figcaption>
-          <form action={coverAction} data-prompt-title="Make this the cover photo?" data-prompt-message="This image will appear first on property cards and public listings after brokerage approval." data-prompt-confirm="Set cover photo">
+          {allowCoverSelection ? <form action={coverAction} data-prompt-title="Make this the cover photo?" data-prompt-message="This image will appear first on property cards and public listings after brokerage approval." data-prompt-confirm="Set cover photo">
             <input type="hidden" name="listingId" value={listingId} />
             <input type="hidden" name="mediaId" value={image.id} />
             <button className={image.id === selectedCoverId ? "cover-photo-button active" : "cover-photo-button"} type="submit" disabled={coverPending || image.id === selectedCoverId}>{coverPending && image.id !== selectedCoverId ? "Saving…" : image.id === selectedCoverId ? "Main card photo" : "Set as main card photo"}</button>
-          </form>
-          <form action={removeAction} data-prompt-title="Remove this property photo?" data-prompt-message="This photo will be removed from the listing you are editing." data-prompt-confirm="Remove photo" data-prompt-variant="danger">
+          </form> : null}
+          {allowCoverSelection ? <form action={removeAction} data-prompt-title="Remove this property photo?" data-prompt-message="This photo will be removed from the listing you are editing." data-prompt-confirm="Remove photo" data-prompt-variant="danger">
             <input type="hidden" name="listingId" value={listingId} />
             <input type="hidden" name="mediaId" value={image.id} />
             <button className="listing-media-remove" type="submit" aria-label={`Remove property image ${index + 1}`} disabled={removePending}>×</button>
-          </form>
+          </form> : null}
         </figure>
       ))}</div></> : <div className="listing-media-empty"><strong>No property images yet</strong><p>Add bright, accurate photographs. Avoid people, identity documents, vehicle plates, or other unnecessary personal information.</p></div>}
 

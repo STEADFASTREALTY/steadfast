@@ -7,6 +7,7 @@ import { EditListingForm, type EditableListingDraft } from "@/app/components/edi
 import { ListingMediaUploader } from "@/app/components/listing-media-uploader";
 import { ListingClosurePanel } from "@/app/components/listing-closure-panel";
 import { ListingSubmissionPanel } from "@/app/components/listing-submission-panel";
+import { IndependentListingPublishPanel } from "@/app/components/independent-listing-publish-panel";
 import { ListingTransferOutPanel, type IndependentAgentRecipient } from "@/app/components/listing-transfer-out-panel";
 import { ReviewDecisionForm } from "@/app/components/review-decision-form";
 import { StatusMessage } from "@/app/components/status-message";
@@ -60,18 +61,19 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   const query = await searchParams;
   if (!z.string().uuid().safeParse(route.listingId).success) redirect("/access-denied?reason=listing-record");
   const context = await getActiveMembershipContext(`/workspace/listings/${route.listingId}`);
-  if (!context.membership) redirect("/access-denied?reason=brokerage-membership");
-  const access = deriveWorkspaceAccess({ hasMembership: true, roles: context.roles, permissions: context.permissions, platformRoles: context.platformRoles });
+  if (!context.membership && !context.independentAgent) redirect("/access-denied?reason=listing-workspace");
+  const access = deriveWorkspaceAccess({ hasMembership: Boolean(context.membership), roles: context.roles, permissions: context.permissions, platformRoles: context.platformRoles, isIndependentAgent: context.independentAgent });
   if (!access.isAgent && !access.canReviewListings) redirect("/access-denied?reason=listing-workspace");
 
   const admin = createAdminClient();
   const { data: listing } = await admin
     .from("listings")
-    .select("id,brokerage_id,created_by_person_id,property_id,lifecycle_state,lock_version,current_approved_version_id,updated_at")
+    .select("id,brokerage_id,independent_owner_person_id,created_by_person_id,property_id,lifecycle_state,lock_version,current_approved_version_id,updated_at")
     .eq("id", route.listingId)
     .maybeSingle();
   const isAuthorized = listing && (
-    (access.canReviewListings && listing.brokerage_id === context.membership.brokerage_id) ||
+    (access.canReviewListings && listing.brokerage_id === context.membership?.brokerage_id) ||
+    (context.independentAgent && !context.membership && listing.independent_owner_person_id === context.person.id) ||
     (!access.canReviewListings && listing.created_by_person_id === context.person.id)
   );
   if (!isAuthorized || !listing) redirect("/access-denied?reason=listing-record");
@@ -102,7 +104,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
   const { data: address } = property?.address_id
     ? await admin.from("property_addresses").select("administrative_area_id,address_line_1,address_line_2,postal_code").eq("id", property.address_id).maybeSingle()
     : { data: null as Address | null };
-  const brokerage = context.membership.brokerages as unknown as { display_name?: string } | null;
+  const brokerage = context.membership?.brokerages as unknown as { display_name?: string } | null;
   const editable = listing.lifecycle_state === "draft" && version?.revision_state === "working_draft" && address;
   const canEditActiveListing = ["active", "under_offer"].includes(listing.lifecycle_state) && (
     listing.created_by_person_id === context.person.id || access.canReviewListings
@@ -207,7 +209,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
 
   return <main className="account-page">
     <AccountHeader displayName={context.person.display_name} hasWorkspace canManageAgents={access.canManageAgents} canManageListings canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} />
-    <section className="account-hero compact"><span className="eyebrow"><i /> {listingAudience}</span><h1>{version?.title ?? "Listing record"}</h1><p>{brokerage?.display_name ?? "Your brokerage"} · {listing.lifecycle_state.replaceAll("_", " ")}</p></section>
+    <section className="account-hero compact"><span className="eyebrow"><i /> {listingAudience}</span><h1>{version?.title ?? "Listing record"}</h1><p>{context.independentAgent && !context.membership ? "Independent listing" : brokerage?.display_name ?? "Your brokerage"} · {listing.lifecycle_state.replaceAll("_", " ")}</p></section>
     <div className="listing-wizard-shell listing-detail-shell">
       <div className="wizard-topline"><Link href="/workspace/listings">← Back to listings</Link><span>{initial ? "Autosave on · private listing" : canEditActiveListing ? "Active listing · editing available" : "Read only"}</span></div>
       <StatusMessage notice={query.notice} error={query.error} />
@@ -220,7 +222,7 @@ export default async function ListingDraftPage({ params, searchParams }: { param
       </section> : null}
       {access.canReviewListings && context.roles.includes("broker") && ["active", "under_offer", "approved_inactive"].includes(listing.lifecycle_state) && listing.current_approved_version_id ? <ListingTransferOutPanel listingId={listing.id} recipients={independentRecipients} /> : null}
       {listing.lifecycle_state === "transfer_pending" ? <section className="locked-listing-card transfer-pending-card"><span>Transfer pending</span><h2>This listing is awaiting the independent agent’s decision.</h2><p>It is not visible to the public. If the agent declines, the listing remains with the brokerage and stays unpublished until you decide what to do next.</p></section> : null}
-      {initial ? <><EditListingForm key={`${listing.id}:${listing.lock_version}`} initial={initial} parishes={parishes ?? []} />{version.requested_lifecycle_state && ["active", "sold", "rented"].includes(version.requested_lifecycle_state) ? <ListingClosurePanel listingId={listing.id} lockVersion={listing.lock_version} requestedState={version.requested_lifecycle_state as "active" | "sold" | "rented"} /> : null}<ListingMediaUploader listingId={listing.id} images={readyImages} reservedCount={reservedCount} coverMediaId={coverMediaId} /><ListingSubmissionPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} /></> : <>
+      {initial ? <><EditListingForm key={`${listing.id}:${listing.lock_version}`} initial={initial} parishes={parishes ?? []} />{version.requested_lifecycle_state && ["active", "sold", "rented"].includes(version.requested_lifecycle_state) ? <ListingClosurePanel listingId={listing.id} lockVersion={listing.lock_version} requestedState={version.requested_lifecycle_state as "active" | "sold" | "rented"} /> : null}<ListingMediaUploader listingId={listing.id} images={readyImages} reservedCount={reservedCount} coverMediaId={coverMediaId} allowCoverSelection={!context.independentAgent || Boolean(context.membership)} />{context.independentAgent && !context.membership ? <IndependentListingPublishPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} /> : <ListingSubmissionPanel listingId={listing.id} listingVersionId={version.id} lockVersion={listing.lock_version} readyImageCount={readyImages.length} />}</> : <>
         <section className="submitted-listing-summary">
           <div className="submitted-listing-heading"><span>Listing details</span><h2>{version?.revision_state === "submitted" ? "Submitted for review" : "Current listing"}</h2><p>{version?.revision_state === "submitted" ? "These are the exact details awaiting the brokerage decision." : "Review the current details or choose Edit listing to make changes."}</p></div>
           <dl>
