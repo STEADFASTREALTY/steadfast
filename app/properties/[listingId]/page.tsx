@@ -13,6 +13,7 @@ import { publicPageMetadata, STEADFAST_SITE_URL } from "@/lib/seo/metadata";
 import { CurrencyPrice } from "@/app/components/currency-price";
 import { AnalyticsTracker } from "@/app/components/analytics-tracker";
 import { ListingActions } from "@/app/components/listing-actions";
+import { PublicListingPhotoGallery } from "@/app/components/public-listing-photo-gallery";
 
 export const dynamic = "force-dynamic";
 
@@ -101,7 +102,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
     <div className="public-listing-layout">
       <div className="public-listing-main">
         {listing.is_demo ? <section className="demo-listing-notice"><strong>Demonstration listing</strong><p>{listing.demo_notice}</p>{listing.source_url ? <a href={listing.source_url} target="_blank" rel="noreferrer noopener">View the factual market source</a> : null}</section> : null}
-        {gallery?.length ? <section className="public-media-gallery" aria-label="Property photographs">{gallery.map((photo, index) => <Image key={photo.id} src={`/media/listings/${photo.id}/gallery.webp`} alt={`${listing.title} photograph ${index + 1}`} width={photo.width} height={photo.height} sizes={index === 0 ? "(max-width: 900px) 100vw, 65vw" : "(max-width: 700px) 100vw, 32vw"} priority={index === 0} unoptimized />)}</section> : <section className="public-media-hold"><span>{listing.property_subtype ?? listing.property_type}</span><strong>Photographs are being prepared</strong><p>The listing remains protected until its privacy-safe public images are available.</p></section>}
+        {gallery?.length ? <PublicListingPhotoGallery photos={gallery} title={listing.title} /> : <section className="public-media-hold"><span>{listing.property_subtype ?? listing.property_type}</span><strong>Photographs are being prepared</strong><p>The listing remains protected until its privacy-safe public images are available.</p></section>}
         <section className="public-listing-facts"><div><span>Bedrooms</span><strong>{listing.bedrooms ?? "—"}</strong></div><div><span>Bathrooms</span><strong>{listing.bathrooms ?? "—"}</strong></div><div><span>Building</span><strong>{listing.building_area ? `${listing.building_area} ${listing.area_unit?.replace("_", " ") ?? ""}` : "—"}</strong></div><div><span>Land</span><strong>{listing.land_area ? `${listing.land_area} ${listing.area_unit?.replace("_", " ") ?? ""}` : "—"}</strong></div></section>
         <section className="public-description"><span>About this property</span><h2>Property details</h2><p>{listing.description}</p></section>
         {mapEmbedUrl && fullMapUrl ? <section className="public-property-map" aria-labelledby="property-map-title">
