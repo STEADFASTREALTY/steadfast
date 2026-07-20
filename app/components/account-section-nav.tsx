@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function AccountSectionNav({ active }: { active: "profile" | "photo" | "watch" | "password" | "subscription" | "payment" | "security" }) {
+export function AccountSectionNav({ active }: { active: "profile" | "photo" | "watch" | "password" | "subscription" | "security" }) {
   return <nav aria-label="My account sections" className="account-section-nav">
     <span>My account</span>
     <Link className={active === "profile" ? "active" : ""} href="/account?section=profile">Profile</Link>
@@ -8,7 +8,6 @@ export function AccountSectionNav({ active }: { active: "profile" | "photo" | "w
     <Link className={active === "watch" ? "active" : ""} href="/account/saved-listings">My watch</Link>
     <Link className={active === "password" ? "active" : ""} href="/account/password">Password</Link>
     <Link className={active === "subscription" ? "active" : ""} href="/account/subscription">Subscription</Link>
-    <Link className={active === "payment" ? "active" : ""} href="/account/payment">Payment</Link>
     <Link className={active === "security" ? "active" : ""} href="/account/security">Security</Link>
   </nav>;
 }

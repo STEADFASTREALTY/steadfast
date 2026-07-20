@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function ConsumerAccountNav({ active }: { active: "profile" | "watch" | "messages" | "notifications" | "password" | "subscription" | "payment" | "security" }) {
+export function ConsumerAccountNav({ active }: { active: "profile" | "watch" | "messages" | "notifications" | "password" | "subscription" | "security" }) {
   const links: Array<[typeof active, string, string]> = [
     ["profile", "Profile", "/account"],
     ["watch", "My watch", "/account/saved-listings"],
@@ -8,7 +8,6 @@ export function ConsumerAccountNav({ active }: { active: "profile" | "watch" | "
     ["notifications", "Notifications", "/account/notifications"],
     ["password", "Password", "/account/password"],
     ["subscription", "Subscription", "/account/subscription"],
-    ["payment", "Payment", "/account/payment"],
     ["security", "Security", "/account/security"],
   ];
 

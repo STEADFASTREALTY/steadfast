@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth/validation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAccount } from "@/lib/auth/session";
 
 function readText(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -183,4 +184,29 @@ export async function setPasswordAction(formData: FormData) {
   await supabase.auth.signOut({ scope: "others" });
 
   redirect("/account?notice=Your+password+has+been+updated.");
+}
+
+export async function requestEmailVerificationAction() {
+  const account = await requireAccount("/account/security");
+  if (!account.person.primary_email) {
+    redirect("/account/security?error=Add+an+email+address+to+your+profile+before+verifying+it.");
+  }
+  if (account.person.email_verified_at) {
+    redirect("/account/security?notice=Your+email+address+is+already+verified.");
+  }
+
+  const { error } = await account.supabase.auth.signInWithOtp({
+    email: account.person.primary_email,
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo: `${getAppUrl()}/auth/callback?next=%2Faccount%2Fsecurity&email_verification=1`,
+    },
+  });
+  if (error) redirect("/account/security?error=We+could+not+send+the+verification+email.+Please+try+again.");
+
+  await createAdminClient()
+    .from("people")
+    .update({ email_verification_requested_at: new Date().toISOString() })
+    .eq("id", account.person.id);
+  redirect("/account/security?notice=Verification+email+sent.+Open+the+link+in+your+email+to+finish.");
 }

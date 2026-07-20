@@ -68,6 +68,23 @@ export const applicationSchema = z.object({
   brokerageId: z.string().uuid(),
 });
 
+export const professionalUpgradeSchema = z
+  .object({
+    requestedRole: z.enum(["agent", "broker"]),
+    contactPhone: z.string().trim().min(7, "Enter a valid contact number.").max(30),
+    contactAddress: z.string().trim().min(8, "Enter your business address.").max(500),
+    brokerageId: z.string().uuid().optional().or(z.literal("")),
+    brokerageName: z.string().trim().max(160),
+  })
+  .superRefine((value, context) => {
+    if (value.requestedRole === "agent" && !value.brokerageId) {
+      context.addIssue({ code: "custom", path: ["brokerageId"], message: "Choose the brokerage you want to join." });
+    }
+    if (value.requestedRole === "broker" && value.brokerageName.length < 2) {
+      context.addIssue({ code: "custom", path: ["brokerageName"], message: "Enter your brokerage name." });
+    }
+  });
+
 export const decisionSchema = z
   .object({
     applicationId: z.string().uuid(),

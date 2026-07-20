@@ -14,8 +14,10 @@ import {
   invitationAcceptanceSchema,
   invitationSchema,
   profileSchema,
+  professionalUpgradeSchema,
   staffCapabilitySchema,
 } from "@/lib/auth/validation";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function readText(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -64,6 +66,56 @@ export async function submitAgentApplicationAction(formData: FormData) {
 
   if (error) redirect(`${returnTo}?error=Your+application+could+not+be+submitted.`);
   redirect(`${returnTo}?notice=Your+agent+application+was+sent+to+the+brokerage.`);
+}
+
+export async function requestProfessionalUpgradeAction(formData: FormData) {
+  const account = await requireAccount("/account/subscription");
+  const parsed = professionalUpgradeSchema.safeParse({
+    requestedRole: readText(formData, "requestedRole"),
+    contactPhone: readText(formData, "contactPhone"),
+    contactAddress: readText(formData, "contactAddress"),
+    brokerageId: readText(formData, "brokerageId"),
+    brokerageName: readText(formData, "brokerageName"),
+  });
+  if (!parsed.success) {
+    redirect(`/account/subscription?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Check the upgrade details.")}`);
+  }
+
+  const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("professional_registration_requests")
+    .select("id")
+    .eq("person_id", account.person.id)
+    .in("status", ["submitted", "brokerage_approved", "properap_approved", "payment_pending"])
+    .limit(1)
+    .maybeSingle();
+  if (existing) redirect("/account/subscription?notice=Your+professional+upgrade+request+is+already+being+reviewed.");
+
+  if (parsed.data.requestedRole === "agent") {
+    const { data: brokerage } = await admin
+      .from("brokerages")
+      .select("id")
+      .eq("id", parsed.data.brokerageId)
+      .eq("status", "active")
+      .maybeSingle();
+    if (!brokerage) redirect("/account/subscription?error=That+brokerage+is+not+accepting+upgrade+requests.");
+  }
+
+  const { error } = await admin.from("professional_registration_requests").insert({
+    person_id: account.person.id,
+    request_type: parsed.data.requestedRole,
+    brokerage_id: parsed.data.requestedRole === "agent" ? parsed.data.brokerageId : null,
+    brokerage_name: parsed.data.requestedRole === "broker" ? parsed.data.brokerageName : null,
+    contact_phone: parsed.data.contactPhone,
+    contact_address: parsed.data.contactAddress,
+    origin: "upgrade",
+    status: "submitted",
+  });
+  if (error) redirect("/account/subscription?error=Your+upgrade+request+could+not+be+sent.+Please+try+again.");
+
+  await admin.from("people").update({ primary_phone: parsed.data.contactPhone }).eq("id", account.person.id);
+  revalidatePath("/account/subscription");
+  redirect("/account/subscription?notice=Your+upgrade+request+was+sent+to+ProperAP+for+review.");
 }
 
 export async function decideAgentApplicationAction(formData: FormData) {

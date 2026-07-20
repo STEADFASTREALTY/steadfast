@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { signOutAction } from "@/app/actions/auth";
+import { requestEmailVerificationAction, signOutAction } from "@/app/actions/auth";
 import { AccountHeader } from "@/app/components/account-header";
 import { AccountSectionNav } from "@/app/components/account-section-nav";
 import { ConsumerAccountNav } from "@/app/components/consumer-account-nav";
@@ -23,6 +23,11 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
     <div className="account-settings-layout account-security-settings-layout">
       {!context.membership ? <ConsumerAccountNav active="security" /> : <AccountSectionNav active="security" />}
       <div className="account-main">
+      <section className="account-card">
+        <div className="card-heading"><span>Email verification</span><h2>{context.person.email_verified_at ? "Email verified" : "Verify your email"}</h2></div>
+        <p>{context.person.primary_email ?? "No email address is attached to this account."}</p>
+        {context.person.email_verified_at ? <p className="verification-confirmed">This email address has been verified for your ProperAP account.</p> : <form action={requestEmailVerificationAction}><button className="outline-dark-button" type="submit">Send verification email</button></form>}
+      </section>
       <section className="account-card accent-card">
         <StatusMessage error={query.error} notice={query.notice} />
         <div className="card-heading"><span>{required ? "Required" : "Recommended"}</span><h2>Authenticator verification</h2></div>
