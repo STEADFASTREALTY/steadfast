@@ -17,7 +17,7 @@ type UploadState = { kind: "idle" | "uploading" | "error"; message: string };
 
 const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; returnTo?: string }) {
+export function CreateListingForm({ parishes, returnTo, independentAgent = false }: { parishes: Parish[]; returnTo?: string; independentAgent?: boolean }) {
   const router = useRouter();
   const uploadStartedFor = useRef<string | null>(null);
   const selectedImageFilesRef = useRef<File[]>([]);
@@ -115,7 +115,7 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
   }, [retryUpload, router, state.listingId, state.returnTo]);
 
   return (
-    <form action={formAction} className="listing-wizard" data-prompt-title="Create this private draft?" data-prompt-message="SteadFast will save the draft, compress selected property photos to full-HD, strip metadata, and securely upload them for brokerage review." data-prompt-confirm="Create draft">
+    <form action={formAction} className="listing-wizard" data-prompt-title="Create this private draft?" data-prompt-message={independentAgent ? "ProperAP will save the draft, compress selected property photos to full-HD, strip metadata, and securely upload them. You can publish the public draft yourself when ready." : "ProperAP will save the draft, compress selected property photos to full-HD, strip metadata, and securely upload them for brokerage review."} data-prompt-confirm="Create draft">
       {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
       <section className="wizard-section">
         <div className="wizard-step"><span>01</span><div><strong>What are you marketing?</strong><p>Start with the offer and property type.</p></div></div>
@@ -129,7 +129,7 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
       </section>
 
       <section className="wizard-section">
-        <div className="wizard-step"><span>02</span><div><strong>Where is the property?</strong><p>The exact address remains private until the brokerage approves the listing.</p></div></div>
+        <div className="wizard-step"><span>02</span><div><strong>Where is the property?</strong><p>{independentAgent ? "The exact address stays private until you choose public visibility and publish." : "The exact address remains private until the brokerage approves the listing."}</p></div></div>
         <div className="wizard-fields two">
           <label className="full"><span>Street address</span><input name="addressLine1" minLength={2} maxLength={200} required autoComplete="street-address" placeholder="20 Ocean View Drive" /></label>
           <label><span>Unit, apartment, or building</span><input name="addressLine2" maxLength={200} placeholder="Apartment 4" /></label>
@@ -168,15 +168,15 @@ export function CreateListingForm({ parishes, returnTo }: { parishes: Parish[]; 
       </section>
 
       <section className="wizard-section">
-        <div className="wizard-step"><span>05</span><div><strong>Choose the intended audience.</strong><p>This is only a request. The draft cannot appear publicly before brokerage approval.</p></div></div>
+        <div className="wizard-step"><span>05</span><div><strong>Choose the intended audience.</strong><p>{independentAgent ? "Keep the draft private, or choose Public and publish it yourself after adding photos." : "This is only a request. The draft cannot appear publicly before brokerage approval."}</p></div></div>
         <fieldset className="visibility-options"><legend>Requested visibility</legend>
-          <label><input type="radio" name="visibility" value="public" defaultChecked /><span><strong>Public</strong><small>Publishes to public search and websites immediately after broker approval.</small></span></label>
-          <label><input type="radio" name="visibility" value="professional_network" /><span><strong>Agents only</strong><small>Visible to all approved agents on CanadaSAP after approval. It will not appear in public search or public websites.</small></span></label>
-          <label><input type="radio" name="visibility" value="private" /><span><strong>Private</strong><small>Keep it inside your brokerage workspace.</small></span></label>
+          <label><input type="radio" name="visibility" value="public" defaultChecked /><span><strong>Public</strong><small>{independentAgent ? "Ready for you to publish to public search and your agent website." : "Publishes to public search and websites immediately after broker approval."}</small></span></label>
+          <label><input type="radio" name="visibility" value="professional_network" /><span><strong>Agents only</strong><small>Visible to approved agents only. It will not appear in public search or public websites.</small></span></label>
+          <label><input type="radio" name="visibility" value="private" /><span><strong>Private</strong><small>{independentAgent ? "Keep it in your private independent workspace." : "Keep it inside your brokerage workspace."}</small></span></label>
         </fieldset>
       </section>
 
-      <div className="wizard-submit"><div><strong>{state.listingId ? "Private draft created" : "Saved as a private draft"}</strong><p>{state.listingId && uploadState.kind === "error" ? "The draft and every completed image are saved. Retry to continue the remaining image uploads." : selectedImages.length ? "Selected images will be compressed and securely attached before the draft opens." : "You will review and submit it to your broker in a later step."}</p>{state.error ? <p className="inline-form-error" role="alert">{state.error}</p> : null}</div>{state.listingId && uploadState.kind === "error" ? <button className="solid-button" type="button" onClick={() => setRetryUpload((value) => value + 1)}>Retry image upload</button> : <button className="solid-button" type="submit" disabled={pending || uploading || Boolean(state.listingId)}>{pending ? "Creating draft…" : uploading ? "Uploading images…" : selectedImages.length ? "Create draft and upload images" : "Create private draft"}</button>}</div>
+      <div className="wizard-submit"><div><strong>{state.listingId ? "Private draft created" : "Saved as a private draft"}</strong><p>{state.listingId && uploadState.kind === "error" ? "The draft and every completed image are saved. Retry to continue the remaining image uploads." : selectedImages.length ? "Selected images will be compressed and securely attached before the draft opens." : independentAgent ? "You can publish the listing yourself after reviewing the draft." : "You will review and submit it to your broker in a later step."}</p>{state.error ? <p className="inline-form-error" role="alert">{state.error}</p> : null}</div>{state.listingId && uploadState.kind === "error" ? <button className="solid-button" type="button" onClick={() => setRetryUpload((value) => value + 1)}>Retry image upload</button> : <button className="solid-button" type="submit" disabled={pending || uploading || Boolean(state.listingId)}>{pending ? "Creating draft…" : uploading ? "Uploading images…" : selectedImages.length ? "Create draft and upload images" : "Create private draft"}</button>}</div>
     </form>
   );
 }

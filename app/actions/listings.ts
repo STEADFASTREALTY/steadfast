@@ -79,8 +79,9 @@ export async function createListingDraftAction(
 ): Promise<CreateListingDraftState> {
   const returnTo = readText(formData, "returnTo") === "/workspace/site" ? "/workspace/site" : "/workspace/listings";
   const context = await getActiveMembershipContext(returnTo);
-  const canCreate = Boolean(context.membership)
-    && (context.roles.includes("agent") || context.roles.includes("broker"));
+  const canCreate = (Boolean(context.membership)
+    && (context.roles.includes("agent") || context.roles.includes("broker")))
+    || (context.independentAgent && !context.membership);
   if (!canCreate) redirect("/access-denied?reason=listing-creation");
 
   const parsed = createListingDraftSchema.safeParse(readDraftInput(formData));
@@ -90,6 +91,50 @@ export async function createListingDraftAction(
   }
 
   const listingId = randomUUID();
+  if (context.independentAgent && !context.membership) {
+    const admin = createAdminClient();
+    const { data: jamaica } = await admin.from("countries").select("id").eq("code", "JM").maybeSingle();
+    const { data: area } = jamaica ? await admin.from("administrative_areas").select("id,name").eq("id", parsed.data.administrativeAreaId).eq("country_id", jamaica.id).maybeSingle() : { data: null };
+    if (!jamaica || !area) return { error: "Choose a valid Jamaican parish." };
+    const normalizedAddress = `${parsed.data.addressLine1} ${parsed.data.addressLine2} ${parsed.data.postalCode} ${area.name} Jamaica`.trim().replace(/\s+/g, " ").toLowerCase();
+    const fingerprint = createHash("sha256").update(`${context.person.id}|${parsed.data.propertyType}|${normalizedAddress}`).digest("hex");
+    let propertyId: string;
+    const { data: existing } = await admin.from("properties").select("id").is("created_by_brokerage_id", null).eq("created_by_person_id", context.person.id).eq("address_fingerprint", fingerprint).maybeSingle();
+    if (existing) {
+      propertyId = existing.id;
+    } else {
+      const { data: address, error: addressError } = await admin.from("property_addresses").insert({
+        country_id: jamaica.id, administrative_area_id: area.id, address_line_1: parsed.data.addressLine1,
+        address_line_2: parsed.data.addressLine2 || null, postal_code: parsed.data.postalCode || null,
+        normalized_address: normalizedAddress, created_by_brokerage_id: null, created_by_person_id: context.person.id,
+      }).select("id").single();
+      if (addressError || !address) return { error: "The property address could not be saved. Please try again." };
+      const { data: property, error: propertyError } = await admin.from("properties").insert({
+        created_by_brokerage_id: null, created_by_person_id: context.person.id, property_type: parsed.data.propertyType,
+        address_id: address.id, address_fingerprint: fingerprint,
+      }).select("id").single();
+      if (propertyError || !property) return { error: "The property record could not be saved. Please try again." };
+      propertyId = property.id;
+    }
+    const publicLocationLabel = parsed.data.publicLocationPrecision === "hidden" ? null : parsed.data.publicLocationPrecision === "area" ? area.name : `${parsed.data.addressLine1}, ${area.name}`;
+    const contentHash = createHash("sha256").update(JSON.stringify(toCommandPayload(parsed.data))).digest("hex");
+    const { error: listingError } = await admin.from("listings").insert({ id: listingId, brokerage_id: null, independent_owner_person_id: context.person.id, property_id: propertyId, created_by_person_id: context.person.id });
+    if (listingError) return { error: "The independent listing draft could not be created. Please try again." };
+    const { data: version, error: versionError } = await admin.from("listing_versions").insert({
+      listing_id: listingId, version_number: 1, purpose: parsed.data.purpose, property_type: parsed.data.propertyType,
+      property_subtype: parsed.data.propertySubtype || null, currency: "JMD", price: parsed.data.price,
+      price_period: parsed.data.pricePeriod || null, title: parsed.data.title, description: parsed.data.description,
+      bedrooms: parsed.data.bedrooms, bathrooms: parsed.data.bathrooms, building_area: parsed.data.buildingArea,
+      land_area: parsed.data.landArea, area_unit: parsed.data.areaUnit || null, visibility: parsed.data.visibility,
+      public_location_precision: parsed.data.publicLocationPrecision, public_location_label: publicLocationLabel,
+      content_hash: contentHash, created_by_person_id: context.person.id,
+    }).select("id").single();
+    if (versionError || !version) return { error: "The independent listing version could not be created. Please try again." };
+    await admin.from("listing_state_events").insert({ listing_id: listingId, from_state: null, to_state: "draft", source_version_id: version.id, actor_person_id: context.person.id, reason: "Independent agent listing draft created" });
+    await admin.from("audit_events").insert({ actor_person_id: context.person.id, effective_role_key: "agent", brokerage_id: null, action: "listing.draft_created", target_type: "listing", target_id: listingId, source: "web", correlation_id: randomUUID(), after_summary: { lifecycle_state: "draft", ownership: "independent" } });
+    revalidatePath("/workspace/listings");
+    return { listingId, returnTo };
+  }
   const { error } = await context.supabase.from("create_listing_draft_commands").insert({
     listing_id: listingId,
     ...toCommandPayload(parsed.data),
