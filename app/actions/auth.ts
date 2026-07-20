@@ -12,6 +12,7 @@ import {
   signOutSchema,
 } from "@/lib/auth/validation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function readText(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -87,20 +88,41 @@ export async function registerAction(formData: FormData) {
     redirect(`/register?error=${encodeURIComponent(message)}&next=${encodeURIComponent(next)}`);
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const registrationMetadata = {
+    first_name: parsed.data.firstName,
+    last_name: parsed.data.lastName,
+    display_name: `${parsed.data.firstName} ${parsed.data.lastName}`,
+    requested_role: parsed.data.requestedRole,
+    contact_phone: parsed.data.contactPhone,
+    contact_address: parsed.data.contactAddress,
+    brokerage_id: parsed.data.brokerageId || undefined,
+    brokerage_name: parsed.data.brokerageName || undefined,
+  };
+  const admin = createAdminClient();
+  const { error: createError } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: {
-      data: { first_name: parsed.data.firstName, last_name: parsed.data.lastName, display_name: `${parsed.data.firstName} ${parsed.data.lastName}`, requested_role: parsed.data.requestedRole, contact_phone: parsed.data.contactPhone, contact_address: parsed.data.contactAddress, brokerage_id: parsed.data.brokerageId || undefined, brokerage_name: parsed.data.brokerageName || undefined },
-      emailRedirectTo: `${getAppUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
-    },
+    email_confirm: true,
+    user_metadata: registrationMetadata,
   });
 
-  if (error) {
+  if (createError) {
     redirect(`/register?error=Registration+could+not+be+completed.+Please+try+again.&next=${encodeURIComponent(next)}`);
   }
-  redirect("/sign-in?notice=Check+your+email+to+confirm+your+new+account.");
+
+  const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+  if (signInError) {
+    redirect(`/sign-in?error=Your+account+was+created,+but+we+could+not+start+your+session.+Please+sign+in.&next=${encodeURIComponent(next)}`);
+  }
+
+  if (parsed.data.requestedRole !== "consumer") {
+    redirect("/account?notice=Your+professional+registration+has+been+submitted.+ProperAP+will+notify+you+when+activation+is+complete.");
+  }
+  redirect(next);
 }
 
 export async function signOutAction(formData: FormData) {
