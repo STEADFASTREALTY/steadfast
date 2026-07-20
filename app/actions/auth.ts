@@ -74,6 +74,7 @@ export async function registerAction(formData: FormData) {
     firstName: readText(formData, "firstName"),
     lastName: readText(formData, "lastName"),
     requestedRole: readText(formData, "requestedRole"),
+    agentMode: readText(formData, "agentMode") || "brokerage",
     contactPhone: readText(formData, "contactPhone"),
     contactAddress: readText(formData, "contactAddress"),
     brokerageId: readText(formData, "brokerageId"),
@@ -94,9 +95,10 @@ export async function registerAction(formData: FormData) {
     last_name: parsed.data.lastName,
     display_name: `${parsed.data.firstName} ${parsed.data.lastName}`,
     requested_role: parsed.data.requestedRole,
+    agent_mode: parsed.data.requestedRole === "agent" ? parsed.data.agentMode : undefined,
     contact_phone: parsed.data.contactPhone,
     contact_address: parsed.data.contactAddress,
-    brokerage_id: parsed.data.brokerageId || undefined,
+    brokerage_id: parsed.data.requestedRole === "agent" && parsed.data.agentMode === "brokerage" ? parsed.data.brokerageId || undefined : undefined,
     brokerage_name: parsed.data.brokerageName || undefined,
   };
   const admin = createAdminClient();

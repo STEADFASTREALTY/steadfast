@@ -26,6 +26,7 @@ export const registerSchema = z
     firstName: z.string().trim().min(1).max(80),
     lastName: z.string().trim().min(1).max(80),
     requestedRole: z.enum(["consumer", "agent", "broker"]),
+    agentMode: z.enum(["brokerage", "independent"]),
     contactPhone: z.string().trim().max(30),
     contactAddress: z.string().trim().max(500),
     brokerageId: z.string().uuid().optional().or(z.literal("")),
@@ -42,7 +43,7 @@ export const registerSchema = z
     if (value.requestedRole === "consumer") return;
     if (value.contactPhone.length < 7) context.addIssue({ code: "custom", path: ["contactPhone"], message: "Enter a valid contact number." });
     if (value.contactAddress.length < 8) context.addIssue({ code: "custom", path: ["contactAddress"], message: "Enter your business address." });
-    if (value.requestedRole === "agent" && !value.brokerageId) context.addIssue({ code: "custom", path: ["brokerageId"], message: "Choose the brokerage that referred you." });
+    if (value.requestedRole === "agent" && value.agentMode === "brokerage" && !value.brokerageId) context.addIssue({ code: "custom", path: ["brokerageId"], message: "Choose the brokerage that referred you." });
     if (value.requestedRole === "broker" && value.brokerageName.length < 2) context.addIssue({ code: "custom", path: ["brokerageName"], message: "Enter your brokerage name." });
   });
 

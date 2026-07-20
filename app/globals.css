@@ -531,6 +531,14 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .registration-role-option span { display: grid; gap: 5px; }
 .registration-role-option strong { color: var(--ink); font-size: 16px; }
 .registration-role-option small { color: #52635f; font-size: 16px !important; font-weight: 400; letter-spacing: 0; line-height: 1.45; text-transform: none; }
+.agent-mode-picker { display: block !important; border: 1px solid var(--line); padding: 16px; }
+.agent-mode-picker > div { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.agent-mode-picker label { align-items: flex-start; display: flex !important; gap: 10px; min-height: 84px; padding: 13px; border: 1px solid var(--line); cursor: pointer; }
+.agent-mode-picker label:hover, .agent-mode-picker label.selected { background: #f3f7f5; border-color: var(--evergreen); }
+.agent-mode-picker input { accent-color: var(--evergreen); margin-top: 3px; }
+.agent-mode-picker span { display: grid; gap: 5px; }
+.agent-mode-picker strong { color: var(--ink); font-size: 16px; }
+.agent-mode-picker small { color: #52635f; font-size: 15px; font-weight: 400; letter-spacing: 0; line-height: 1.45; text-transform: none; }
 .registration-notice { background: #fff7df; border-left: 4px solid var(--gold); color: #3f4036; font-size: 15px; line-height: 1.5; margin: 0; padding: 13px 15px; }
 .password-requirements { color: #52635f; font-size: 15px; line-height: 1.5; margin: -8px 0 0; }
 .auth-switch { color: #657572; font-size: 15px; margin: 26px 0 0; text-align: center; }
@@ -1080,7 +1088,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
   .auth-intro h1 { font-size: 58px; }
   .stack-form.two-column { grid-template-columns: 1fr; }
   .stack-form.two-column > * { grid-column: 1; }
-  .registration-role-options { grid-template-columns: 1fr; }
+  .registration-role-options, .agent-mode-picker > div { grid-template-columns: 1fr; }
   .stack-form.testimonial-form { grid-template-columns: 1fr; }
   .testimonial-records article { grid-template-columns: 1fr; }
   .stack-form.site-asset-upload { grid-template-columns: 1fr; }

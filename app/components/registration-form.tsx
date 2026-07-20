@@ -14,6 +14,7 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export function RegistrationForm({ brokerages, next }: { brokerages: Brokerage[]; next: string }) {
   const [role, setRole] = useState<RegistrationRole>("consumer");
+  const [agentMode, setAgentMode] = useState<"brokerage" | "independent">("brokerage");
   const [showPassword, setShowPassword] = useState(false);
   const passwordType = showPassword ? "text" : "password";
 
@@ -21,13 +22,14 @@ export function RegistrationForm({ brokerages, next }: { brokerages: Brokerage[]
     <form action={registerAction} className="stack-form two-column">
       <input type="hidden" name="next" value={next} />
       <input type="hidden" name="requestedRole" value={role} />
+      <input type="hidden" name="agentMode" value={agentMode} />
       <fieldset className="registration-role-picker full">
         <legend>Account type</legend>
         <p>Choose how you will use ProperAP. Regular User accounts are active immediately; professional accounts begin as inactive while ProperAP reviews the registration.</p>
         <div className="registration-role-options">
           {([
             ["consumer", "Regular User", "Browse, save listings, and contact agents."],
-            ["agent", "Agent", "Submit an application to the brokerage that referred you."],
+            ["agent", "Agent", "Work independently or submit an application to a brokerage."],
             ["broker", "Broker", "Register your brokerage for ProperAP review and activation."],
           ] as const).map(([value, label, description]) => (
             <label className={`registration-role-option ${role === value ? "selected" : ""}`} key={value}>
@@ -46,7 +48,8 @@ export function RegistrationForm({ brokerages, next }: { brokerages: Brokerage[]
       {role !== "consumer" && <>
         <label><span>Contact number</span><input name="contactPhone" type="tel" autoComplete="tel" minLength={7} maxLength={30} required /></label>
         <label><span>Business address</span><input name="contactAddress" autoComplete="street-address" minLength={8} maxLength={500} required /></label>
-        {role === "agent" ? <label className="full"><span>Brokerage that referred you</span><select name="brokerageId" required defaultValue=""><option value="">Select your brokerage</option>{brokerages.map((brokerage) => <option value={brokerage.id} key={brokerage.id}>{brokerage.display_name}</option>)}</select></label> : <label className="full"><span>Brokerage name</span><input name="brokerageName" minLength={2} maxLength={160} required placeholder="Your brokerage company name" /></label>}
+        {role === "agent" ? <fieldset className="agent-mode-picker full"><legend>How will you work?</legend><div><label className={agentMode === "brokerage" ? "selected" : ""}><input checked={agentMode === "brokerage"} onChange={() => setAgentMode("brokerage")} type="radio" /> <span><strong>Join a brokerage</strong><small>Your application is sent to the brokerage that referred you for approval.</small></span></label><label className={agentMode === "independent" ? "selected" : ""}><input checked={agentMode === "independent"} onChange={() => setAgentMode("independent")} type="radio" /> <span><strong>Work independently</strong><small>ProperAP reviews and activates your independent professional account directly.</small></span></label></div></fieldset> : null}
+        {role === "agent" && agentMode === "brokerage" ? <label className="full"><span>Brokerage that referred you</span><select name="brokerageId" required defaultValue=""><option value="">Select your brokerage</option>{brokerages.map((brokerage) => <option value={brokerage.id} key={brokerage.id}>{brokerage.display_name}</option>)}</select></label> : role === "broker" ? <label className="full"><span>Brokerage name</span><input name="brokerageName" minLength={2} maxLength={160} required placeholder="Your brokerage company name" /></label> : null}
         <p className="registration-notice full"><strong>Professional accounts require ProperAP approval.</strong> Access is limited while we review your information and confirm your registration. We will notify you when your professional workspace is active.</p>
       </>}
       <label className="check-row full"><input name="privacyAccepted" type="checkbox" required /> I agree to the privacy notice and account terms for this pilot.</label>
