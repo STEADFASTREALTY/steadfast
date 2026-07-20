@@ -33,7 +33,8 @@ export async function AccountHeader({
       <BrandLogo compact />
       <nav aria-label="Account navigation">
         <Link href="/properties">Properties</Link>
-        {isConsumer ? <><Link href="/account/saved-listings">Liked listings</Link><Link href="/account/messages">Message center</Link></> : null}
+        <Link href="/account/saved-listings">My watch</Link>
+        {isConsumer ? <Link href="/account/messages">Message center</Link> : null}
         {hasWorkspace ? <Link href="/workspace/site">Website</Link> : null}
         {canManageListings ? <Link href="/workspace/listings">Listings</Link> : null}
         {canShareListings ? <Link href="/workspace/sharing">Sharing</Link> : null}

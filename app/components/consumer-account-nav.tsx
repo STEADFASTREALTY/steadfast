@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-export function ConsumerAccountNav({ active }: { active: "profile" | "saved" | "messages" | "notifications" | "password" | "subscription" | "payment" | "security" }) {
+export function ConsumerAccountNav({ active }: { active: "profile" | "watch" | "messages" | "notifications" | "password" | "subscription" | "payment" | "security" }) {
   const links: Array<[typeof active, string, string]> = [
     ["profile", "Profile", "/account"],
-    ["saved", "Liked listings", "/account/saved-listings"],
+    ["watch", "My watch", "/account/saved-listings"],
     ["messages", "Message center", "/account/messages"],
     ["notifications", "Notifications", "/account/notifications"],
     ["password", "Password", "/account/password"],
