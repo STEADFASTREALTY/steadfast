@@ -497,7 +497,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .solid-button:hover { background: #20433f; }
 
 .auth-page { background: var(--cream); display: grid; grid-template-columns: minmax(340px, .9fr) minmax(480px, 1.1fr); min-height: 100vh; }
-.auth-intro { background: #eef2f5; border-right: 1px solid #d7dfe4; color: var(--charcoal); display: flex; flex-direction: column; justify-content: center; padding: clamp(48px, 8vw, 110px); }
+.auth-intro { align-self: start; background: #eef2f5; border-right: 1px solid #d7dfe4; box-sizing: border-box; color: var(--charcoal); display: flex; flex-direction: column; height: 100vh; justify-content: center; padding: clamp(48px, 8vw, 110px); position: sticky; top: 0; }
 .auth-intro .brand-logo { align-self: center; height: 282px; margin-bottom: 42px; width: 330px; }
 .auth-intro .brand-logo img { filter: drop-shadow(0 2px 4px rgba(7,52,120,.14)); }
 .auth-intro .eyebrow { color: var(--gold); }
@@ -990,7 +990,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 
 @media (max-width: 960px) {
   .auth-page { grid-template-columns: 1fr; }
-  .auth-intro { min-height: 480px; }
+  .auth-intro { height: auto; min-height: 480px; position: static; }
   .auth-card { margin: 45px auto; width: calc(100% - 48px); }
   .account-layout, .management-layout, .account-settings-layout, .team-management-layout { grid-template-columns: 1fr; }
   .team-capacity-dashboard { grid-template-columns: 1fr 1fr; }
