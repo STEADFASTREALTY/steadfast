@@ -542,7 +542,7 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .account-layout, .management-layout { display: grid; gap: 34px; grid-template-columns: minmax(0, 1fr) 320px; margin: -38px auto 0; max-width: 1250px; padding: 0 28px 90px; position: relative; }
 .account-settings-layout { display: grid; gap: 24px; grid-template-columns: 190px minmax(0, 1fr) 320px; margin: 24px auto 0; max-width: 1440px; padding: 0 28px 90px; position: relative; }
 .account-section-nav { align-self: start; background: var(--ink); display: grid; gap: 3px; padding: 14px 10px; position: sticky; top: 18px; }
-.account-section-nav > span { color: var(--gold); font-size: 15px; font-weight: 700; letter-spacing: .09em; padding: 8px 10px 12px; text-transform: uppercase; }
+.account-section-nav > span, .account-section-nav > strong { color: var(--gold); font-size: 15px; font-weight: 700; letter-spacing: .09em; padding: 8px 10px 12px; text-transform: uppercase; }
 .account-section-nav a { align-items: center; color: rgba(255,255,255,.78); display: flex; font-size: 15px; font-weight: 700; min-height: 44px; padding: 0 12px; }
 .account-section-nav a:hover, .account-section-nav a.active { background: rgba(255,255,255,.13); color: #fff; }
 .nav-alert-badge { align-items: center; background: var(--error); border: 2px solid #fff; border-radius: 999px; color: #fff; display: inline-flex; font-size: 15px; font-weight: 800; height: 24px; justify-content: center; line-height: 1; margin-left: auto; min-width: 24px; padding: 0 5px; }
