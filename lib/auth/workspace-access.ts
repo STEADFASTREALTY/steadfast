@@ -35,7 +35,7 @@ export function deriveWorkspaceAccess({
     isAgent: roles.includes("agent") || isBroker,
     canManageAgents: isBroker || allows("agent.manage"),
     canReviewListings: isBroker || allows("listing.review"),
-    canManageInquiries: isBroker || roles.includes("agent") || allows("inquiry.manage") || allows("inquiry.own.manage"),
+    canManageInquiries: roles.includes("agent"),
     canShareListings: isBroker || roles.includes("agent") || allows("listing.share"),
     canManageBrokerage: isBroker || allows("brokerage.profile"),
     isOperations,
