@@ -58,7 +58,7 @@ export default async function InquiryInboxPage({ searchParams }: PageProps) {
       />
       <section className="account-hero compact">
         <span className="eyebrow"><i /> Private client service</span>
-        <h1>Property inquiries.</h1>
+        <h1>Property inquiries</h1>
       </section>
       <div className="inquiry-status-wrap"><StatusMessage error={query.error} notice={query.notice} /></div>
       <InquiryInbox inquiries={inboxInquiries} />

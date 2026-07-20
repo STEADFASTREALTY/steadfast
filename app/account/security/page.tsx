@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { setPasswordAction, signOutAction } from "@/app/actions/auth";
 import { AccountHeader } from "@/app/components/account-header";
 import { AccountSectionNav } from "@/app/components/account-section-nav";
+import { ConsumerAccountNav } from "@/app/components/consumer-account-nav";
 import { MfaEnrollment } from "@/app/components/mfa-enrollment";
 import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
@@ -18,9 +19,9 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
 
   return <main className="account-page">
     <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} isConsumer={!context.membership} />
-    <section className="account-hero compact"><span className="eyebrow"><i /> Account protection</span><h1>Security.</h1><p>Protect your account and control signed-in machines.</p></section>
+    <section className="account-hero compact"><span className="eyebrow"><i /> Account protection</span><h1>Security</h1><p>Protect your account and control signed-in machines.</p></section>
     <div className="account-settings-layout account-security-settings-layout">
-      <AccountSectionNav active="security" />
+      {!context.membership ? <ConsumerAccountNav active="security" /> : <AccountSectionNav active="security" />}
       <div className="account-main">
       <section className="account-card">
         <div className="card-heading"><span>Password</span><h2>Change your password</h2></div>

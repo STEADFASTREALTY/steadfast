@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AccountHeader } from "@/app/components/account-header";
 import { AccountSectionNav } from "@/app/components/account-section-nav";
+import { ConsumerAccountNav } from "@/app/components/consumer-account-nav";
 import { StatusMessage } from "@/app/components/status-message";
 import {
   submitAgentApplicationAction,
@@ -62,17 +63,18 @@ export default async function AccountPage({
   const openApplication = applications?.some((application) =>
     ["draft", "submitted", "broker_approved"].includes(application.status),
   );
+  const isConsumer = !context.membership;
 
   return (
     <main className="account-page">
       <AccountHeader displayName={context.person.display_name} hasWorkspace={access.hasWorkspace} canManageAgents={access.canManageAgents} canManageListings={access.isAgent || access.canReviewListings} canManageInquiries={access.canManageInquiries} canShareListings={access.canShareListings} isConsumer={!context.membership} />
       <section className="account-hero compact">
-        <span className="eyebrow"><i /> Your SteadFast account</span>
-        <h1>Hello, {context.person.display_name}.</h1>
-        <p>Keep your profile current and manage how you participate in the professional network.</p>
+        <span className="eyebrow"><i /> Your ProperAP account</span>
+        <h1>Hello, {context.person.display_name}</h1>
+        <p>{isConsumer ? "Keep your details, saved properties, messages, and notifications in one private place." : "Keep your profile current and manage how you participate in the professional network."}</p>
       </section>
       <div className="account-settings-layout">
-        <AccountSectionNav active={activeSection} />
+        {isConsumer ? <ConsumerAccountNav active="profile" /> : <AccountSectionNav active={activeSection} />}
         <div className="account-main">
           <StatusMessage error={params.error} notice={params.notice} />
           {activeSection === "profile" ? <>
@@ -88,7 +90,7 @@ export default async function AccountPage({
             </form>
           </section>
 
-          {!context.membership && !openApplication ? (
+          {!isConsumer && !openApplication ? (
             <section className="account-card accent-card">
               <div className="card-heading"><span>For professionals</span><h2>Apply to join a brokerage</h2></div>
               <p>Independent agent registration is not available. Choose the brokerage that referred you; its broker will review your application.</p>
@@ -99,7 +101,7 @@ export default async function AccountPage({
             </section>
           ) : null}
 
-          {applications?.length ? (
+          {!isConsumer && applications?.length ? (
             <section className="account-card">
               <div className="card-heading"><span>Applications</span><h2>Agent application history</h2></div>
               <div className="record-list">{applications.map((application) => {
@@ -108,7 +110,7 @@ export default async function AccountPage({
               })}</div>
             </section>
           ) : null}
-          </> : <section className="account-card profile-photo-card">
+          </> : !isConsumer ? <section className="account-card profile-photo-card">
             <div className="card-heading"><span>My photo</span><h2>How clients see you</h2></div>
             <p>Your photograph appears on your public agent website and brokerage team card.</p>
             {profileAsset ? <div className="site-asset-preview"><img src={`/media/sites/${profileAsset.id}/display.webp?v=${profileAsset.id}`} alt="Current professional profile" /></div> : <div className="site-asset-preview empty"><span>No photo uploaded yet</span></div>}
@@ -119,14 +121,14 @@ export default async function AccountPage({
               <label className="site-file-picker"><span>Professional photo</span><input className="site-file-input" name="asset" type="file" accept="image/jpeg,image/png,image/webp" required /><span className="site-file-picker-row"><span className="site-file-picker-button">Choose file</span><span className="site-file-name">JPEG, PNG, or WebP under 5 MB</span></span></label>
               <button className="outline-dark-button image-upload-button" type="submit">Prepare and upload</button>
             </form> : <p className="form-error">An active agent website is required before you can add a professional photo.</p>}
-          </section>}
+          </section> : null}
         </div>
 
         <aside className="account-sidebar">
           <section>
-            <span>Professional status</span>
+            <span>{isConsumer ? "Your account" : "Professional status"}</span>
             <strong>{context.membership ? "Active brokerage member" : "Registered user"}</strong>
-            <p>{context.membership ? "Your brokerage controls your professional roles and listing authority." : "Browse properties freely or apply to the brokerage that referred you."}</p>
+            <p>{context.membership ? "Your brokerage controls your professional roles and listing authority." : "Browse freely, keep liked listings, and receive updates about the properties that matter to you."}</p>
           </section>
           {context.membership ? <section><span>Brokerage</span><strong>{(context.membership.brokerages as unknown as { display_name?: string } | null)?.display_name ?? "Your brokerage"}</strong><p>Roles: {context.roles.join(", ").replaceAll("_", " ") || "member"}</p></section> : null}
         </aside>

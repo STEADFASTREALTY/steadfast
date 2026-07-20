@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AccountHeader } from "@/app/components/account-header";
+import { ConsumerAccountNav } from "@/app/components/consumer-account-nav";
 import { NotificationInbox, type InboxNotification } from "@/app/components/notification-inbox";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
@@ -84,9 +85,9 @@ export default async function NotificationsPage() {
       />
       <section className="account-hero compact inbox-hero">
         <span className="eyebrow"><i /> Updates for you</span>
-        <h1>Notifications.</h1>
+        <h1>Notifications</h1>
       </section>
-      <NotificationInbox notifications={inboxNotifications} />
+      {!context.membership ? <div className="account-settings-layout consumer-account-layout"><ConsumerAccountNav active="notifications" /><div className="account-main"><NotificationInbox notifications={inboxNotifications} /></div></div> : <NotificationInbox notifications={inboxNotifications} />}
     </main>
   );
 }
