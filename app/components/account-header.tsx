@@ -46,7 +46,7 @@ export async function AccountHeader({
         {canManageInquiries ? <Link href="/workspace/inquiries">Inquiries</Link> : null}
         {canManageAgents ? <Link href="/broker/agents">Team</Link> : null}
         {(canManageListings || canManageAgents || canManageInquiries || canShareListings) ? <Link href="/workspace/analytics">Analytics</Link> : null}
-        {isPlatformRole ? <Link href="/staff">Operations</Link> : null}
+        {isPlatformRole ? <Link href="/staff">Members</Link> : null}
         <Link href="/account">My account</Link>
         <NotificationNavLink initialCount={unreadNotificationCount ?? 0} />
       </nav>
