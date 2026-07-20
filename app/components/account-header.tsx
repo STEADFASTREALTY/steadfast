@@ -40,7 +40,7 @@ export async function AccountHeader({
         <Link href="/properties">Properties</Link>
         {!isPlatformRole ? <Link href="/account/saved-listings">My watch</Link> : null}
         {isConsumer && !isPlatformRole ? <Link href="/account/messages">Message center</Link> : null}
-        {hasWorkspace ? <Link href="/workspace/site">Website</Link> : null}
+        {hasWorkspace && !isPlatformRole ? <Link href="/workspace/site">Website</Link> : null}
         {canManageListings ? <Link href="/workspace/listings">Listings</Link> : null}
         {canShareListings ? <Link href="/workspace/sharing">Sharing</Link> : null}
         {canManageInquiries ? <Link href="/workspace/inquiries">Inquiries</Link> : null}
