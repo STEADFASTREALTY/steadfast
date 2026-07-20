@@ -14,7 +14,7 @@ export async function requireAccount(nextPath = "/account") {
 
   const { data: person, error: personError } = await supabase
     .from("people")
-    .select("id, display_name, primary_email, primary_phone, locale, timezone, account_status")
+    .select("id, first_name, last_name, display_name, primary_email, primary_phone, locale, timezone, account_status, created_at")
     .eq("auth_user_id", userData.user.id)
     .single();
 

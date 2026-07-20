@@ -69,7 +69,8 @@ export async function signInAction(formData: FormData) {
 export async function registerAction(formData: FormData) {
   const next = safeInternalPath(readText(formData, "next"));
   const parsed = registerSchema.safeParse({
-    displayName: readText(formData, "displayName"),
+    firstName: readText(formData, "firstName"),
+    lastName: readText(formData, "lastName"),
     email: readText(formData, "email"),
     password: readText(formData, "password"),
     confirmPassword: readText(formData, "confirmPassword"),
@@ -86,7 +87,7 @@ export async function registerAction(formData: FormData) {
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      data: { display_name: parsed.data.displayName },
+      data: { first_name: parsed.data.firstName, last_name: parsed.data.lastName, display_name: `${parsed.data.firstName} ${parsed.data.lastName}` },
       emailRedirectTo: `${getAppUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });

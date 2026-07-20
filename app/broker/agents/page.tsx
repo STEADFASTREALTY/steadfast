@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Team management", description: "Mana
 export const dynamic = "force-dynamic";
 
 type TeamSection = "members" | "applications";
-type Person = { auth_user_id?: string | null; display_name?: string; primary_email?: string } | null;
+type Person = { auth_user_id?: string | null; first_name?: string; last_name?: string; display_name?: string; primary_email?: string } | null;
 type Role = { role_key: string; ends_at: string | null };
 type Permission = { permission_key: string; effect: string; ends_at: string | null };
 const MEMBERS_PER_PAGE = 5;
@@ -77,7 +77,7 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
 
   const [applicationsResult, membersResult, invitationsResult, subscriptionResult] = await Promise.all([
     admin.from("agent_applications").select("id, status, submitted_at, broker_reason, people!agent_applications_person_id_fkey(display_name, primary_email)").eq("brokerage_id", brokerageId).order("submitted_at", { ascending: false }),
-    admin.from("brokerage_memberships").select("id, person_id, status, starts_at, people!brokerage_memberships_person_id_fkey(auth_user_id, display_name, primary_email), membership_roles(role_key, ends_at), membership_permissions(permission_key, effect, ends_at)").eq("brokerage_id", brokerageId).in("status", ["active", "suspended"]).order("starts_at"),
+    admin.from("brokerage_memberships").select("id, person_id, status, starts_at, people!brokerage_memberships_person_id_fkey(auth_user_id, first_name, last_name, display_name, primary_email), membership_roles(role_key, ends_at), membership_permissions(permission_key, effect, ends_at)").eq("brokerage_id", brokerageId).in("status", ["active", "suspended"]).order("starts_at"),
     canInvite ? admin.from("brokerage_invitations").select("id, email, status, expires_at, created_at, brokerage_invitation_roles(role_key)").eq("brokerage_id", brokerageId).order("created_at", { ascending: false }).limit(10) : Promise.resolve({ data: [] }),
     admin.from("brokerage_subscription_records").select("plan_key,status,starts_at,ends_at").eq("brokerage_id", brokerageId).eq("status", "paid").lte("starts_at", new Date().toISOString()).gte("ends_at", new Date().toISOString()).order("ends_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
@@ -148,7 +148,9 @@ export default async function BrokerAgentsPage({ searchParams }: { searchParams:
                   <thead><tr><th>Photo</th><th>First</th><th>Last</th><th>Role</th><th>Joined</th><th>Listings</th><th>Webpage</th><th>Action</th></tr></thead>
                   <tbody>{pageMembers.map((member) => {
                     const person = member.people as unknown as Person;
-                    const { firstName, lastName } = splitName(person?.display_name);
+                    const { firstName, lastName } = person?.first_name && person?.last_name
+                      ? { firstName: person.first_name, lastName: person.last_name }
+                      : splitName(person?.display_name);
                     const roles = member.membership_roles as unknown as Role[];
                     const activeRoles = activeRoleKeys(roles);
                     const isPrincipalBroker = activeRoles.includes("broker");

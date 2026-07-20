@@ -80,8 +80,10 @@ export default async function AccountPage({
           {activeSection === "profile" ? <>
           <section className="account-card">
             <div className="card-heading"><span>Profile</span><h2>Your details</h2></div>
-            <form action={updateProfileAction} className="stack-form two-column" data-prompt-title="Save your profile changes?" data-prompt-message="Your SteadFast display name and phone number will be updated for future account and professional use." data-prompt-confirm="Save profile">
-              <label className="full"><span>Display name</span><input name="displayName" defaultValue={context.person.display_name} minLength={2} maxLength={120} required /></label>
+            <form action={updateProfileAction} className="stack-form two-column" data-prompt-title="Save your profile changes?" data-prompt-message="Your first name, last name, and phone number will be updated for future account and professional use." data-prompt-confirm="Save profile">
+              <label><span>First name</span><input name="firstName" defaultValue={context.person.first_name} autoComplete="given-name" minLength={1} maxLength={80} required /></label>
+              <label><span>Last name</span><input name="lastName" defaultValue={context.person.last_name} autoComplete="family-name" minLength={1} maxLength={80} required /></label>
+              <label className="full"><span>Display name</span><input value={`${context.person.first_name} ${context.person.last_name}`} readOnly /><small>Your display name is kept in sync with your first and last name.</small></label>
               <label className="full"><span>Email</span><input value={context.person.primary_email ?? context.user.email ?? ""} readOnly /></label>
               <label className="full"><span>Phone</span><input name="phone" defaultValue={context.person.primary_phone ?? ""} autoComplete="tel" maxLength={30} /></label>
               <input type="hidden" name="locale" value="en-JM" />

@@ -26,7 +26,8 @@ export default async function RegisterPage({
         <StatusMessage error={params.error} />
         <form action={registerAction} className="stack-form two-column">
           <input type="hidden" name="next" value={params.next ?? "/account"} />
-          <label className="full"><span>Your name</span><input name="displayName" autoComplete="name" minLength={2} maxLength={120} required /></label>
+          <label><span>First name</span><input name="firstName" autoComplete="given-name" minLength={1} maxLength={80} required /></label>
+          <label><span>Last name</span><input name="lastName" autoComplete="family-name" minLength={1} maxLength={80} required /></label>
           <label className="full"><span>Email</span><input name="email" type="email" autoComplete="email" maxLength={320} required /></label>
           <label><span>Password</span><input name="password" type="password" autoComplete="new-password" minLength={10} maxLength={128} required /></label>
           <label><span>Confirm password</span><input name="confirmPassword" type="password" autoComplete="new-password" minLength={10} maxLength={128} required /></label>

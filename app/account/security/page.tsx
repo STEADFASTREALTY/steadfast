@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setPasswordAction, signOutAction } from "@/app/actions/auth";
+import { signOutAction } from "@/app/actions/auth";
 import { AccountHeader } from "@/app/components/account-header";
 import { AccountSectionNav } from "@/app/components/account-section-nav";
 import { ConsumerAccountNav } from "@/app/components/consumer-account-nav";
@@ -23,15 +23,6 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
     <div className="account-settings-layout account-security-settings-layout">
       {!context.membership ? <ConsumerAccountNav active="security" /> : <AccountSectionNav active="security" />}
       <div className="account-main">
-      <section className="account-card">
-        <div className="card-heading"><span>Password</span><h2>Change your password</h2></div>
-        <p>Choose a new password for your ProperAP account. Other signed-in devices will be signed out when it is changed.</p>
-        <form action={setPasswordAction} className="stack-form" data-prompt-title="Change your password?" data-prompt-message="Other signed-in devices will be signed out for account protection." data-prompt-confirm="Change password">
-          <label><span>New password</span><input name="password" type="password" autoComplete="new-password" minLength={10} required /></label>
-          <label><span>Confirm new password</span><input name="confirmPassword" type="password" autoComplete="new-password" minLength={10} required /></label>
-          <button className="solid-button" type="submit">Save new password</button>
-        </form>
-      </section>
       <section className="account-card accent-card">
         <StatusMessage error={query.error} notice={query.notice} />
         <div className="card-heading"><span>{required ? "Required" : "Recommended"}</span><h2>Authenticator verification</h2></div>

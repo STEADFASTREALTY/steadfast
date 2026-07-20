@@ -1,11 +1,14 @@
 import Link from "next/link";
 
-export function ConsumerAccountNav({ active }: { active: "profile" | "saved" | "messages" | "notifications" | "security" }) {
+export function ConsumerAccountNav({ active }: { active: "profile" | "saved" | "messages" | "notifications" | "password" | "subscription" | "payment" | "security" }) {
   const links: Array<[typeof active, string, string]> = [
     ["profile", "Profile", "/account"],
     ["saved", "Liked listings", "/account/saved-listings"],
     ["messages", "Message center", "/account/messages"],
     ["notifications", "Notifications", "/account/notifications"],
+    ["password", "Password", "/account/password"],
+    ["subscription", "Subscription", "/account/subscription"],
+    ["payment", "Payment", "/account/payment"],
     ["security", "Security", "/account/security"],
   ];
 

@@ -25,7 +25,8 @@ function readText(formData: FormData, key: string) {
 export async function updateProfileAction(formData: FormData) {
   const account = await requireAccount();
   const parsed = profileSchema.safeParse({
-    displayName: readText(formData, "displayName"),
+    firstName: readText(formData, "firstName"),
+    lastName: readText(formData, "lastName"),
     phone: readText(formData, "phone"),
     locale: readText(formData, "locale"),
     timezone: readText(formData, "timezone"),
@@ -36,7 +37,8 @@ export async function updateProfileAction(formData: FormData) {
   const { error } = await account.supabase
     .from("people")
     .update({
-      display_name: parsed.data.displayName,
+      first_name: parsed.data.firstName,
+      last_name: parsed.data.lastName,
       primary_phone: parsed.data.phone || null,
       locale: parsed.data.locale,
       timezone: parsed.data.timezone,

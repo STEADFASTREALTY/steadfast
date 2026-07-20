@@ -23,7 +23,8 @@ export const forgotPasswordSchema = z.object({ email });
 
 export const registerSchema = z
   .object({
-    displayName: z.string().trim().min(2).max(120),
+    firstName: z.string().trim().min(1).max(80),
+    lastName: z.string().trim().min(1).max(80),
     email,
     password,
     confirmPassword: password,
@@ -45,7 +46,8 @@ export const passwordSetupSchema = z
   });
 
 export const profileSchema = z.object({
-  displayName: z.string().trim().min(2).max(120),
+  firstName: z.string().trim().min(1).max(80),
+  lastName: z.string().trim().min(1).max(80),
   phone: z.string().trim().max(30),
   locale: z.enum(["en-JM"]),
   timezone: z.enum(["America/Jamaica"]),
