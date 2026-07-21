@@ -1332,14 +1332,25 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .plans-hero span, .plans-faq > span { color: #986c00; font-size: 15px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
 .plans-hero h1 { max-width: 900px; margin: 12px auto; color: #102c2a; font-family: Georgia,serif; font-size: clamp(38px,5vw,68px); font-weight: 500; line-height: 1.05; }
 .plans-hero p { max-width: 680px; margin: 0 auto; color: #425b55; font-size: 18px; line-height: 1.6; }
-.plans-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 16px; width: min(100% - 48px,1760px); margin: 42px auto; align-items: stretch; }
+.billing-switcher { display:flex; align-items:center; justify-content:space-between; gap:28px; width:min(100% - 48px,1200px); margin:36px auto 0; padding:22px 26px; border:1px solid #ded1b8; background:#fbfaf6; }
+.billing-switcher span { color:#986c00; font-size:15px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+.billing-switcher p { max-width:610px; margin:6px 0 0; color:#425b55; font-size:16px; line-height:1.5; }
+.billing-toggle { display:flex; flex:none; gap:4px; padding:4px; border:1px solid #c9d6d2; background:#eef2f0; }
+.billing-toggle button { min-height:44px; border:0; padding:0 17px; background:transparent; color:#102c2a; font-size:15px; font-weight:700; cursor:pointer; }
+.billing-toggle button:hover { background:#d9e4df; }
+.billing-toggle button[aria-pressed="true"] { background:#102c2a; color:#fff; }
+.plans-grid { display:grid; gap:16px; width:min(100% - 48px,1760px); align-items:stretch; }
+.professional-plans-grid { grid-template-columns:repeat(4,minmax(0,1fr)); margin:20px auto 26px; }
+.other-plans-grid { grid-template-columns:repeat(2,minmax(0,1fr)); width:min(100% - 48px,860px); margin:0 auto 42px; }
 .plan-card { position: relative; display: flex; flex-direction: column; padding: 28px 22px; border: 1px solid #ded1b8; background: #fbfaf6; }
 .plan-card.featured { border: 2px solid #168c91; box-shadow: 0 14px 34px rgba(16,44,42,.12); }
 .plan-recommended { position: absolute; top: -16px; left: 20px; padding: 7px 12px; background: #168c91; color: #fff; font-size: 15px; font-weight: 800; }
+.plan-annual-badge { display:inline-flex; align-self:flex-start; margin:0 0 12px; padding:6px 9px; background:#d8a72e; color:#17201c; font-size:15px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
 .plan-card h2 { margin: 5px 0 16px; font-family: Georgia,serif; font-size: 27px; font-weight: 500; }
 .plan-price { color: #102c2a; font-family: Georgia,serif; font-size: 38px; font-weight: 700; }
 .plan-unit { min-height: 46px; margin: 5px 0 14px; color: #546a64; font-size: 15px; }
-.plan-card > p:not(.plan-unit) { min-height: 76px; font-size: 15px; line-height: 1.5; }
+.plan-payment-note { min-height:68px; margin:12px 0 4px; color:#425b55; font-size:15px; line-height:1.5; }
+.plan-card > p:not(.plan-unit):not(.plan-payment-note) { min-height:76px; font-size:15px; line-height:1.5; }
 .plan-card ul { flex: 1; margin: 18px 0 26px; padding-left: 20px; }
 .plan-card li { margin-bottom: 10px; font-size: 15px; line-height: 1.45; }
 .plan-card .primary-button, .plan-card .outline-button { display: block; width: 100%; padding: 13px; text-align: center; font-size: 15px; }
@@ -1355,5 +1366,5 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .plans-cta { display: flex; justify-content: center; align-items: center; gap: 22px; padding: 42px 24px; background: #d9e4df; }
 .plans-cta h2 { margin: 0; font-family: Georgia,serif; font-size: 28px; font-weight: 500; }
 .plans-cta a { font-size: 15px; }
-@media (max-width: 1200px) { .plans-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .analytics-metrics { grid-template-columns: repeat(2,1fr); } }
-@media (max-width: 760px) { .analytics-shell { width: calc(100% - 32px); } .analytics-layout { grid-template-columns: minmax(0,1fr); } .analytics-layout .account-section-nav { position: static; } .analytics-toolbar, .plans-cta { align-items: stretch; flex-direction: column; } .analytics-metrics, .analytics-two-column, .plans-grid, .plans-explainer, .plans-faq > div { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 1200px) { .professional-plans-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .analytics-metrics { grid-template-columns:repeat(2,1fr); } }
+@media (max-width: 760px) { .analytics-shell { width:calc(100% - 32px); } .analytics-layout { grid-template-columns:minmax(0,1fr); } .analytics-layout .account-section-nav { position:static; } .analytics-toolbar, .plans-cta, .billing-switcher { align-items:stretch; flex-direction:column; } .billing-toggle { width:100%; } .billing-toggle button { flex:1; padding:0 10px; } .analytics-metrics, .analytics-two-column, .plans-grid, .plans-explainer, .plans-faq > div { grid-template-columns:minmax(0,1fr); } }
