@@ -1356,7 +1356,8 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .plan-card .primary-button, .plan-card .outline-button { display:block; width:100%; padding:13px; text-align:center; font-size:15px; transition:background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease; }
 .plan-card .primary-button { border:2px solid var(--evergreen); border-radius:999px; background:var(--evergreen); color:#fff; }
 .plan-card .primary-button:hover { border-color:var(--gold); background:#fff; box-shadow:0 0 0 3px rgba(216,167,46,.18); color:var(--evergreen); }
-.plan-card .outline-button:hover { border-color:var(--gold); background:var(--sage); box-shadow:0 0 0 3px rgba(216,167,46,.14); }
+.plan-card .outline-button { border:2px solid var(--gold); background:transparent; color:var(--evergreen); }
+.plan-card .outline-button:hover { border-color:var(--gold); background:var(--gold); box-shadow:0 0 0 3px rgba(216,167,46,.18); color:var(--charcoal); }
 .plans-explainer { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; width: min(100% - 48px,1200px); margin: 72px auto; padding: 44px; background: #102c2a; color: #fff; }
 .plans-explainer span { color: #e5bd57; font-size: 15px; font-weight: 800; text-transform: uppercase; }
 .plans-explainer h2 { margin: 10px 0 0; font-family: Georgia,serif; font-size: 34px; font-weight: 500; }
