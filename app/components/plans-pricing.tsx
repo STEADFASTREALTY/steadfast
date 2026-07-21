@@ -50,6 +50,8 @@ function PlanCard({ plan, cycle }: { plan: Plan; cycle: BillingCycle }) {
 
 export function PlansPricing() {
   const [cycle, setCycle] = useState<BillingCycle>("annual");
+  const topPlans = [otherPlans[0], ...professionalPlans.slice(0, 3)];
+  const lowerPlans = [professionalPlans[3], otherPlans[1]];
   return <>
     <section className="billing-switcher" aria-label="Choose a payment schedule">
       <div><span>Annual professional membership</span><p>Pay annually upfront to receive one month free and keep your plan price fixed for 12 months.</p></div>
@@ -58,7 +60,7 @@ export function PlansPricing() {
         <button type="button" onClick={() => setCycle("annual")} aria-pressed={cycle === "annual"}>Annual - 1 month free</button>
       </div>
     </section>
-    <section className="plans-grid professional-plans-grid" aria-label="ProperAP professional subscription plans">{professionalPlans.map((plan) => <PlanCard key={plan.name} plan={plan} cycle={cycle} />)}</section>
-    <section className="plans-grid other-plans-grid" aria-label="ProperAP consumer and enterprise plans">{otherPlans.map((plan) => <PlanCard key={plan.name} plan={plan} cycle={cycle} />)}</section>
+    <section className="plans-grid professional-plans-grid" aria-label="ProperAP primary subscription plans">{topPlans.map((plan) => <PlanCard key={plan.name} plan={plan} cycle={cycle} />)}</section>
+    <section className="plans-grid other-plans-grid" aria-label="ProperAP growth and enterprise plans">{lowerPlans.map((plan) => <PlanCard key={plan.name} plan={plan} cycle={cycle} />)}</section>
   </>;
 }
