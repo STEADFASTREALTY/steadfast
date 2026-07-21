@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 type BillingCycle = "annual" | "monthly";
+type PlanAudience = "professional" | "broker";
 
 type Plan = {
   name: string;
@@ -50,17 +51,22 @@ function PlanCard({ plan, cycle }: { plan: Plan; cycle: BillingCycle }) {
 
 export function PlansPricing() {
   const [cycle, setCycle] = useState<BillingCycle>("annual");
-  const topPlans = [otherPlans[0], ...professionalPlans.slice(0, 3)];
-  const lowerPlans = [professionalPlans[3], otherPlans[1]];
+  const [audience, setAudience] = useState<PlanAudience>("professional");
+  const visiblePlans = audience === "professional"
+    ? [otherPlans[0], ...professionalPlans.slice(0, 2)]
+    : [...professionalPlans.slice(2), otherPlans[1]];
   return <>
+    <div className="plans-audience-tabs" role="tablist" aria-label="Choose plans for your role">
+      <button type="button" role="tab" aria-selected={audience === "professional"} onClick={() => setAudience("professional")}>Free users &amp; agents</button>
+      <button type="button" role="tab" aria-selected={audience === "broker"} onClick={() => setAudience("broker")}>Brokers</button>
+    </div>
     <section className="billing-switcher" aria-label="Choose a payment schedule">
-      <div><span>Annual professional membership</span><p>Pay annually upfront to receive one month free and keep your plan price fixed for 12 months.</p></div>
+      <div><span>{audience === "professional" ? "Professional membership" : "Brokerage membership"}</span><p>Pay annually upfront to receive one month free and keep your plan price fixed for 12 months.</p></div>
       <div className="billing-toggle" role="group" aria-label="Payment schedule">
         <button type="button" onClick={() => setCycle("monthly")} aria-pressed={cycle === "monthly"}>Monthly</button>
         <button type="button" onClick={() => setCycle("annual")} aria-pressed={cycle === "annual"}>Annual - 1 month free</button>
       </div>
     </section>
-    <section className="plans-grid professional-plans-grid" aria-label="ProperAP primary subscription plans">{topPlans.map((plan) => <PlanCard key={plan.name} plan={plan} cycle={cycle} />)}</section>
-    <section className="plans-grid other-plans-grid" aria-label="ProperAP growth and enterprise plans">{lowerPlans.map((plan) => <PlanCard key={plan.name} plan={plan} cycle={cycle} />)}</section>
+    <section className="plans-grid audience-plans-grid" aria-label={audience === "professional" ? "ProperAP plans for free users and agents" : "ProperAP plans for brokers"}>{visiblePlans.map((plan) => <PlanCard key={plan.name} plan={plan} cycle={cycle} />)}</section>
   </>;
 }
