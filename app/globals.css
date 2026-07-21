@@ -634,6 +634,17 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .account-card { background: var(--paper); border: 1px solid var(--line); padding: 34px; }
 .accent-card { border-top: 4px solid var(--lime); }
 .account-card > p { color: #657572; font-size: 15px; line-height: 1.65; }
+.delete-account-card { border-color: color-mix(in srgb, var(--error) 55%, var(--line)); }
+.delete-account-card .card-heading > span { color: var(--error); }
+.delete-account-form { display: grid; gap: 18px; margin-top: 24px; max-width: 720px; }
+.delete-account-form > label:not(.delete-account-check) { display: grid; gap: 8px; }
+.delete-account-form > label > span { color: #4f6560; font-size: 15px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.delete-account-form input[type="text"], .delete-account-form input:not([type]) { min-height: 46px; }
+.delete-account-check { align-items: flex-start; display: flex; gap: 11px; color: var(--charcoal); font-size: 15px; line-height: 1.5; }
+.delete-account-check input { accent-color: var(--error); flex: 0 0 auto; height: 18px; margin: 2px 0 0; width: 18px; }
+.delete-account-form .danger-button { justify-self: start; }
+.delete-account-form .danger-button:disabled { background: #a9928c; border-color: #a9928c; cursor: not-allowed; }
+.delete-account-blocked { background: color-mix(in srgb, var(--gold) 15%, var(--paper)); border-left: 4px solid var(--gold); color: var(--charcoal) !important; margin: 22px 0 0; padding: 15px 17px; }
 .staff-layout { grid-template-columns: 210px minmax(0, 1fr); max-width: 1440px; }
 .staff-metric-grid { display: grid; gap: 18px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .staff-metric-grid article { background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--gold); padding: 22px; }

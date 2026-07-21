@@ -5,6 +5,7 @@ import { AccountSectionNav } from "@/app/components/account-section-nav";
 import { ConsumerAccountNav } from "@/app/components/consumer-account-nav";
 import { PlatformAccountNav } from "@/app/components/platform-account-nav";
 import { MfaEnrollment } from "@/app/components/mfa-enrollment";
+import { DeleteAccountForm } from "@/app/components/delete-account-form";
 import { StatusMessage } from "@/app/components/status-message";
 import { getActiveMembershipContext } from "@/lib/auth/session";
 import { deriveWorkspaceAccess } from "@/lib/auth/workspace-access";
@@ -43,6 +44,7 @@ export default async function AccountSecurityPage({ searchParams }: { searchPara
           <button className="outline-dark-button" type="submit">Sign out other machines</button>
         </form>
       </section>
+      <DeleteAccountForm blockedReason={required ? "ProperAP staff and administrator accounts must be removed by another administrator." : context.roles.includes("broker") ? "Transfer or close your brokerage before permanently deleting a principal broker account." : undefined} />
       </div>
       <aside className="security-note"><strong>Plan for device loss</strong><p>ProperAP does not display recovery codes. Enroll a second authenticator on another protected device, or contact a ProperAP administrator if every enrolled device is unavailable.</p></aside>
     </div>

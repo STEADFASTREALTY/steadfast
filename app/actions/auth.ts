@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { headers } from "next/headers";
 import { getAppUrl, safeInternalPath } from "@/lib/app-url";
@@ -222,4 +223,71 @@ export async function requestEmailVerificationAction() {
     .update({ email_verification_requested_at: new Date().toISOString() })
     .eq("id", account.person.id);
   redirect("/account/security?notice=Verification+email+sent.+Open+the+link+in+your+email+to+finish.");
+}
+
+async function removePersonalAccountAssets(personId: string) {
+  const admin = createAdminClient();
+  const [{ data: profileAssets, error: profileAssetsError }, { data: sites, error: sitesError }] = await Promise.all([
+    admin.from("person_profile_assets").select("bucket_id,object_path").eq("person_id", personId),
+    admin.from("professional_sites").select("id").eq("owner_person_id", personId),
+  ]);
+  if (profileAssetsError || sitesError) throw new Error("We could not prepare your private images for deletion.");
+
+  const siteIds = (sites ?? []).map((site) => site.id);
+  const { data: siteAssets, error: siteAssetsError } = siteIds.length
+    ? await admin.from("site_assets").select("bucket_id,object_path").in("site_id", siteIds)
+    : { data: [], error: null };
+  if (siteAssetsError) throw new Error("We could not prepare your website images for deletion.");
+
+  const filesByBucket = new Map<string, string[]>();
+  for (const asset of [...(profileAssets ?? []), ...(siteAssets ?? [])]) {
+    const paths = filesByBucket.get(asset.bucket_id) ?? [];
+    paths.push(asset.object_path);
+    filesByBucket.set(asset.bucket_id, paths);
+  }
+  for (const [bucket, paths] of filesByBucket) {
+    const { error } = await admin.storage.from(bucket).remove(paths);
+    if (error) throw new Error("We could not remove every private image. Please try again.");
+  }
+}
+
+export async function permanentlyDeleteAccountAction(formData: FormData) {
+  const acknowledgement = readText(formData, "acknowledgement");
+  const confirmation = readText(formData, "confirmation");
+  if (acknowledgement !== "on" || confirmation !== "DELETE MY ACCOUNT") {
+    redirect("/account/security?error=Confirm+the+warning+and+type+DELETE+MY+ACCOUNT+exactly.");
+  }
+
+  const account = await requireAccount("/account/security");
+  try {
+    await removePersonalAccountAssets(account.person.id);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "We could not prepare your account for deletion.";
+    redirect(`/account/security?error=${encodeURIComponent(message)}`);
+  }
+
+  const { error: deletionError } = await account.supabase
+    .from("permanent_account_deletion_commands")
+    .insert({ request_id: randomUUID() });
+  if (deletionError) {
+    const message = deletionError.message.includes("principal broker")
+      ? "Transfer or close your brokerage before permanently deleting a principal broker account."
+      : deletionError.message.includes("staff and administrator")
+        ? "ProperAP staff and administrator accounts must be removed by another administrator."
+        : "Your account could not be deleted. Please try again or contact ProperAP support.";
+    redirect(`/account/security?error=${encodeURIComponent(message)}`);
+  }
+
+  const admin = createAdminClient();
+  const { error: authDeletionError } = await admin.auth.admin.deleteUser(account.user.id, false);
+  if (authDeletionError) {
+    redirect("/sign-in?error=Your+profile+was+removed,+but+we+could+not+finish+removing+the+sign-in+account.+Please+contact+ProperAP+support.");
+  }
+
+  await account.supabase.auth.signOut({ scope: "global" });
+  const cookieStore = await cookies();
+  const cookieDomain = await steadfastCookieDomain();
+  cookieStore.delete("sf_remember_device");
+  if (cookieDomain) cookieStore.delete({ name: "sf_remember_device", domain: cookieDomain });
+  redirect("/sign-in?notice=Your+account+has+been+permanently+deleted.");
 }
