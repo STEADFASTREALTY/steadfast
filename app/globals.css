@@ -527,7 +527,9 @@ footer p, footer > span { color: rgba(255,255,255,.43); font-size: 15px; }
 .registration-role-options { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .registration-role-option { align-items: flex-start; border: 1px solid var(--line); cursor: pointer; display: flex !important; gap: 10px; min-height: 98px; padding: 14px; transition: border-color .16s ease, background-color .16s ease; }
 .registration-role-option:hover, .registration-role-option.selected { background: #f3f7f5; border-color: var(--evergreen); }
-.registration-role-option input { accent-color: var(--evergreen); flex: 0 0 auto; margin: 3px 0 0; }
+.registration-role-option input[type="radio"] { appearance: none; -webkit-appearance: none; background: #fff; border: 1px solid #7e8582; border-radius: 50%; box-shadow: none; cursor: pointer; flex: 0 0 auto; height: 50px; margin: 3px 0 0; outline: 0; transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease; width: 50px; }
+.registration-role-option input[type="radio"]:checked { background: var(--gold); border-color: var(--gold); }
+.registration-role-option input[type="radio"]:focus, .registration-role-option input[type="radio"]:focus-visible { border-color: var(--teal-strong); box-shadow: 0 0 0 3px rgba(22,140,145,.22); }
 .registration-role-option span { display: grid; gap: 5px; }
 .registration-role-option strong { color: var(--ink); font-size: 16px; }
 .registration-role-option small { color: #52635f; font-size: 16px !important; font-weight: 400; letter-spacing: 0; line-height: 1.45; text-transform: none; }
