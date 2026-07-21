@@ -102,6 +102,14 @@ export async function registerAction(formData: FormData) {
     brokerage_name: parsed.data.brokerageName || undefined,
   };
   const admin = createAdminClient();
+  if (parsed.data.requestedRole === "broker") {
+    const { data: available, error: availabilityError } = await admin.rpc("brokerage_name_is_available", {
+      candidate: parsed.data.brokerageName,
+    });
+    if (availabilityError || available !== true) {
+      redirect(`/register?error=${encodeURIComponent("That brokerage name is already registered or awaiting ProperAP review. Please use the company’s existing account or contact ProperAP support.")}&next=${encodeURIComponent(next)}`);
+    }
+  }
   const { error: createError } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -110,6 +118,9 @@ export async function registerAction(formData: FormData) {
   });
 
   if (createError) {
+    if (createError.message.toLowerCase().includes("brokerage with this name")) {
+      redirect(`/register?error=${encodeURIComponent("That brokerage name is already registered or awaiting ProperAP review. Please use the company’s existing account or contact ProperAP support.")}&next=${encodeURIComponent(next)}`);
+    }
     redirect(`/register?error=Registration+could+not+be+completed.+Please+try+again.&next=${encodeURIComponent(next)}`);
   }
 
