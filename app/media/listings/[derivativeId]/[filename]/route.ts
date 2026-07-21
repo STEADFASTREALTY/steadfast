@@ -20,12 +20,18 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     .select("id,variant")
     .eq("id", route.derivativeId)
     .maybeSingle();
-  if (!publicMedia) return siteAssetResponse(route.derivativeId, route.filename);
-  if (route.filename !== `${publicMedia.variant}.webp`) return new NextResponse(null, { status: 404 });
+  const { data: closedMedia } = publicMedia ? { data: null } : await supabase
+    .from("closed_listing_media")
+    .select("id,variant")
+    .eq("id", route.derivativeId)
+    .maybeSingle();
+  const media = publicMedia ?? closedMedia;
+  if (!media) return siteAssetResponse(route.derivativeId, route.filename);
+  if (route.filename !== `${media.variant}.webp`) return new NextResponse(null, { status: 404 });
 
   const admin = createAdminClient();
   const { data: projection } = await admin
-    .from("public_listing_media")
+    .from(publicMedia ? "public_listing_media" : "closed_listing_media")
     .select("derivative_id")
     .eq("id", route.derivativeId)
     .single();

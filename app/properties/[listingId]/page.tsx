@@ -25,13 +25,16 @@ type RouteProps = {
 async function getPublicListing(listingId: string) {
   if (!z.string().uuid().safeParse(listingId).success) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("public_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_person_id,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at,updated_at,is_demo,demo_notice,source_url").eq("listing_id", listingId).maybeSingle();
-  return data;
+  const { data: active } = await supabase.from("public_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,brokerage_name,brokerage_slug,assigned_agent_person_id,assigned_agent_name,assigned_agent_slug,ready_media_count,published_at,updated_at,is_demo,demo_notice,source_url").eq("listing_id", listingId).maybeSingle();
+  if (active) return { ...active, isClosedArchive: false };
+  const { data: closed } = await supabase.from("closed_listing_snapshots").select("listing_id,approved_version_id,lifecycle_state,purpose,property_type,property_subtype,currency,price,price_period,title,description,bedrooms,bathrooms,building_area,land_area,area_unit,administrative_area_name,public_location_label,public_location_precision,public_latitude,public_longitude,closed_at,updated_at").eq("listing_id", listingId).maybeSingle();
+  return closed ? { ...closed, isClosedArchive: true, brokerage_name: null, brokerage_slug: null, assigned_agent_person_id: null, assigned_agent_name: null, assigned_agent_slug: null, ready_media_count: 0, published_at: closed.closed_at, is_demo: false, demo_notice: null, source_url: null } : null;
 }
 
 export async function generateMetadata({ params }: RouteProps): Promise<Metadata> {
   const listing = await getPublicListing((await params).listingId);
   if (!listing) return { title: "Property not available", description: "This ProperAP property listing is not publicly available.", robots: { index: false, follow: false, noarchive: true } };
+  if (listing.isClosedArchive) return { title: `${listing.title} | Closed property record`, description: listing.description.slice(0, 155), robots: { index: false, follow: false, noarchive: true } };
   return publicPageMetadata({
     title: listing.title,
     description: listing.description.slice(0, 155),
@@ -57,7 +60,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
     : null;
   const formatListingDate = (value: string) => new Intl.DateTimeFormat("en-JM", { dateStyle: "medium", timeZone: "America/Jamaica" }).format(new Date(value));
   const supabase = await createClient();
-  const { data: gallery } = await supabase.from("public_listing_media")
+  const { data: gallery } = await supabase.from(listing.isClosedArchive ? "closed_listing_media" : "public_listing_media")
     .select("id,variant,position,width,height")
     .eq("listing_id", listing.listing_id)
     .eq("approved_version_id", listing.approved_version_id)
@@ -70,7 +73,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
     .maybeSingle();
   let sourceSite: { id: string; site_type: string; owner_person_id: string | null; display_name: string } | null = null;
   let displayingAgent: { id: string; name: string } | null = null;
-  if (query?.site && z.string().uuid().safeParse(query.site).success) {
+  if (!listing.isClosedArchive && query?.site && z.string().uuid().safeParse(query.site).success) {
     const { data } = await supabase.from("professional_sites").select("id,site_type,owner_person_id,display_name").eq("id", query.site).eq("status", "active").maybeSingle();
     sourceSite = data;
     if (data?.site_type === "agent" && data.owner_person_id && data.owner_person_id !== listing.assigned_agent_person_id) {
@@ -81,7 +84,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
   }
 
   return <main className="public-listing-page">
-    <AnalyticsTracker eventName="listing_viewed" listingId={listing.listing_id} siteId={sourceSite?.id} />
+    {!listing.isClosedArchive ? <AnalyticsTracker eventName="listing_viewed" listingId={listing.listing_id} siteId={sourceSite?.id} /> : null}
     <StructuredData value={{
       "@context": "https://schema.org",
       "@type": "Product",
@@ -89,15 +92,15 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
       description: listing.description,
       category: "Real estate listing",
       url: `${STEADFAST_SITE_URL}/properties/${listing.listing_id}`,
-      offers: { "@type": "Offer", price: listing.price, priceCurrency: listing.currency, availability: "https://schema.org/InStock" },
+      offers: { "@type": "Offer", price: listing.price, priceCurrency: listing.currency, availability: listing.isClosedArchive ? "https://schema.org/OutOfStock" : "https://schema.org/InStock" },
       areaServed: { "@type": "AdministrativeArea", name: listing.administrative_area_name },
       ...(hasPublicMapPoint ? { geo: { "@type": "GeoCoordinates", latitude, longitude } } : {}),
-      seller: { "@type": "RealEstateAgent", name: listing.brokerage_name },
+      ...(!listing.isClosedArchive && listing.brokerage_name ? { seller: { "@type": "RealEstateAgent", name: listing.brokerage_name } } : {}),
     }} />
     <PublicHeader />
     <section className="public-listing-hero">
-      <div><span>{listing.purpose === "sale" ? "For sale" : "Long-term rental"} · {listing.lifecycle_state.replaceAll("_", " ")}</span><h1>{listing.title}</h1><p>{location}</p><dl className="public-listing-dates"><div><dt>Published</dt><dd>{formatListingDate(listing.published_at)}</dd></div><div><dt>Last updated</dt><dd>{formatListingDate(listing.updated_at)}</dd></div></dl></div>
-      <div className="public-listing-price-actions"><ListingActions listingId={listing.listing_id} title={listing.title} siteId={sourceSite?.id} />{listing.currency === "JMD" ? <CurrencyPrice priceJmd={Number(listing.price)} pricePeriod={listing.price_period} rates={exchangeRates} /> : <strong>{new Intl.NumberFormat("en-JM", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price)}{listing.price_period ? <small> / {listing.price_period}</small> : null}</strong>}</div>
+      <div><span>{listing.isClosedArchive ? `Closed property · ${listing.lifecycle_state.replaceAll("_", " ")}` : `${listing.purpose === "sale" ? "For sale" : "Long-term rental"} · ${listing.lifecycle_state.replaceAll("_", " ")}`}</span><h1>{listing.title}</h1><p>{location}</p><dl className="public-listing-dates"><div><dt>{listing.isClosedArchive ? "Closed" : "Published"}</dt><dd>{formatListingDate(listing.published_at)}</dd></div><div><dt>Last updated</dt><dd>{formatListingDate(listing.updated_at)}</dd></div></dl></div>
+      <div className="public-listing-price-actions">{!listing.isClosedArchive ? <ListingActions listingId={listing.listing_id} title={listing.title} siteId={sourceSite?.id} /> : null}{listing.currency === "JMD" ? <CurrencyPrice priceJmd={Number(listing.price)} pricePeriod={listing.price_period} rates={exchangeRates} /> : <strong>{new Intl.NumberFormat("en-JM", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price)}{listing.price_period ? <small> / {listing.price_period}</small> : null}</strong>}</div>
     </section>
     <div className="public-listing-layout">
       <div className="public-listing-main">
@@ -111,7 +114,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
           <a href={fullMapUrl} target="_blank" rel="noreferrer noopener">Open larger map</a>
         </section> : null}
       </div>
-      <aside className="public-agent-card" id="contact-agent">
+      {listing.isClosedArchive ? <aside className="public-agent-card closed-listing-contact"><span>Closed property record</span><h2>This listing is no longer available.</h2><p>ProperAP keeps the property information as an archive, but does not show agent or brokerage details for closed listings.</p><Link className="outline-dark-button" href="/properties">Continue searching</Link></aside> : <aside className="public-agent-card" id="contact-agent">
         <span>Contact the listing representative</span>
         <h2>{listing.assigned_agent_name}</h2>
         <p>{listing.brokerage_name}</p>
@@ -132,7 +135,7 @@ export default async function PublicListingPage({ params, searchParams }: RouteP
           <small className="inquiry-privacy">Your details stay inside the professional inquiry workspace and are not displayed publicly.</small>
         </form>
         <Link className="outline-dark-button" href="/properties">Continue searching</Link>
-      </aside>
+      </aside>}
     </div>
   </main>;
 }
