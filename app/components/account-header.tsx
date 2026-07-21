@@ -38,6 +38,7 @@ export async function AccountHeader({
       <BrandLogo compact />
       <nav aria-label="Account navigation">
         <Link href="/properties">Properties</Link>
+        {hasWorkspace && !isPlatformRole ? <Link href="/workspace/search">Search</Link> : null}
         {!isPlatformRole ? <Link href="/account/saved-listings">My watch</Link> : null}
         {isConsumer && !isPlatformRole ? <Link href="/account/messages">Message center</Link> : null}
         {hasWorkspace && !isPlatformRole ? <Link href="/workspace/site">Website</Link> : null}
